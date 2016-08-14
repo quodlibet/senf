@@ -12,14 +12,16 @@
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
-import senf
-from senf._compat import text_type
+import sys
 
 
-def test_version():
-    assert isinstance(senf.version, tuple)
-    assert len(senf.version) == 3
+PY2 = sys.version_info[0] == 2
+PY3 = not PY2
 
 
-def test_version_string():
-    assert isinstance(senf.version_string, text_type)
+if PY2:
+    string_types = (str, unicode)
+    text_type = unicode
+elif PY3:
+    string_types = (str,)
+    text_type = str

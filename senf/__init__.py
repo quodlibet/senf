@@ -12,70 +12,13 @@
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
-"""
-senf makes filename handing easier by papering over platform differences
-in Python 2 and by making it easier to migrate to Python 3 or to have a mixed
-Py2/Py3 code base. While at it, it improves the Unicode support for Python 2
-under Windows.
-
-It supports Python 2.6, 2.7, 3.3+, works with PyPy, and only depends on the
-stdlib.
-
-The core type it introduces is the "fsnative" type which actually is
-
-* unicode under Py2 + Windows
-* str under Py2 on other platforms
-* str under Py3 + Windows
-* str+surrogateescape under Py3 on other platforms [0]
-
-The type is used for file names, environment variables and process arguments
-and senf provides functions so you can tread it as an opaque type and not have
-to worry about its content or encoding.
-
-The other nice thing about the fsnative type is that you can mix it with ASCII
-str on all Python versions and platforms [1] which means minimal change to you
-code:
-
-::
-
-    os.path.join(some_fsnative_path, "somefile")
-    some_fsnative_path.endswith(".txt")
-    some_fsnative_path == "foo.txt"
-
-For unicode text you will need to use the `fsnative` wrapper:
-
-::
-
-    os.path.join(some_fsnative_path, fsnative(u"Gewürze"))
-
-
-The provided functions and constants can be split into three categories:
-
-1) Helper functions to work with the fsnative type
-2) Alternative implementations of stdlib functions for introducing Unicode
-   support under Windows + Python 2 (os.environ for example)
-3) Wrappers for constants and functions which don't return a fsnative path
-   by default (os.sep, mkdtemp() with default arguments)
-
-senf does not monkey patch stdlib functions, it just provides alternatives and
-wrappers.
-
-----
-
-[0] Under Python 3, bytes is also a valid type for paths under Unix.
-    We decide to not use/allow it as there are stdlib modules, like pathlib,
-    which don't support bytes and mixing bytes with str+surrogateescape
-    doesn't work.
-[1] As long as you don't use "unicode_literals", which we strongly recommend.
-"""
-
 
 version = (0, 0, 0)
-"""The version tuple (major, minor, micro)"""
+"""Tuple[`int`, `int`, `int`]: The version tuple (major, minor, micro)"""
 
 
 version_string = u".".join(map(str, version))
-"""A version string"""
+"""`senf.text`: A version string"""
 
 
 environ = None
@@ -97,7 +40,13 @@ def expandvars():
 
 
 def fsnative(text):
-    """Takes text and returns a fsnative path object."""
+    """Takes text and returns a fsnative path object.
+
+    Args:
+        text (text): The text convert to a path
+    Returns:
+        fsnative_type: The new path
+    """
     pass
 
 
