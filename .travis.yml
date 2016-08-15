@@ -63,8 +63,9 @@ matrix:
 
 install:
   - if [ "$TYPE" == "windows" ]; then sudo dpkg --add-architecture i386; fi
+  - if [ "$TYPE" == "windows" ]; then sudo add-apt-repository -y ppa:ubuntu-wine/ppa; fi
   - if [ "$TYPE" == "windows" ]; then travis_retry sudo apt-get update -q; fi
-  - if [ "$TYPE" == "windows" ]; then travis_retry sudo apt-get install --no-install-recommends -y wine xvfb; fi
+  - if [ "$TYPE" == "windows" ]; then travis_retry sudo apt-get install --no-install-recommends -y wine1.8 xvfb; fi
   - if [ "$TYPE" == "linux" ]; then travis_retry sudo apt-get install --no-install-recommends -y python3-pytest python-pytest; fi
 
 script:
