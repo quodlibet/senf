@@ -12,9 +12,11 @@
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
+import sys
+
 import senf
 from senf import fsnative, py2fsn, sep, pathsep, curdir, pardir, \
-    altsep, extsep, devnull, defpath
+    altsep, extsep, devnull, defpath, argv
 
 
 def test_version():
@@ -45,3 +47,9 @@ def test_constants():
     assert isinstance(extsep, fsnative)
     assert isinstance(devnull, fsnative)
     assert isinstance(defpath, fsnative)
+
+
+def test_argv():
+    assert isinstance(argv, list)
+    assert len(sys.argv) == len(argv)
+    assert all(isinstance(v, fsnative) for v in argv)

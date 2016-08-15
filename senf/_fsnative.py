@@ -43,7 +43,6 @@ def _create_fsnative(type_):
         def __subclasscheck__(self, subclass):
             return issubclass(subclass, type_)
 
-
     class impl(object):
         """fsnative(text)
 
@@ -103,3 +102,43 @@ def py2fsn(path):
     if os.name == "nt" and PY2:
         return path.decode("utf-8")
     return path
+
+
+def path2fsn(path):
+    """Returns a fsnative path for a bytes path under Py3+Unix.
+    If the passed in path is a fsnative path simply returns it.
+
+    This is useful for interfaces which need so support bytes paths under Py3.
+    """
+    pass
+
+
+def fsn2text():
+    """Converts a path to text. This process is not reversible and should
+    only be used for display purposes.
+    """
+    pass
+
+
+def fsn2bytes(path, encoding):
+    """Turns a path to bytes. If the path is not associated with an encoding
+    the passed encoding is used (under Windows for example)
+    """
+    pass
+
+
+def bytes2fsn(data, encoding):
+    """Turns bytes to a path. If the path is not associated with an encoding
+    the passed encoding is used (under Windows for example)
+    """
+    pass
+
+
+def uri2fsn():
+    """Takes a file URI and returns a fsnative path"""
+    pass
+
+
+def fsn2uri():
+    """Takes a fsnative path and returns a file URI"""
+    pass

@@ -25,3 +25,58 @@ altsep = py2fsn(os.altsep) if os.altsep is not None else None
 extsep = py2fsn(os.extsep)
 devnull = py2fsn(os.devnull)
 defpath = py2fsn(os.defpath)
+
+
+def expanduser():
+    """Like os.path.expanduser but supports unicode user names under Win+Py2"""
+    pass
+
+
+def expandvars():
+    """Like os.path.expanduser but supports unicode variables under Win+Py2"""
+    pass
+
+
+def getcwd():
+    """Like os.getcwd() but returns a fsnative path"""
+    pass
+
+
+def getenv():
+    """Like os.getenv() but supports unicode under Win+Py2"""
+    pass
+
+
+def unsetenv():
+    """Like os.unsetenc() but supports unicode under Win+Py2"""
+    pass
+
+
+def putenv():
+    """Like os.putenv() but supports unicode under Win+Py2"""
+    pass
+
+
+def mkdtemp():
+    """Like tempfile.mkdtemp(), but always returns a fsnative path"""
+    pass
+
+
+def mkstemp():
+    """Like tempfile.mkstemp(), but always returns a fsnative path"""
+    pass
+
+
+def format_exc():
+    """"""
+    pass
+
+
+def format_exception():
+    """"""
+    pass
+
+
+def extract_tb():
+    """"""
+    pass

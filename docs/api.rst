@@ -27,6 +27,7 @@ Alternative implementations or wrappers of stdlib functions and constants. In
 some cases their default is changed to return an fsnative path (mkdtemp() with
 default arguments) or Unicode support for Windows is added (sys.argv)
 
+.. autodata:: argv
 
 .. autodata:: sep
 
