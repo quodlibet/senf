@@ -13,7 +13,8 @@
 # included in all copies or substantial portions of the Software.
 
 import senf
-from senf._compat import text_type
+from senf import fsnative, py2fsn, sep, pathsep, curdir, pardir, \
+    altsep, extsep, devnull, defpath
 
 
 def test_version():
@@ -22,4 +23,25 @@ def test_version():
 
 
 def test_version_string():
-    assert isinstance(senf.version_string, text_type)
+    assert isinstance(senf.version_string, str)
+
+
+def test_fsnative():
+    assert isinstance(fsnative(u"foo"), fsnative)
+    fsntype = type(fsnative(u""))
+    assert issubclass(fsntype, fsnative)
+
+
+def test_py2fsn():
+    assert isinstance(py2fsn(senf.__path__[0]), fsnative)
+
+
+def test_constants():
+    assert isinstance(sep, fsnative)
+    assert isinstance(pathsep, fsnative)
+    assert isinstance(curdir, fsnative)
+    assert isinstance(pardir, fsnative)
+    assert altsep is None or isinstance(altsep, fsnative)
+    assert isinstance(extsep, fsnative)
+    assert isinstance(devnull, fsnative)
+    assert isinstance(defpath, fsnative)

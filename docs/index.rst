@@ -8,6 +8,8 @@
 
     api
 
+.. currentmodule:: senf
+
 
 What?
 -----
@@ -16,6 +18,9 @@ What?
 in Python 2 and by making it easier to migrate to Python 3 or to have a mixed
 Py2/Py3 code base. While at it, it improves the Unicode support for Python 2
 under Windows to be on par with Python 3.
+
+You can think of it as `six <https://pypi.org/project/six/>`__ for file path
+handling.
 
 It supports Python 2.6, 2.7, 3.3+, works with PyPy, and only depends on the
 stdlib.
@@ -29,6 +34,9 @@ stdlib.
     for entry in os.listdir(fsnative(u"my_dir")):
         print_(u"File: ", entry)
 
+**senf** does not monkey patch stdlib functions, it just provides alternatives
+and wrappers.
+
 
 Who?
 ----
@@ -36,15 +44,15 @@ Who?
 You might want to use senf if you
 
 * use Python 2 and want to improve your Windows support
-* use Python 2 and want to move to Python 3
+* use Python 2 and want to move (gradually) to Python 3
 * have a library which needs to support both Python 2 and Python 3
-* want to print filenames under Python 3
+* want to print filenames
 
 
 How?
 ----
 
-The core type it introduces is the ``fsnative`` type which actually is
+It introduces a virtual type called `fsnative` which actually represents
 
 - `unicode` under Py2 + Windows
 - `str` under Py2 on other platforms
@@ -55,7 +63,7 @@ The type is used for file names, environment variables and process arguments
 and senf provides functions so you can tread it as an opaque type and not have
 to worry about its content or encoding.
 
-The other nice thing about the ``fsnative`` type is that you can mix it with
+The other nice thing about the `fsnative` type is that you can mix it with
 ASCII `str` on all Python versions and platforms [#]_ which means minimal
 change to your code:
 
@@ -65,23 +73,15 @@ change to your code:
     some_fsnative_path.endswith(".txt")
     some_fsnative_path == "foo.txt"
 
-For non-ASCII text you will need to use the ``fsnative`` wrapper:
+For non-ASCII text you will need to use the `fsnative` helper:
 
 ::
 
     os.path.join(some_fsnative_path, fsnative(u"Gewürze"))
 
 
-The provided functions and constants can be split into three categories:
+See the :doc:`api` for more details.
 
-1) Helper functions to work with the fsnative type
-2) Alternative implementations of stdlib functions for introducing Unicode
-   support under Windows + Python 2 (os.environ for example)
-3) Wrappers for constants and functions which don't return a fsnative path
-   by default (os.sep, mkdtemp() with default arguments)
-
-senf does not monkey patch stdlib functions, it just provides alternatives and
-wrappers.
 
 ----
 
@@ -90,4 +90,4 @@ wrappers.
        pathlib, which don't support bytes and mixing bytes with
        str + surrogateescape doesn't work.
 .. [#] As long as you don't use "unicode_literals", which we strongly
-       recommend.
+       recommend you don't use.

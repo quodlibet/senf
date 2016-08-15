@@ -2,18 +2,47 @@
 API Documentation
 =================
 
+.. currentmodule:: senf
+
 Package Related
 ---------------
 
-.. autodata:: senf.version
+.. autodata:: version
 
-.. autodata:: senf.version_string
+.. autodata:: version_string
 
 
 Fsnative Related
 ----------------
 
-.. autofunction:: senf.fsnative
+Helper functions to work with the fsnative type
+
+.. autoclass:: fsnative
+
+
+Stdlib Replacements
+-------------------
+
+Alternative implementations or wrappers of stdlib functions and constants. In
+some cases their default is changed to return an fsnative path (mkdtemp() with
+default arguments) or Unicode support for Windows is added (sys.argv)
+
+
+.. autodata:: sep
+
+.. autodata:: pathsep
+
+.. autodata:: curdir
+
+.. autodata:: pardir
+
+.. autodata:: altsep
+
+.. autodata:: extsep
+
+.. autodata:: devnull
+
+.. autodata:: defpath
 
 
 Documentation Types
@@ -33,10 +62,3 @@ types depending on the Python version and platform used.
 
     Represents :obj:`python:str` under Python 2 and :obj:`python3:bytes` under
     Python 3.
-
-
-.. class:: fsnative_type()
-
-    Represents a file name which can be :obj:`python:str` or
-    :obj:`python:unicode` under Python 2 and :obj:`python3:str` +
-    ``surrogateescape`` under Python 3.
