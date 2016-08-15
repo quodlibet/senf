@@ -15,6 +15,7 @@
 import os
 
 from ._fsnative import py2fsn
+from ._compat import PY2
 
 
 sep = py2fsn(os.sep)
@@ -38,8 +39,14 @@ def expandvars():
 
 
 def getcwd():
-    """Like os.getcwd() but returns a fsnative path"""
-    pass
+    """Like `os.getcwd` but returns a fsnative path
+
+    Returns: `fsnative`
+    """
+
+    if os.name == "nt" and PY2:
+        return os.getcwdu()
+    return os.getcwd()
 
 
 def getenv():

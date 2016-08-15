@@ -45,6 +45,8 @@ default arguments) or Unicode support for Windows is added (sys.argv)
 
 .. autodata:: defpath
 
+.. autofunction:: getcwd
+
 
 Documentation Types
 -------------------

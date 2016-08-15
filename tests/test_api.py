@@ -16,7 +16,7 @@ import sys
 
 import senf
 from senf import fsnative, py2fsn, sep, pathsep, curdir, pardir, \
-    altsep, extsep, devnull, defpath, argv
+    altsep, extsep, devnull, defpath, argv, getcwd
 
 
 def test_version():
@@ -53,3 +53,7 @@ def test_argv():
     assert isinstance(argv, list)
     assert len(sys.argv) == len(argv)
     assert all(isinstance(v, fsnative) for v in argv)
+
+
+def test_getcwd():
+    assert isinstance(getcwd(), fsnative)

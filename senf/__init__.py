@@ -15,11 +15,11 @@
 from ._fsnative import fsnative, py2fsn
 from ._print import print_
 from ._stdlib import sep, pathsep, curdir, pardir, altsep, extsep, devnull, \
-    defpath
+    defpath, getcwd
 from ._argv import create_argv as _create_argv
 
 
-fsnative, print_, py2fsn
+fsnative, print_, py2fsn, getcwd
 
 version = (0, 0, 0)
 """Tuple[`int`, `int`, `int`]: The version tuple (major, minor, micro)"""
