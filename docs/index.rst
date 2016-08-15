@@ -30,7 +30,7 @@ stdlib.
     import os
     from senf import fsnative, print_
 
-    # This supports unicode file names under Py2/3 on Linux/macOS/Window
+    # This supports unicode file names under Py2/3 on Linux/macOS/Windows
     for entry in os.listdir(fsnative(u"my_dir")):
         print_(u"File: ", entry)
 
@@ -57,7 +57,7 @@ It introduces a virtual type called `fsnative` which actually represents
 - `unicode` under Py2 + Windows
 - `str` under Py2 on other platforms
 - `str` under Py3 + Windows
-- `str` + ``surrogateescape`` under Py3 on other platforms [#]_
+- `str` + ``surrogates`` under Py3 on other platforms [#]_
 
 The type is used for file names, environment variables and process arguments
 and senf provides functions so you can tread it as an opaque type and not have
