@@ -37,3 +37,6 @@ def create_argv():
     LocalFree(argv)
 
     return res
+
+
+argv = create_argv()

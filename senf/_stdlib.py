@@ -15,7 +15,8 @@
 import os
 
 from ._fsnative import py2fsn
-from ._compat import PY2
+from ._compat import PY2, text_type
+from ._environ import del_windows_env_var, set_windows_env_var, environ
 
 
 sep = py2fsn(os.sep)
@@ -41,7 +42,8 @@ def expandvars():
 def getcwd():
     """Like `os.getcwd` but returns a fsnative path
 
-    Returns: `fsnative`
+    Returns:
+        `fsnative`
     """
 
     if os.name == "nt" and PY2:
@@ -49,19 +51,58 @@ def getcwd():
     return os.getcwd()
 
 
-def getenv():
-    """Like os.getenv() but supports unicode under Win+Py2"""
-    pass
+def getenv(key, value=None):
+    """Like `os.getenv` but returns unicode under Windows + Python 2
+
+    Args:
+        key (fsnative): The env var to get
+        value (object): The value to return if the env var does not exist
+    Returns:
+        `fsnative` or `object`:
+            The env var or the passed value if it doesn't exist
+    """
+
+    if os.name == "nt" and PY2:
+        key = text_type(key)
+        return environ.get(key, value)
+    return os.getenv(key, value)
 
 
-def unsetenv():
-    """Like os.unsetenc() but supports unicode under Win+Py2"""
-    pass
+def unsetenv(key):
+    """Like `os.unsetenv` but takes unicode under Windows + Python 2
+
+    Args:
+        key (fsnative): The env var to unset
+    """
+
+    if os.name == "nt":
+        # python 3 has no unsetenv under Windows -> use our ctypes one as well
+        key = text_type(key)
+        try:
+            del_windows_env_var(key)
+        except WindowsError:
+            pass
+    else:
+        os.unsetenv(key)
 
 
-def putenv():
-    """Like os.putenv() but supports unicode under Win+Py2"""
-    pass
+def putenv(key, value):
+    """Like `os.putenv` but takes unicode under Windows + Python 2
+
+    Args:
+        key (fsnative): The env var to get
+        value (object): The value to return if the env var does not exist
+    """
+
+    if os.name == "nt" and PY2:
+        key = text_type(key)
+        value = text_type(value)
+        try:
+            set_windows_env_var(key, value)
+        except WindowsError:
+            pass
+    else:
+        os.putenv(key, value)
 
 
 def mkdtemp():

@@ -32,3 +32,22 @@ CommandLineToArgvW.restype = ctypes.POINTER(wintypes.LPWSTR)
 LocalFree = kernel32.LocalFree
 LocalFree.argtypes = [wintypes.HLOCAL]
 LocalFree.restype = wintypes.HLOCAL
+
+LPCTSTR = ctypes.c_wchar_p
+LPTSTR = wintypes.LPWSTR
+
+SetEnvironmentVariableW = kernel32.SetEnvironmentVariableW
+SetEnvironmentVariableW.argtypes = [LPCTSTR, LPCTSTR]
+SetEnvironmentVariableW.restype = wintypes.BOOL
+
+GetEnvironmentVariableW = kernel32.GetEnvironmentVariableW
+GetEnvironmentVariableW.argtypes = [LPCTSTR, LPTSTR, wintypes.DWORD]
+GetEnvironmentVariableW.restype = wintypes.DWORD
+
+GetEnvironmentStringsW = kernel32.GetEnvironmentStringsW
+GetEnvironmentStringsW.argtypes = []
+GetEnvironmentStringsW.restype = ctypes.c_void_p
+
+FreeEnvironmentStringsW = kernel32.FreeEnvironmentStringsW
+FreeEnvironmentStringsW.argtypes = [ctypes.c_void_p]
+FreeEnvironmentStringsW.restype = ctypes.c_bool

@@ -16,7 +16,9 @@ import sys
 
 import senf
 from senf import fsnative, py2fsn, sep, pathsep, curdir, pardir, \
-    altsep, extsep, devnull, defpath, argv, getcwd
+    altsep, extsep, devnull, defpath, argv, getcwd, environ, getenv, \
+    unsetenv, putenv
+from senf._compat import iteritems
 
 
 def test_version():
@@ -57,3 +59,38 @@ def test_argv():
 
 def test_getcwd():
     assert isinstance(getcwd(), fsnative)
+
+
+def test_environ():
+    for key, value in iteritems(environ):
+        assert isinstance(key, fsnative)
+        assert isinstance(value, fsnative)
+
+    environ["foo"] = "bar"
+    assert getenv("foo") == "bar"
+    assert isinstance(getenv("foo"), fsnative)
+
+    assert environ["foo"] == "bar"
+    assert isinstance(environ["foo"], fsnative)
+
+    del environ["foo"]
+    assert getenv("foo") is None
+
+
+def test_getenv():
+    environ["foo"] = "bar"
+
+    assert getenv("foo") == "bar"
+    del environ["foo"]
+    assert getenv("foo", "quux") == "quux"
+    assert getenv("foo") is None
+
+
+def test_unsetenv():
+    putenv("foo", "bar")
+    # for some reason getenv goes to the cache, which makes it hard to test
+    # things
+    assert getenv("foo") is None
+    unsetenv("foo")
+    unsetenv("foo")
+    assert getenv("foo") is None

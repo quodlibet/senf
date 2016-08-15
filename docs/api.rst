@@ -27,6 +27,8 @@ Alternative implementations or wrappers of stdlib functions and constants. In
 some cases their default is changed to return an fsnative path (mkdtemp() with
 default arguments) or Unicode support for Windows is added (sys.argv)
 
+.. autodata:: environ
+
 .. autodata:: argv
 
 .. autodata:: sep
@@ -46,6 +48,12 @@ default arguments) or Unicode support for Windows is added (sys.argv)
 .. autodata:: defpath
 
 .. autofunction:: getcwd
+
+.. autofunction:: getenv
+
+.. autofunction:: putenv
+
+.. autofunction:: unsetenv
 
 
 Documentation Types

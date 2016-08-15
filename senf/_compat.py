@@ -22,6 +22,14 @@ PY3 = not PY2
 if PY2:
     string_types = (str, unicode)
     text_type = unicode
+
+    iteritems = lambda d: d.iteritems()
+    itervalues = lambda d: d.itervalues()
+    iterkeys = lambda d: d.iterkeys()
 elif PY3:
     string_types = (str,)
     text_type = str
+
+    iteritems = lambda d: iter(d.items())
+    itervalues = lambda d: iter(d.values())
+    iterkeys = lambda d: iter(d.keys())

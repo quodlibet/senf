@@ -15,11 +15,13 @@
 from ._fsnative import fsnative, py2fsn
 from ._print import print_
 from ._stdlib import sep, pathsep, curdir, pardir, altsep, extsep, devnull, \
-    defpath, getcwd
-from ._argv import create_argv as _create_argv
+    defpath, getcwd, getenv, unsetenv, putenv
+from ._argv import argv
+from ._environ import environ
 
 
-fsnative, print_, py2fsn, getcwd
+fsnative, print_, py2fsn, getcwd, getenv, unsetenv, putenv
+
 
 version = (0, 0, 0)
 """Tuple[`int`, `int`, `int`]: The version tuple (major, minor, micro)"""
@@ -29,11 +31,13 @@ version_string = ".".join(map(str, version))
 """`str`: A version string"""
 
 
-environ = None
-"""Like os.environ but supports unicode under Win+Py2"""
+environ = environ
+"""Dict[`fsnative`, `fsnative`]: Like `os.environ` but contains unicode keys
+and values under Windows + Python 2
+"""
 
 
-argv = _create_argv()
+argv = argv
 """List[`fsnative`]: Like `sys.argv` but contains unicode under
 Windows + Python 2
 """
