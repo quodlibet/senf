@@ -19,6 +19,7 @@ PYTHONEXE="$WINEPREFIX/drive_c/$DIRNAME/python.exe"
 PIPEXE="$WINEPREFIX/drive_c/$DIRNAME/Scripts/pip.exe"
 wget "https://bootstrap.pypa.io/get-pip.py"
 wine "$PYTHONEXE" get-pip.py
+rm get-pip.py
 wine "$PIPEXE" install pytest
 wine "$PYTHONEXE" ${@:2}
 exit_code=$?
