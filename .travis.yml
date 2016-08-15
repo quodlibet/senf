@@ -1,6 +1,4 @@
 matrix:
-  allow_failures:
-    - python: "pypy3"
   include:
     - os: linux
       dist: trusty

@@ -16,6 +16,8 @@ wget -P "$DIR" -c "https://www.python.org/ftp/python/$VERSION/python-$VERSION.ms
 wine msiexec /a "$DIR/python-$VERSION.msi" /qb
 
 PYTHONEXE="$WINEPREFIX/drive_c/$DIRNAME/python.exe"
+wget "https://bootstrap.pypa.io/get-pip.py"
+wine "$PYTHONEXE" get-pip.py
 wine "$PYTHONEXE" -m pip install pytest
 wine "$PYTHONEXE" ${@:2}
 exit_code=$?
