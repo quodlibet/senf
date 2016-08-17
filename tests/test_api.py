@@ -43,6 +43,15 @@ def test_fsnative():
 def test_path2fsn():
     assert isinstance(path2fsn(senf.__path__[0]), fsnative)
 
+    if os.name == "nt":
+        assert path2fsn(u"\u1234") == u"\u1234"
+        assert path2fsn("abc") == u"abc"
+        assert isinstance(path2fsn("abc"), fsnative)
+        assert path2fsn(b"abc") == u"abc"
+    else:
+        assert path2fsn(u"foo") == fsnative(u"foo")
+        assert path2fsn(b"foo") == fsnative(u"foo")
+
 
 def test_constants():
     assert isinstance(sep, fsnative)

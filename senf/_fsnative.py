@@ -114,13 +114,17 @@ def path2fsn(path):
     This will not fail for a valid path.
     """
 
-    # allow ascii str on py2+win and bytes on py3+unix
+    # allow ascii str on py2+win and bytes on py3
     if PY2:
-        if os.name == "nt" and isinstance(path, str):
-            path = path.decode("ascii")
+        if os.name == "nt":
+            if isinstance(path, str):
+                path = path.decode("ascii")
+        else:
+            if isinstance(path, unicode):
+                path = path.encode(_fsencoding())
     else:
-        # TODO: If it ever gets added we should call os.fspath() here
-        if os.name != "nt" and isinstance(path, bytes):
+        # TODO: If it ever gets added to Python we should call os.fspath() here
+        if isinstance(path, bytes):
             path = os.fsdecode(path)
 
     if not isinstance(path, fsnative_type):
