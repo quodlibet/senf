@@ -73,6 +73,8 @@ default arguments) or Unicode support for Windows is added (sys.argv)
 
 .. autofunction:: print_
 
+.. autofunction:: input_
+
 
 Documentation Types
 -------------------

@@ -16,7 +16,7 @@ import sys
 import os
 import ctypes
 
-from ._fsnative import _fsencoding
+from ._fsnative import _fsencoding, path2fsn
 from ._compat import text_type, PY3
 
 
@@ -83,3 +83,24 @@ def print_(*objects, **kwargs):
         # reset the code page to what we had before
         if old_cp is not None:
             ctypes.windll.kernel32.SetConsoleOutputCP(old_cp)
+
+
+def input_(prompt=None):
+    """
+    Args:
+        prompt (`fsnative` or `None`): Prints the passed text to stdout without
+            a trailing newline
+    Returns:
+        `fsnative`
+
+    Like :func:`python3:input` but returns a `fsnative` and allows printing
+    `fsnative` as prompt to stdout.
+
+    Use :func:`fsn2text` on the output if you just want to process text.
+    """
+
+    if prompt is not None:
+        print_(prompt, linesep=False)
+
+    data = getattr(sys.stdin, "buffer", sys.stdin).readline().rstrip(b"\r\n")
+    return path2fsn(data)
