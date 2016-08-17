@@ -93,7 +93,7 @@ fsnative = _create_fsnative(fsnative_type)
 def _fsencoding():
     """The encoding used for paths, argv, environ, stdout and stdin"""
 
-    assert fsnative_type is bytes, "only call on unix code paths"
+    assert os.name != "nt", "only call on unix code paths"
 
     return locale.getpreferredencoding() or "utf-8"
 
