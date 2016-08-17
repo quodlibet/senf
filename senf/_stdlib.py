@@ -14,19 +14,18 @@
 
 import os
 
-from ._fsnative import py2fsn
-from ._compat import PY2, text_type
-from ._environ import del_windows_env_var, set_windows_env_var, environ
+from ._fsnative import path2fsn
+from ._compat import PY2
 
 
-sep = py2fsn(os.sep)
-pathsep = py2fsn(os.pathsep)
-curdir = py2fsn(os.curdir)
-pardir = py2fsn(os.pardir)
-altsep = py2fsn(os.altsep) if os.altsep is not None else None
-extsep = py2fsn(os.extsep)
-devnull = py2fsn(os.devnull)
-defpath = py2fsn(os.defpath)
+sep = path2fsn(os.sep)
+pathsep = path2fsn(os.pathsep)
+curdir = path2fsn(os.curdir)
+pardir = path2fsn(os.pardir)
+altsep = path2fsn(os.altsep) if os.altsep is not None else None
+extsep = path2fsn(os.extsep)
+devnull = path2fsn(os.devnull)
+defpath = path2fsn(os.defpath)
 
 
 def expanduser():
@@ -40,7 +39,7 @@ def expandvars():
 
 
 def getcwd():
-    """Like `os.getcwd` but returns a fsnative path
+    """Like `os.getcwd` but returns a `fsnative` path
 
     Returns:
         `fsnative`
@@ -49,70 +48,6 @@ def getcwd():
     if os.name == "nt" and PY2:
         return os.getcwdu()
     return os.getcwd()
-
-
-def getenv(key, value=None):
-    """Like `os.getenv` but returns unicode under Windows + Python 2
-
-    Args:
-        key (fsnative): The env var to get
-        value (object): The value to return if the env var does not exist
-    Returns:
-        `fsnative` or `object`:
-            The env var or the passed value if it doesn't exist
-    """
-
-    if os.name == "nt" and PY2:
-        key = text_type(key)
-        return environ.get(key, value)
-    return os.getenv(key, value)
-
-
-def unsetenv(key):
-    """Like `os.unsetenv` but takes unicode under Windows + Python 2
-
-    Args:
-        key (fsnative): The env var to unset
-    """
-
-    if os.name == "nt":
-        # python 3 has no unsetenv under Windows -> use our ctypes one as well
-        key = text_type(key)
-        try:
-            del_windows_env_var(key)
-        except WindowsError:
-            pass
-    else:
-        os.unsetenv(key)
-
-
-def putenv(key, value):
-    """Like `os.putenv` but takes unicode under Windows + Python 2
-
-    Args:
-        key (fsnative): The env var to get
-        value (object): The value to return if the env var does not exist
-    """
-
-    if os.name == "nt" and PY2:
-        key = text_type(key)
-        value = text_type(value)
-        try:
-            set_windows_env_var(key, value)
-        except WindowsError:
-            pass
-    else:
-        os.putenv(key, value)
-
-
-def mkdtemp():
-    """Like tempfile.mkdtemp(), but always returns a fsnative path"""
-    pass
-
-
-def mkstemp():
-    """Like tempfile.mkstemp(), but always returns a fsnative path"""
-    pass
 
 
 def format_exc():

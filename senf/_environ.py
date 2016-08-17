@@ -17,6 +17,7 @@ import ctypes
 import collections
 
 from ._compat import text_type, PY2
+from ._fsnative import path2fsn
 if os.name == "nt":
     from ._winapi import SetEnvironmentVariableW, GetEnvironmentStringsW, \
         FreeEnvironmentStringsW, GetEnvironmentVariableW
@@ -115,39 +116,45 @@ def read_windows_environ():
     return dict_
 
 
-class WindowsEnviron(collections.MutableMapping):
-    """os.environ that supports unicode on Windows.
-
-    Like os.environ it will only contain the environment content present at
-    load time. Changes will be synced with the real environment.
+class Environ(collections.MutableMapping):
+    """Dict[`fsnative`, `fsnative`]: Like `os.environ` but contains unicode
+    keys and values under Windows + Python 2
     """
 
     def __init__(self):
-        try:
-            env = read_windows_environ()
-        except WindowsError:
-            env = {}
+        if os.name == "nt" and PY2:
+            try:
+                env = read_windows_environ()
+            except WindowsError:
+                env = {}
+        else:
+            env = os.environ
         self._env = env
 
     def __getitem__(self, key):
-        key = text_type(key)
+        key = path2fsn(key)
         return self._env[key]
 
     def __setitem__(self, key, value):
-        key = text_type(key)
-        value = text_type(value)
-        try:
-            set_windows_env_var(key, value)
-        except WindowsError:
-            pass
+        key = path2fsn(key)
+        value = path2fsn(value)
+
+        if os.name == "nt" and PY2:
+            try:
+                set_windows_env_var(key, value)
+            except WindowsError:
+                pass
         self._env[key] = value
 
     def __delitem__(self, key):
-        key = text_type(key)
-        try:
-            del_windows_env_var(key)
-        except WindowsError:
-            pass
+        key = path2fsn(key)
+
+        if os.name == "nt" and PY2:
+            try:
+                del_windows_env_var(key)
+            except WindowsError:
+                pass
+
         del self._env[key]
 
     def __iter__(self):
@@ -160,10 +167,59 @@ class WindowsEnviron(collections.MutableMapping):
         return repr(self._env)
 
 
-def create_environ():
+environ = Environ()
+
+
+def getenv(key, value=None):
+    """Like `os.getenv` but returns unicode under Windows + Python 2
+
+    Args:
+        key (pathlike): The env var to get
+        value (object): The value to return if the env var does not exist
+    Returns:
+        `fsnative` or `object`:
+            The env var or the passed value if it doesn't exist
+    """
+
+    key = path2fsn(key)
     if os.name == "nt" and PY2:
-        return WindowsEnviron()
-    return os.environ
+        return environ.get(key, value)
+    return os.getenv(key, value)
 
 
-environ = create_environ()
+def unsetenv(key):
+    """Like `os.unsetenv` but takes unicode under Windows + Python 2
+
+    Args:
+        key (pathlike): The env var to unset
+    """
+
+    key = path2fsn(key)
+    if os.name == "nt":
+        # python 3 has no unsetenv under Windows -> use our ctypes one as well
+        try:
+            del_windows_env_var(key)
+        except WindowsError:
+            pass
+    else:
+        os.unsetenv(key)
+
+
+def putenv(key, value):
+    """Like `os.putenv` but takes unicode under Windows + Python 2
+
+    Args:
+        key (pathlike): The env var to get
+        value (pathlike): The value to set
+    """
+
+    key = path2fsn(key)
+    value = path2fsn(value)
+
+    if os.name == "nt" and PY2:
+        try:
+            set_windows_env_var(key, value)
+        except WindowsError:
+            pass
+    else:
+        os.putenv(key, value)

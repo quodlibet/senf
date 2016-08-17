@@ -19,6 +19,20 @@ Helper functions to work with the fsnative type
 
 .. autoclass:: fsnative
 
+.. autofunction:: path2fsn
+
+.. autofunction:: fsn2text
+
+.. autofunction:: fsn2bytes
+
+.. autofunction:: bytes2fsn
+
+.. autofunction:: uri2fsn
+
+.. autofunction:: fsn2uri
+
+.. autofunction:: fsn2uri_ascii
+
 
 Stdlib Replacements
 -------------------
@@ -57,6 +71,8 @@ default arguments) or Unicode support for Windows is added (sys.argv)
 
 .. autofunction:: unsetenv
 
+.. autofunction:: print_
+
 
 Documentation Types
 -------------------
@@ -75,3 +91,10 @@ types depending on the Python version and platform used.
 
     Represents :obj:`python:str` under Python 2 and :obj:`python3:bytes` under
     Python 3.
+
+
+.. class:: pathlike()
+
+    Anything the Python stdlib allows as a path. This includes `fsnative`,
+    ASCII :obj:`python:str` under Python 2 + Windows and :obj:`python3:bytes`
+    under Python 3 + Unix.

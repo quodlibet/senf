@@ -54,10 +54,10 @@ How?
 
 It introduces a virtual type called `fsnative` which actually represents
 
-- `unicode` under Py2 + Windows
-- `str` under Py2 on other platforms
-- `str` under Py3 + Windows
-- `str` + ``surrogates`` under Py3 on other platforms [#]_
+- :obj:`python:unicode`  under Py2 + Windows
+- :obj:`python:str` under Py2 on other platforms
+- :obj:`python3:str` under Py3 + Windows
+- :obj:`python3:str` + ``surrogates`` under Py3 on other platforms [#]_
 
 The type is used for file names, environment variables and process arguments
 and senf provides functions so you can tread it as an opaque type and not have

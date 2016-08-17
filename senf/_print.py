@@ -16,7 +16,7 @@ import sys
 import os
 import ctypes
 
-from ._fsnative import fsencoding
+from ._fsnative import _fsencoding
 from ._compat import text_type, PY3
 
 
@@ -49,7 +49,7 @@ def print_(*objects, **kwargs):
             encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
             old_cp = None
     else:
-        encoding = fsencoding()
+        encoding = _fsencoding()
 
     try:
         if linesep:

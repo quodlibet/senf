@@ -16,9 +16,9 @@ import ctypes
 from ctypes import WinDLL, wintypes
 
 
-user32 = WinDLL("user32")
 shell32 = WinDLL("shell32")
 kernel32 = WinDLL("kernel32")
+shlwapi = WinDLL("shlwapi")
 
 GetCommandLineW = kernel32.GetCommandLineW
 GetCommandLineW.argtypes = []
@@ -33,16 +33,32 @@ LocalFree = kernel32.LocalFree
 LocalFree.argtypes = [wintypes.HLOCAL]
 LocalFree.restype = wintypes.HLOCAL
 
+# https://msdn.microsoft.com/en-us/library/windows/desktop/aa383751.aspx
 LPCTSTR = ctypes.c_wchar_p
 LPTSTR = wintypes.LPWSTR
+PCWSTR = ctypes.c_wchar_p
+PCTSTR = PCWSTR
+PWSTR = ctypes.c_wchar_p
+PTSTR = PWSTR
+DWORD = wintypes.DWORD
+
+INTERNET_MAX_SCHEME_LENGTH = 32
+INTERNET_MAX_PATH_LENGTH = 2048
+INTERNET_MAX_URL_LENGTH = (
+    INTERNET_MAX_SCHEME_LENGTH + len("://") + INTERNET_MAX_PATH_LENGTH)
+
+UrlCreateFromPathW = shlwapi.UrlCreateFromPathW
+UrlCreateFromPathW.argtypes = [
+    PCTSTR, PTSTR, ctypes.POINTER(DWORD), DWORD]
+UrlCreateFromPathW.restype = ctypes.HRESULT
 
 SetEnvironmentVariableW = kernel32.SetEnvironmentVariableW
 SetEnvironmentVariableW.argtypes = [LPCTSTR, LPCTSTR]
 SetEnvironmentVariableW.restype = wintypes.BOOL
 
 GetEnvironmentVariableW = kernel32.GetEnvironmentVariableW
-GetEnvironmentVariableW.argtypes = [LPCTSTR, LPTSTR, wintypes.DWORD]
-GetEnvironmentVariableW.restype = wintypes.DWORD
+GetEnvironmentVariableW.argtypes = [LPCTSTR, LPTSTR, DWORD]
+GetEnvironmentVariableW.restype = DWORD
 
 GetEnvironmentStringsW = kernel32.GetEnvironmentStringsW
 GetEnvironmentStringsW.argtypes = []

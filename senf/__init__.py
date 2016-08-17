@@ -12,15 +12,19 @@
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
-from ._fsnative import fsnative, py2fsn
+from ._fsnative import fsnative, path2fsn, fsn2text, fsn2bytes, \
+    bytes2fsn, uri2fsn, fsn2uri, fsn2uri_ascii
 from ._print import print_
 from ._stdlib import sep, pathsep, curdir, pardir, altsep, extsep, devnull, \
-    defpath, getcwd, getenv, unsetenv, putenv
+    defpath, getcwd
 from ._argv import argv
-from ._environ import environ
+from ._environ import environ, getenv, unsetenv, putenv
+from ._temp import mkstemp, gettempdir, gettempprefix, mkdtemp
 
 
-fsnative, print_, py2fsn, getcwd, getenv, unsetenv, putenv
+fsnative, print_, getcwd, getenv, unsetenv, putenv, environ, \
+    path2fsn, fsn2text, fsn2bytes, bytes2fsn, uri2fsn, fsn2uri, mkstemp, \
+    gettempdir, gettempprefix, mkdtemp, fsn2uri_ascii
 
 
 version = (0, 0, 0)
@@ -31,12 +35,6 @@ version_string = ".".join(map(str, version))
 """`str`: A version string"""
 
 
-environ = environ
-"""Dict[`fsnative`, `fsnative`]: Like `os.environ` but contains unicode keys
-and values under Windows + Python 2
-"""
-
-
 argv = argv
 """List[`fsnative`]: Like `sys.argv` but contains unicode under
 Windows + Python 2
@@ -44,32 +42,32 @@ Windows + Python 2
 
 
 sep = sep
-"""`fsnative`: Like os.sep or os.path.sep but a fsnative path"""
+"""`fsnative`: Like `os.sep` but a `fsnative`"""
 
 
 pathsep = pathsep
-"""`fsnative`: Like os.pathsep but a fsnative path"""
+"""`fsnative`: Like `os.pathsep` but a `fsnative`"""
 
 
 curdir = curdir
-"""`fsnative`: Like os.curdir but a fsnative path"""
+"""`fsnative`: Like `os.curdir` but a `fsnative`"""
 
 
 pardir = pardir
-"""`fsnative`: Like os.pardir but a fsnative path"""
+"""`fsnative`: Like `os.pardir` but a fsnative"""
 
 
 altsep = altsep
-"""`fsnative` or `None`: Like os.altsep but a fsnative path"""
+"""`fsnative` or `None`: Like `os.altsep` but a `fsnative` or `None`"""
 
 
 extsep = extsep
-"""`fsnative`: Like os.extsep but a fsnative path"""
+"""`fsnative`: Like `os.extsep` but a `fsnative`"""
 
 
 devnull = devnull
-"""`fsnative`: Like os.devnull but a fsnative path"""
+"""`fsnative`: Like `os.devnull` but a `fsnative`"""
 
 
 defpath = defpath
-"""`fsnative`: Like os.defpath but a fsnative path"""
+"""`fsnative`: Like `os.defpath` but a `fsnative`"""

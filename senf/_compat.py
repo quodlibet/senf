@@ -20,6 +20,11 @@ PY3 = not PY2
 
 
 if PY2:
+    from urlparse import urlparse
+    urlparse
+    from urllib import pathname2url, url2pathname, quote
+    pathname2url, url2pathname, quote
+
     string_types = (str, unicode)
     text_type = unicode
 
@@ -27,6 +32,11 @@ if PY2:
     itervalues = lambda d: d.itervalues()
     iterkeys = lambda d: d.iterkeys()
 elif PY3:
+    from urllib.parse import urlparse, quote
+    urlparse, quote
+    from urllib.request import pathname2url, url2pathname
+    pathname2url, url2pathname
+
     string_types = (str,)
     text_type = str
 
