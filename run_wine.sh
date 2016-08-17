@@ -21,6 +21,7 @@ wget "https://bootstrap.pypa.io/get-pip.py"
 wine "$PYTHONEXE" get-pip.py
 rm get-pip.py
 wine "$PIPEXE" install pytest
+wine "$PIPEXE" install coverage
 wine "$PYTHONEXE" ${@:2}
 exit_code=$?
 wineserver --wait

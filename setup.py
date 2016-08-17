@@ -2,25 +2,69 @@
 # -*- coding: utf-8 -*-
 # Copyright 2016 Christoph Reiter
 
+import os
 import sys
 
-from setuptools import setup
-from setuptools.command.test import test as TestCommand
+from setuptools import setup, Command
 
 import senf
 
 
-class pytest_command(TestCommand):
+class coverage_command(Command):
+    description = "generate test coverage data"
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        try:
+            from coverage import coverage
+        except ImportError:
+            raise SystemExit(
+                "Missing 'coverage' module. See "
+                "https://pypi.python.org/pypi/coverage or try "
+                "`apt-get install python-coverage python3-coverage`")
+
+        for key in list(sys.modules.keys()):
+            if key.startswith('senf'):
+                del(sys.modules[key])
+
+        cov = coverage()
+        cov.start()
+
+        cmd = self.reinitialize_command("test")
+        cmd.ensure_finalized()
+        cmd.run()
+
+        dest = os.path.join(os.getcwd(), "coverage")
+
+        cov.stop()
+        cov.html_report(
+            directory=dest,
+            ignore_errors=True,
+            include=["senf/*"])
+
+        print("Coverage summary: file://%s/index.html" % dest)
+
+
+class pytest_command(Command):
     user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
 
     def initialize_options(self):
-        TestCommand.initialize_options(self)
         self.pytest_args = []
 
-    def run_tests(self):
+    def finalize_options(self):
+        pass
+
+    def run(self):
         import pytest
         errno = pytest.main(self.pytest_args)
-        sys.exit(errno)
+        if errno != 0:
+            sys.exit(errno)
 
 
 if __name__ == "__main__":
@@ -53,5 +97,8 @@ at it backports some Python 3 improvements like unicode environ/argv to Python
             'License :: OSI Approved :: MIT License',
         ],
         tests_require=['pytest'],
-        cmdclass = {'test': pytest_command},
+        cmdclass = {
+            'test': pytest_command,
+            'coverage': coverage_command,
+        },
     )

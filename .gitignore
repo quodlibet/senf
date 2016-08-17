@@ -4,3 +4,4 @@ MANIFEST
 *.pyc
 docs/_build
 *.egg-info
+coverage
