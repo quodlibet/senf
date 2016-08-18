@@ -24,6 +24,8 @@ from senf import fsnative, sep, pathsep, curdir, pardir, \
     unsetenv, putenv, uri2fsn, fsn2uri, path2fsn, mkstemp, mkdtemp, \
     fsn2uri_ascii, fsn2text, fsn2bytes, bytes2fsn, print_, input_
 from senf._compat import iteritems, PY3, PY2, BytesIO, StringIO
+from senf._environ import set_windows_env_var, get_windows_env_var, \
+    del_windows_env_var
 
 
 linesepb = os.linesep
@@ -55,6 +57,39 @@ def capture_output(data=None):
         sys.stdin = old_in
         sys.stderr = old_err
         sys.stdout = old_out
+
+
+@pytest.mark.skipif(os.name != "nt" or PY3, reason="win+py2 only")
+def test_set_windows_env_var():
+    with pytest.raises(TypeError):
+        set_windows_env_var("", u"")
+
+    with pytest.raises(TypeError):
+        set_windows_env_var(u"", "")
+
+    with pytest.raises(WindowsError):
+        set_windows_env_var(u"==", u"")
+
+    set_windows_env_var(u"foo", u"bar")
+    assert get_windows_env_var(u"foo") == u"bar"
+    del_windows_env_var(u"foo")
+    with pytest.raises(WindowsError):
+        get_windows_env_var(u"foo")
+
+
+@pytest.mark.skipif(os.name != "nt" or PY3, reason="win+py2 only")
+def test_get_windows_env_var():
+    with pytest.raises(TypeError):
+        get_windows_env_var("")
+
+
+@pytest.mark.skipif(os.name != "nt" or PY3, reason="win+py2 only")
+def test_del_windows_env_var():
+    with pytest.raises(TypeError):
+        del_windows_env_var("")
+
+    with pytest.raises(WindowsError):
+        del_windows_env_var(u"nopenopenopenope")
 
 
 def test_print():
@@ -221,6 +256,18 @@ def test_environ():
 
     del environ["foo"]
     assert getenv("foo") is None
+    with pytest.raises(KeyError):
+        del environ["foo"]
+
+    if os.name == "nt":
+        with pytest.raises(ValueError):
+            environ["=="] = "bla"
+    else:
+        environ["=="] = "bla"
+        assert environ["=="] == "bla"
+
+    assert len(environ) == len(environ.keys())
+    repr(environ)
 
 
 def test_getenv():
@@ -240,6 +287,14 @@ def test_unsetenv():
     unsetenv("foo")
     unsetenv("foo")
     assert getenv("foo") is None
+
+
+def test_putenv():
+    if os.name == "nt":
+        with pytest.raises(ValueError):
+            putenv("==", "bla")
+    else:
+        putenv("==", "bla")
 
 
 def test_uri2fsn():

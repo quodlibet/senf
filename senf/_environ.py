@@ -141,8 +141,12 @@ class Environ(collections.MutableMapping):
             try:
                 set_windows_env_var(key, value)
             except WindowsError:
-                pass
-        self._env[key] = value
+                # py3+win fails for invalid keys. try to do the same
+                raise ValueError
+        try:
+            self._env[key] = value
+        except OSError:
+            raise ValueError
 
     def __delitem__(self, key):
         key = path2fsn(key)
@@ -209,6 +213,8 @@ def putenv(key, value):
     Args:
         key (pathlike): The env var to get
         value (pathlike): The value to set
+    Raises:
+        ValueError
     """
 
     key = path2fsn(key)
@@ -218,6 +224,12 @@ def putenv(key, value):
         try:
             set_windows_env_var(key, value)
         except WindowsError:
-            pass
+            # py3 + win fails here
+            raise ValueError
     else:
-        os.putenv(key, value)
+        try:
+            os.putenv(key, value)
+        except OSError:
+            # win + py3 raise here for invalid keys which is probably a bug.
+            # ValueError seems better
+            raise ValueError

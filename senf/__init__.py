@@ -30,7 +30,7 @@ from ._temp import mkstemp, gettempdir, gettempprefix, mkdtemp
 
 fsnative, print_, getcwd, getenv, unsetenv, putenv, environ, \
     path2fsn, fsn2text, fsn2bytes, bytes2fsn, uri2fsn, fsn2uri, mkstemp, \
-    gettempdir, gettempprefix, mkdtemp, fsn2uri_ascii, input
+    gettempdir, gettempprefix, mkdtemp, fsn2uri_ascii, input_
 
 
 version = (0, 0, 0)
