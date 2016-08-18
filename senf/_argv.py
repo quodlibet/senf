@@ -27,10 +27,14 @@ def create_argv():
         return sys.argv
 
     argc = ctypes.c_int()
-    argv = winapi.CommandLineToArgvW(
-        winapi.GetCommandLineW(), ctypes.byref(argc))
+    try:
+        argv = winapi.CommandLineToArgvW(
+           winapi.GetCommandLineW(), ctypes.byref(argc))
+    except WindowsError:
+        return []
+
     if not argv:
-        return
+        return []
 
     res = argv[max(0, argc.value - len(sys.argv)):argc.value]
 
