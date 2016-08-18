@@ -88,15 +88,15 @@ def test_bytes2fsn():
         bytes2fsn(object(), "utf-8")
 
     with pytest.raises(TypeError):
-        bytes2fsn(u"", "utf-8")
+        bytes2fsn(u"data", "utf-8")
 
     if os.name == "nt":
         with pytest.raises(ValueError):
-            bytes2fsn(b"", "notanencoding")
+            bytes2fsn(b"data", "notanencoding")
         with pytest.raises(ValueError):
-            bytes2fsn(b"", None)
+            bytes2fsn(b"data", None)
         with pytest.raises(TypeError):
-            bytes2fsn(b"", object())
+            bytes2fsn(b"data", object())
 
 
 def test_constants():
