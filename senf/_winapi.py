@@ -40,12 +40,33 @@ PCWSTR = ctypes.c_wchar_p
 PCTSTR = PCWSTR
 PWSTR = ctypes.c_wchar_p
 PTSTR = PWSTR
+
+BOOL = wintypes.BOOL
+UINT = wintypes.UINT
+WORD = wintypes.WORD
 DWORD = wintypes.DWORD
+SHORT = wintypes.SHORT
+HANDLE = wintypes.HANDLE
+
+STD_INPUT_HANDLE = DWORD(-10)
+STD_OUTPUT_HANDLE = DWORD(-11)
+STD_ERROR_HANDLE = DWORD(-12)
+
+INVALID_HANDLE_VALUE = wintypes.HANDLE(-1).value
 
 INTERNET_MAX_SCHEME_LENGTH = 32
 INTERNET_MAX_PATH_LENGTH = 2048
 INTERNET_MAX_URL_LENGTH = (
     INTERNET_MAX_SCHEME_LENGTH + len("://") + INTERNET_MAX_PATH_LENGTH)
+
+FOREGROUND_BLUE = 0x0001
+FOREGROUND_GREEN = 0x0002
+FOREGROUND_RED = 0x0004
+FOREGROUND_INTENSITY = 0x0008
+BACKGROUND_BLUE = 0x0010
+BACKGROUND_GREEN = 0x0020
+BACKGROUND_RED = 0x0040
+BACKGROUND_RED = 0x0040
 
 UrlCreateFromPathW = shlwapi.UrlCreateFromPathW
 UrlCreateFromPathW.argtypes = [
@@ -67,3 +88,54 @@ GetEnvironmentStringsW.restype = ctypes.c_void_p
 FreeEnvironmentStringsW = kernel32.FreeEnvironmentStringsW
 FreeEnvironmentStringsW.argtypes = [ctypes.c_void_p]
 FreeEnvironmentStringsW.restype = ctypes.c_bool
+
+GetStdHandle = kernel32.GetStdHandle
+GetStdHandle.argtypes = [DWORD]
+GetStdHandle.restype = HANDLE
+
+
+class COORD(ctypes.Structure):
+
+    _fields_ = [
+        ("X", SHORT),
+        ("Y", SHORT),
+    ]
+
+
+class SMALL_RECT(ctypes.Structure):
+
+    _fields_ = [
+        ("Left", SHORT),
+        ("Top", SHORT),
+        ("Right", SHORT),
+        ("Bottom", SHORT),
+    ]
+
+
+class PCONSOLE_SCREEN_BUFFER_INFO(ctypes.Structure):
+
+    _fields_ = [
+        ("dwSize", COORD),
+        ("dwCursorPosition", COORD),
+        ("wAttributes", WORD),
+        ("srWindow", SMALL_RECT),
+        ("dwMaximumWindowSize", COORD),
+    ]
+
+
+GetConsoleScreenBufferInfo = kernel32.GetConsoleScreenBufferInfo
+GetConsoleScreenBufferInfo.argtypes = [
+    HANDLE, ctypes.POINTER(PCONSOLE_SCREEN_BUFFER_INFO)]
+GetConsoleScreenBufferInfo.restype = BOOL
+
+GetConsoleOutputCP = kernel32.GetConsoleOutputCP
+GetConsoleOutputCP.argtypes = []
+GetConsoleOutputCP.restype = UINT
+
+SetConsoleOutputCP = kernel32.SetConsoleOutputCP
+SetConsoleOutputCP.argtypes = [UINT]
+SetConsoleOutputCP.restype = BOOL
+
+SetConsoleTextAttribute = kernel32.SetConsoleTextAttribute
+SetConsoleTextAttribute.argtypes = [HANDLE, WORD]
+SetConsoleTextAttribute.restype = BOOL

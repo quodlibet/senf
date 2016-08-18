@@ -18,9 +18,7 @@ import collections
 
 from ._compat import text_type, PY2
 from ._fsnative import path2fsn
-if os.name == "nt":
-    from ._winapi import SetEnvironmentVariableW, GetEnvironmentStringsW, \
-        FreeEnvironmentStringsW, GetEnvironmentVariableW
+from . import _winapi as winapi
 
 
 def get_windows_env_var(key):
@@ -35,7 +33,7 @@ def get_windows_env_var(key):
 
     buf = ctypes.create_unicode_buffer(32767)
 
-    stored = GetEnvironmentVariableW(key, buf, 32767)
+    stored = winapi.GetEnvironmentVariableW(key, buf, 32767)
     if stored == 0:
         raise ctypes.WinError()
     return buf[:stored]
@@ -54,7 +52,7 @@ def set_windows_env_var(key, value):
     if not isinstance(value, text_type):
         raise TypeError("%r not of type %r" % (value, text_type))
 
-    status = SetEnvironmentVariableW(key, value)
+    status = winapi.SetEnvironmentVariableW(key, value)
     if status == 0:
         raise ctypes.WinError()
 
@@ -69,7 +67,7 @@ def del_windows_env_var(key):
     if not isinstance(key, text_type):
         raise TypeError("%r not of type %r" % (key, text_type))
 
-    status = SetEnvironmentVariableW(key, None)
+    status = winapi.SetEnvironmentVariableW(key, None)
     if status == 0:
         raise ctypes.WinError()
 
@@ -81,7 +79,7 @@ def read_windows_environ():
         WindowsEnvironError
     """
 
-    res = GetEnvironmentStringsW()
+    res = winapi.GetEnvironmentStringsW()
     if not res:
         raise ctypes.WinError()
 
@@ -109,7 +107,7 @@ def read_windows_environ():
             continue
         dict_[key] = value
 
-    status = FreeEnvironmentStringsW(res)
+    status = winapi.FreeEnvironmentStringsW(res)
     if status == 0:
         raise ctypes.WinError()
 

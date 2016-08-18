@@ -15,9 +15,8 @@
 import os
 import locale
 import ctypes
-if os.name == "nt":
-    from ._winapi import INTERNET_MAX_URL_LENGTH, UrlCreateFromPathW, DWORD
 
+from . import _winapi as winapi
 from ._compat import text_type, PY3, PY2, url2pathname, urlparse, quote
 
 
@@ -287,11 +286,11 @@ def fsn2uri(path):
         raise TypeError("path needs to be %s", fsnative_type.__name__)
 
     if os.name == "nt":
-        buf = ctypes.create_unicode_buffer(INTERNET_MAX_URL_LENGTH)
-        length = DWORD(INTERNET_MAX_URL_LENGTH)
+        buf = ctypes.create_unicode_buffer(winapi.INTERNET_MAX_URL_LENGTH)
+        length = winapi.DWORD(winapi.INTERNET_MAX_URL_LENGTH)
         flags = 0
         try:
-            UrlCreateFromPathW(path, buf, ctypes.byref(length), flags)
+            winapi.UrlCreateFromPathW(path, buf, ctypes.byref(length), flags)
         except WindowsError as e:
             raise ValueError(e)
         return buf[:length.value]

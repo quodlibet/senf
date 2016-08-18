@@ -15,80 +15,162 @@
 import sys
 import os
 import ctypes
+import re
 
 from ._fsnative import _fsencoding, path2fsn
-from ._compat import text_type, PY3
+from ._compat import text_type, PY2
+from . import _winapi as winapi
 
 
 def print_(*objects, **kwargs):
-    """A print which supports bytes and str+surrogates under python3.
-
-    Needed so we can print anything passed to us through argv and environ.
-    Under Windows only text_type is allowed.
+    """print_(*objects, sep=None, end=None, file=None, flush=False)
 
     Arguments:
         objects: one or more bytes/text
-        linesep (bool): whether a line separator should be appended
-        sep (bool): whether objects should be printed separated by spaces
+        sep (fsnative): Object separator to use, defaults to ``" "``
+        end (fsnative): Trailing string use, defaults to `os.linesep`
+        file (object): A file-like object, defaults to `sys.stdout`
+        flush (bool): If the file stream should be flushed
+
+    A print which supports printing bytes under Unix + Python 3 and Unicode
+    under Windows + Python 2.
+
+    In addition it interprets ANSI escape sequences on platforms which
+    don't support them.
     """
 
-    linesep = kwargs.pop("linesep", True)
-    sep = kwargs.pop("sep", True)
-    file_ = kwargs.pop("file", None)
-    if file_ is None:
-        file_ = sys.stdout
+    sep = kwargs.get("sep", " ")
+    end = kwargs.get("end", os.linesep)
+    file = kwargs.get("file", sys.stdout)
+    flush = kwargs.get("flush", False)
 
-    old_cp = None
+    if os.name == "nt" and file in (sys.__stdout__, sys.__stderr__):
+        _print_windows(objects, sep, end, file, flush)
+    else:
+        _print_default(objects, sep, end, file, flush)
+
+
+def _print_default(objects, sep, end, file, flush):
+    """A print_() implementation which writes bytes"""
+
     if os.name == "nt":
-        # Try to force the output to cp65001 aka utf-8.
-        # If that fails use the current one (most likely cp850, so
-        # most of unicode will be replaced with '?')
         encoding = "utf-8"
-        old_cp = ctypes.windll.kernel32.GetConsoleOutputCP()
-        if ctypes.windll.kernel32.SetConsoleOutputCP(65001) == 0:
-            encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
-            old_cp = None
     else:
         encoding = _fsencoding()
 
-    try:
-        if linesep:
-            objects = list(objects) + [os.linesep]
+    if isinstance(sep, text_type):
+        sep = sep.encode(encoding, "replace")
 
-        parts = []
-        for text in objects:
-            if isinstance(text, text_type):
-                if PY3:
-                    try:
-                        text = text.encode(encoding, 'surrogateescape')
-                    except UnicodeEncodeError:
-                        text = text.encode(encoding, 'replace')
-                else:
-                    text = text.encode(encoding, 'replace')
-            parts.append(text)
+    if isinstance(end, text_type):
+        end = end.encode(encoding, "replace")
 
-        data = (b" " if sep else b"").join(parts)
-        try:
-            fileno = file_.fileno()
-        except (AttributeError, OSError, ValueError):
-            # for tests when stdout is replaced
-            try:
-                file_.write(data)
-            except TypeError:
-                file_.write(data.decode(encoding, "replace"))
-        else:
-            file_.flush()
-            os.write(fileno, data)
-    finally:
-        # reset the code page to what we had before
-        if old_cp is not None:
-            ctypes.windll.kernel32.SetConsoleOutputCP(old_cp)
+    parts = []
+    for obj in objects:
+        if isinstance(obj, text_type):
+            if PY2:
+                obj = obj.encode(encoding, "replace")
+            else:
+                obj = obj.encode(encoding, "surrogateescape")
+        parts.append(obj)
+
+    data = sep.join(parts) + end
+
+    file = getattr(file, "buffer", file)
+    file.write(data)
+    if flush:
+        file.flush()
 
 
-def input_(prompt=None):
+class ANSI(object):
+
+    NO_COLOR = '\033[0m'
+    MAGENTA = '\033[95m'
+    BLUE = '\033[94m'
+    CYAN = '\033[96m'
+    WHITE = '\033[97m'
+    YELLOW = '\033[93m'
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    BLACK = '\033[90m'
+    GRAY = '\033[2m'
+
+
+_ANSI_ESC_RE = re.compile(u"(\x1b\[\d\d?m)")
+
+
+def _print_windows(objects, sep, end, file, flush):
+    """The windows implementation of print_()"""
+
+    if file is sys.__stdout__:
+        h = winapi.GetStdHandle(winapi.STD_OUTPUT_HANDLE)
+    elif file is sys.__stderr__:
+        h = winapi.GetStdHandle(winapi.STD_ERROR_HANDLE)
+    else:
+        assert 0
+
+    if h == winapi.INVALID_HANDLE_VALUE:
+        return _print_default(objects, sep, end, file, flush)
+
+    # get the default value
+    info = winapi.PCONSOLE_SCREEN_BUFFER_INFO()
+    if not winapi.GetConsoleScreenBufferInfo(h, ctypes.byref(info)):
+        # not a console, fallback (e.g. redirect to file)
+        return _print_default(objects, sep, end, file, flush)
+
+    mapping = {
+        ANSI.NO_COLOR: info.wAttributes & 0xF,
+        ANSI.MAGENTA: (winapi.FOREGROUND_BLUE | winapi.FOREGROUND_RED |
+                        winapi.FOREGROUND_INTENSITY),
+        ANSI.BLUE: winapi.FOREGROUND_BLUE | winapi.FOREGROUND_INTENSITY,
+        ANSI.CYAN: (winapi.FOREGROUND_BLUE | winapi.FOREGROUND_GREEN |
+                     winapi.FOREGROUND_INTENSITY),
+        ANSI.WHITE: (winapi.FOREGROUND_BLUE | winapi.FOREGROUND_GREEN |
+                      winapi.FOREGROUND_RED | winapi.FOREGROUND_INTENSITY),
+        ANSI.YELLOW: (winapi.FOREGROUND_GREEN | winapi.FOREGROUND_RED |
+                       winapi.FOREGROUND_INTENSITY),
+        ANSI.GREEN: winapi.FOREGROUND_GREEN | winapi.FOREGROUND_INTENSITY,
+        ANSI.RED: winapi.FOREGROUND_RED | winapi.FOREGROUND_INTENSITY,
+        ANSI.BLACK: 0,
+        ANSI.GRAY: winapi.FOREGROUND_INTENSITY,
+    }
+
+    parts = []
+    for obj in objects:
+        if isinstance(obj, bytes):
+            obj = obj.decode("ascii", "replace")
+        parts.append(obj)
+
+    text = sep.join(parts) + end
+    assert isinstance(text, text_type)
+
+    fileno = file.fileno()
+    file.flush()
+
+    # try to force a utf-8 code page
+    old_cp = winapi.GetConsoleOutputCP()
+    encoding = "utf-8"
+    if winapi.SetConsoleOutputCP(65001) == 0:
+        encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
+        old_cp = None
+
+    bg = info.wAttributes & (~0xF)
+    for part in _ANSI_ESC_RE.split(text):
+        if part in mapping:
+            winapi.SetConsoleTextAttribute(h, mapping[part] | bg)
+        elif not _ANSI_ESC_RE.match(part):
+            os.write(fileno, part.encode(encoding, 'replace'))
+
+    file.flush()
+
+    # reset the code page to what we had before
+    if old_cp is not None:
+        winapi.SetConsoleOutputCP(old_cp)
+
+
+def input(prompt=None):
     """
     Args:
-        prompt (`fsnative` or `None`): Prints the passed text to stdout without
+        prompt (`bytes` or `text`): Prints the passed text to stdout without
             a trailing newline
     Returns:
         `fsnative`
@@ -100,7 +182,7 @@ def input_(prompt=None):
     """
 
     if prompt is not None:
-        print_(prompt, linesep=False)
+        print_(prompt, end="")
 
     data = getattr(sys.stdin, "buffer", sys.stdin).readline().rstrip(b"\r\n")
     return path2fsn(data)

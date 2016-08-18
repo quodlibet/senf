@@ -17,6 +17,7 @@ import sys
 import ctypes
 
 from ._compat import PY2
+from . import _winapi as winapi
 
 
 def create_argv():
@@ -25,16 +26,15 @@ def create_argv():
     if os.name != "nt" or not PY2:
         return sys.argv
 
-    from ._winapi import GetCommandLineW, CommandLineToArgvW, LocalFree
-
     argc = ctypes.c_int()
-    argv = CommandLineToArgvW(GetCommandLineW(), ctypes.byref(argc))
+    argv = winapi.CommandLineToArgvW(
+        winapi.GetCommandLineW(), ctypes.byref(argc))
     if not argv:
         return
 
     res = argv[max(0, argc.value - len(sys.argv)):argc.value]
 
-    LocalFree(argv)
+    winapi.LocalFree(argv)
 
     return res
 
