@@ -1,6 +1,8 @@
 #!/bin/bash
-# ./run_wine.sh 2.7.11 setup.py test
-# ./run_wine.sh 3.4.4 setup.py test
+# ./run_wine.sh 2.7.12 python
+# ./run_wine.sh 2.7.12 cmd
+# ./run_wine.sh 3.4.4 python
+# ./run_wine.sh 3.4.4 cmd
 
 DIR=$(mktemp -d)
 export WINEPREFIX="$DIR/_wine_env"
@@ -22,7 +24,15 @@ wine "$PYTHONEXE" get-pip.py
 rm get-pip.py
 wine "$PIPEXE" install pytest
 wine "$PIPEXE" install coverage
-wine "$PYTHONEXE" ${@:2}
+
+if [ "$2" == "cmd" ]; then
+    wineconsole --backend=curses
+elif [ "$2" == "python" ]; then
+    wine "$PYTHONEXE" ${@:3}
+else
+    wine ${@:2}
+fi
+
 exit_code=$?
 wineserver --wait
 rm -Rf "$DIR"

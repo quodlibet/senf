@@ -71,4 +71,4 @@ install:
 script:
   - if [ "$TYPE" == "linux" ]; then eval python $PYARGS -m pytest tests; fi
   - if [ "$TYPE" == "linux" ]; then LANG=C eval python $PYARGS -m pytest tests; fi
-  - if [ "$TYPE" == "windows" ]; then eval xvfb-run -a ./run_wine.sh "$PYVER" $PYARGS -m pytest tests; fi
+  - if [ "$TYPE" == "windows" ]; then eval xvfb-run -a ./run_wine.sh "$PYVER" python $PYARGS -m pytest tests; fi
