@@ -28,16 +28,6 @@ devnull = path2fsn(os.devnull)
 defpath = path2fsn(os.defpath)
 
 
-def expanduser():
-    """Like os.path.expanduser but supports unicode user names under Win+Py2"""
-    pass
-
-
-def expandvars():
-    """Like os.path.expanduser but supports unicode variables under Win+Py2"""
-    pass
-
-
 def getcwd():
     """Like `os.getcwd` but returns a `fsnative` path
 
@@ -48,18 +38,3 @@ def getcwd():
     if os.name == "nt" and PY2:
         return os.getcwdu()
     return os.getcwd()
-
-
-def format_exc():
-    """"""
-    pass
-
-
-def format_exception():
-    """"""
-    pass
-
-
-def extract_tb():
-    """"""
-    pass
