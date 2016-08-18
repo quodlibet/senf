@@ -17,7 +17,7 @@ import os
 import ctypes
 import re
 
-from ._fsnative import _fsencoding, path2fsn
+from ._fsnative import _encoding, path2fsn
 from ._compat import text_type, PY2
 from . import _winapi as winapi
 
@@ -56,7 +56,7 @@ def _print_default(objects, sep, end, file, flush):
     if os.name == "nt":
         encoding = "utf-8"
     else:
-        encoding = _fsencoding()
+        encoding = _encoding()
 
     if isinstance(sep, text_type):
         sep = sep.encode(encoding, "replace")
