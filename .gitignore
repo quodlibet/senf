@@ -5,3 +5,4 @@ MANIFEST
 docs/_build
 *.egg-info
 coverage
+.coverage

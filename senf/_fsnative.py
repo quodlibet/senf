@@ -24,9 +24,8 @@ def _fsnative(text):
     if not isinstance(text, text_type):
         raise TypeError("%r needs to be a text type (%r)" % (text, text_type))
 
-    if fsnative_type is text_type:
-        return text
-    else:
+    if os.name != "nt":
+        # First we go to bytes so we can be sure we have a valid source.
         # Theoretically we should fail here in case we have a non-unicode
         # encoding. But this would make everything complicated and there is
         # no good way to handle a failure from the user side. Instead
@@ -34,9 +33,14 @@ def _fsnative(text):
         # a mis-configured environment
         encoding = _encoding()
         try:
-            return text.encode(encoding)
+            path = text.encode(encoding)
         except UnicodeEncodeError:
-            return text.encode("utf-8")
+            path = text.encode("utf-8")
+        if PY3:
+            return os.fsdecode(path)
+        return path
+    else:
+        return text
 
 
 def _create_fsnative(type_):
@@ -263,7 +267,10 @@ def uri2fsn(uri):
             path = path.decode("utf-8")
         return path
     else:
-        return url2pathname(path)
+        if PY2:
+            return url2pathname(path)
+        else:
+            return fsnative(url2pathname(path))
 
 
 def fsn2uri(path):

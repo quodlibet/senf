@@ -261,6 +261,9 @@ def test_uri2fsn():
         assert uri2fsn(u"file://UNC/foo/bar") == u"\\\\UNC\\foo\\bar"
         assert uri2fsn(u"file://\u1234/\u4321") == u"\\\\\u1234\\\u4321"
 
+    with pytest.raises(TypeError):
+        uri2fsn(object())
+
     with pytest.raises(ValueError):
         uri2fsn("http://www.foo.bar")
 
@@ -307,7 +310,7 @@ def test_fsn2uri_ascii():
         if PY2:
             path = "/foo-\xe1\x88\xb4"
         else:
-            path = u"/foo-\u1234"
+            path = fsnative(u"/foo-\u1234")
         assert fsn2uri_ascii(path) == "file:///foo-%E1%88%B4"
         assert isinstance(fsn2uri_ascii(path), str)
 
