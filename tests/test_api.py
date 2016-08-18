@@ -14,6 +14,7 @@
 
 import os
 import sys
+import contextlib
 
 import pytest
 
@@ -21,8 +22,79 @@ import senf
 from senf import fsnative, sep, pathsep, curdir, pardir, \
     altsep, extsep, devnull, defpath, argv, getcwd, environ, getenv, \
     unsetenv, putenv, uri2fsn, fsn2uri, path2fsn, mkstemp, mkdtemp, \
-    fsn2uri_ascii, fsn2text, fsn2bytes, bytes2fsn
-from senf._compat import iteritems, PY3, PY2
+    fsn2uri_ascii, fsn2text, fsn2bytes, bytes2fsn, print_, input_
+from senf._compat import iteritems, PY3, PY2, BytesIO, StringIO
+
+
+linesepb = os.linesep
+if PY3:
+    linesepb = linesepb.encode("ascii")
+
+
+@contextlib.contextmanager
+def capture_output(data=None):
+    """
+    with capture_output as (stdout, stderr):
+        some_action()
+    print stdout.getvalue(), stderr.getvalue()
+    """
+
+    in_ = BytesIO(data or b"")
+    err = BytesIO()
+    out = BytesIO()
+    old_in = sys.stdin
+    old_err = sys.stderr
+    old_out = sys.stdout
+    sys.stdin = in_
+    sys.stderr = err
+    sys.stdout = out
+
+    try:
+        yield (out, err)
+    finally:
+        sys.stdin = old_in
+        sys.stderr = old_err
+        sys.stdout = old_out
+
+
+def test_print():
+    f = BytesIO()
+    print_(u"foo", file=f)
+    out = f.getvalue()
+    assert isinstance(out, bytes)
+    assert out == b"foo" + linesepb
+
+    f = StringIO()
+    print_(u"foo", file=f)
+    out = f.getvalue()
+    assert isinstance(out, str)
+    assert out == "foo" + os.linesep
+
+
+def test_print_capture():
+    with capture_output() as (out, err):
+        print_(u"bla")
+        assert out.getvalue() == b"bla" + linesepb
+        assert err.getvalue() == b""
+
+
+def test_input():
+    with capture_output(b"foo" + linesepb + b"bla"):
+        out = input_()
+        assert out == "foo"
+        assert isinstance(out, fsnative)
+        out = input_()
+        assert out == "bla"
+        assert isinstance(out, fsnative)
+
+
+def test_input_prompt():
+    with capture_output(b"foo") as (out, err):
+        in_ = input_(u"bla")
+        assert in_ == "foo"
+        assert isinstance(in_, fsnative)
+        assert out.getvalue() == b"bla"
+        assert err.getvalue() == b""
 
 
 def test_version():

@@ -25,6 +25,9 @@ if PY2:
     from urllib import pathname2url, url2pathname, quote
     pathname2url, url2pathname, quote
 
+    from StringIO import StringIO
+    BytesIO = StringIO
+
     string_types = (str, unicode)
     text_type = unicode
 
@@ -36,6 +39,11 @@ elif PY3:
     urlparse, quote
     from urllib.request import pathname2url, url2pathname
     pathname2url, url2pathname
+
+    from io import StringIO
+    StringIO = StringIO
+    from io import BytesIO
+    BytesIO = BytesIO
 
     string_types = (str,)
     text_type = str

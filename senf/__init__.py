@@ -20,7 +20,7 @@ if os.name != "nt":
 
 from ._fsnative import fsnative, path2fsn, fsn2text, fsn2bytes, \
     bytes2fsn, uri2fsn, fsn2uri, fsn2uri_ascii
-from ._print import print_, input
+from ._print import print_, input_
 from ._stdlib import sep, pathsep, curdir, pardir, altsep, extsep, devnull, \
     defpath, getcwd
 from ._argv import argv

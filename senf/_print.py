@@ -76,7 +76,13 @@ def _print_default(objects, sep, end, file, flush):
     data = sep.join(parts) + end
 
     file = getattr(file, "buffer", file)
-    file.write(data)
+
+    try:
+        file.write(data)
+    except TypeError:
+        # for file like objects with don't support bytes
+        file.write(data.decode(encoding, "replace"))
+
     if flush:
         file.flush()
 
@@ -167,7 +173,7 @@ def _print_windows(objects, sep, end, file, flush):
         winapi.SetConsoleOutputCP(old_cp)
 
 
-def input(prompt=None):
+def input_(prompt=None):
     """
     Args:
         prompt (`bytes` or `text`): Prints the passed text to stdout without

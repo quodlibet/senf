@@ -22,6 +22,7 @@ wine "$PYTHONEXE" get-pip.py
 rm get-pip.py
 wine "$PIPEXE" install pytest
 wine "$PIPEXE" install coverage
+wine cmd
 wine "$PYTHONEXE" ${@:2}
 exit_code=$?
 wineserver --wait
