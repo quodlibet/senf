@@ -18,7 +18,7 @@ import ctypes
 import re
 
 from ._fsnative import _encoding, path2fsn
-from ._compat import text_type, PY2
+from ._compat import text_type, PY2, PY3
 from . import _winapi as winapi
 
 
@@ -26,9 +26,10 @@ def print_(*objects, **kwargs):
     """print_(*objects, sep=None, end=None, file=None, flush=False)
 
     Arguments:
-        objects: one or more bytes/text
+        objects: none or more `bytes` or `text`
         sep (fsnative): Object separator to use, defaults to ``" "``
-        end (fsnative): Trailing string use, defaults to `os.linesep`
+        end (fsnative): Trailing string to use, defaults to ``"\\n"``.
+            If end is ``"\\n"`` then `os.linesep` is used.
         file (object): A file-like object, defaults to `sys.stdout`
         flush (bool): If the file stream should be flushed
 
@@ -40,9 +41,12 @@ def print_(*objects, **kwargs):
     """
 
     sep = kwargs.get("sep", " ")
-    end = kwargs.get("end", os.linesep)
+    end = kwargs.get("end", "\n")
     file = kwargs.get("file", sys.stdout)
     flush = kwargs.get("flush", False)
+
+    if end == "\n":
+        end = os.linesep
 
     if os.name == "nt" and file in (sys.__stdout__, sys.__stderr__):
         _print_windows(objects, sep, end, file, flush)
@@ -80,8 +84,16 @@ def _print_default(objects, sep, end, file, flush):
     try:
         file.write(data)
     except TypeError:
-        # for file like objects with don't support bytes
-        file.write(data.decode(encoding, "replace"))
+        if os.name != "nt" and PY3:
+            # For StringIO, first try with surrogates
+            data = os.fsdecode(data)
+            try:
+                file.write(data)
+            except (TypeError, ValueError):
+                file.write(data.decode(encoding, "replace"))
+        else:
+            # for file like objects with don't support bytes
+            file.write(data.decode(encoding, "replace"))
 
     if flush:
         file.flush()

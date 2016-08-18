@@ -77,6 +77,21 @@ def test_print_capture():
         assert out.getvalue() == b"bla" + linesepb
         assert err.getvalue() == b""
 
+    with capture_output() as (out, err):
+        print_(u"bla", end="\n")
+        assert out.getvalue() == b"bla" + linesepb
+
+    with capture_output() as (out, err):
+        print_()
+        assert out.getvalue() == linesepb
+
+
+def test_print_py3_stringio():
+    if os.name != "nt" and PY3:
+        f = StringIO()
+        print_(b"\xff\xfe", file=f)
+        assert f.getvalue() == os.fsdecode(b"\xff\xfe\n")
+
 
 def test_input():
     with capture_output(b"foo" + linesepb + b"bla"):
