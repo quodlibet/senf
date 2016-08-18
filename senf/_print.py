@@ -86,9 +86,9 @@ def _print_default(objects, sep, end, file, flush):
     except TypeError:
         if os.name != "nt" and PY3:
             # For StringIO, first try with surrogates
-            data = os.fsdecode(data)
+            surr_data = os.fsdecode(data)
             try:
-                file.write(data)
+                file.write(surr_data)
             except (TypeError, ValueError):
                 file.write(data.decode(encoding, "replace"))
         else:

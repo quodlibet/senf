@@ -23,7 +23,7 @@ from senf import fsnative, sep, pathsep, curdir, pardir, \
     altsep, extsep, devnull, defpath, argv, getcwd, environ, getenv, \
     unsetenv, putenv, uri2fsn, fsn2uri, path2fsn, mkstemp, mkdtemp, \
     fsn2uri_ascii, fsn2text, fsn2bytes, bytes2fsn, print_, input_
-from senf._compat import iteritems, PY3, PY2, BytesIO, StringIO
+from senf._compat import iteritems, PY3, PY2, BytesIO, StringIO, text_type
 from senf._environ import set_windows_env_var, get_windows_env_var, \
     del_windows_env_var
 
@@ -104,6 +104,33 @@ def test_print():
     out = f.getvalue()
     assert isinstance(out, str)
     assert out == "foo" + os.linesep
+
+    print_(u"foo", file=f, flush=True)
+
+
+@pytest.mark.skipif(os.name == "nt" or PY2, reason="unix+py3 only")
+def test_print_strict_strio():
+    f = StringIO()
+
+    real_write = f.write
+
+    def strict_write(data):
+        if not isinstance(data, text_type):
+            raise TypeError
+        real_write(data.encode("utf-8").decode("utf-8"))
+
+    f.write = strict_write
+
+    print_(os.fsdecode(b"\xff\xfe"), file=f)
+    assert f.getvalue() == u"\ufffd\ufffd\n"
+
+
+def test_print_real():
+    print_(u"foo")
+    print_(u"foo", file=sys.stderr)
+    print_(u"\033[94mfoo", u"\033[0m")
+    print_(b"foo")
+    print_(u"foo", flush=True)
 
 
 def test_print_capture():
