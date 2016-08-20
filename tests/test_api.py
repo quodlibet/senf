@@ -26,7 +26,7 @@ from senf import fsnative, sep, pathsep, curdir, pardir, \
 from senf._compat import iteritems, PY3, PY2, BytesIO, StringIO, text_type
 from senf._environ import set_windows_env_var, get_windows_env_var, \
     del_windows_env_var
-from senf._print import ansi_parse, ansi_split
+from senf._winansi import ansi_parse, ansi_split
 
 
 linesepb = os.linesep

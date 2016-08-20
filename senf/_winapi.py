@@ -117,7 +117,7 @@ class SMALL_RECT(ctypes.Structure):
     ]
 
 
-class PCONSOLE_SCREEN_BUFFER_INFO(ctypes.Structure):
+class CONSOLE_SCREEN_BUFFER_INFO(ctypes.Structure):
 
     _fields_ = [
         ("dwSize", COORD),
@@ -130,7 +130,7 @@ class PCONSOLE_SCREEN_BUFFER_INFO(ctypes.Structure):
 
 GetConsoleScreenBufferInfo = kernel32.GetConsoleScreenBufferInfo
 GetConsoleScreenBufferInfo.argtypes = [
-    HANDLE, ctypes.POINTER(PCONSOLE_SCREEN_BUFFER_INFO)]
+    HANDLE, ctypes.POINTER(CONSOLE_SCREEN_BUFFER_INFO)]
 GetConsoleScreenBufferInfo.restype = BOOL
 
 GetConsoleOutputCP = kernel32.GetConsoleOutputCP
@@ -144,3 +144,7 @@ SetConsoleOutputCP.restype = BOOL
 SetConsoleTextAttribute = kernel32.SetConsoleTextAttribute
 SetConsoleTextAttribute.argtypes = [HANDLE, WORD]
 SetConsoleTextAttribute.restype = BOOL
+
+SetConsoleCursorPosition = kernel32.SetConsoleCursorPosition
+SetConsoleCursorPosition.argtypes = [HANDLE, COORD]
+SetConsoleCursorPosition.restype = BOOL
