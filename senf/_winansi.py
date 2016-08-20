@@ -44,6 +44,9 @@ class AnsiCommand(object):
     SET_POS = "H"
     SET_POS_ALT = "f"
 
+    SAVE_POS = "s"
+    RESTORE_POS = "u"
+
 
 class TextAction(object):
     RESET_ALL = 0
@@ -115,6 +118,8 @@ class AnsiState(object):
         self.bold = False
         self.bg_light = False
         self.fg_light = False
+
+        self.saved_pos = (0, 0)
 
     def do_text_action(self, attrs, action):
         # In case the external state has changed, apply it it to ours.
@@ -281,10 +286,22 @@ class AnsiState(object):
             x, y = args[:2]
 
             win_rect = buffer_info.srWindow
-            x -= win_rect.Left + 1
-            y -= win_rect.Top + 1
+            x += win_rect.Left - 1
+            y += win_rect.Top - 1
 
             x = max(x, 0)
             y = max(y, 0)
             winapi.SetConsoleCursorPosition(handle, winapi.COORD(x, y))
-
+        elif cmd == AnsiCommand.SAVE_POS:
+            win_rect = buffer_info.srWindow
+            coord = buffer_info.dwCursorPosition
+            x, y = coord.X, coord.Y
+            x -= win_rect.Left
+            y -= win_rect.Top
+            self.saved_pos = (x, y)
+        elif cmd == AnsiCommand.RESTORE_POS:
+            win_rect = buffer_info.srWindow
+            x, y = self.saved_pos
+            x += win_rect.Left
+            y += win_rect.Top
+            winapi.SetConsoleCursorPosition(handle, winapi.COORD(x, y))
