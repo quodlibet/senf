@@ -105,12 +105,17 @@ ansi_state = AnsiState()
 def _print_windows(objects, sep, end, file, flush):
     """The windows implementation of print_()"""
 
-    fileno = file.fileno()
     h = winapi.INVALID_HANDLE_VALUE
-    if fileno == 1:
-        h = winapi.GetStdHandle(winapi.STD_OUTPUT_HANDLE)
-    elif fileno == 2:
-        h = winapi.GetStdHandle(winapi.STD_ERROR_HANDLE)
+
+    try:
+        fileno = file.fileno()
+    except (IOError, AttributeError):
+        pass
+    else:
+        if fileno == 1:
+            h = winapi.GetStdHandle(winapi.STD_OUTPUT_HANDLE)
+        elif fileno == 2:
+            h = winapi.GetStdHandle(winapi.STD_ERROR_HANDLE)
 
     if h == winapi.INVALID_HANDLE_VALUE:
         return _print_default(objects, sep, end, file, flush)
