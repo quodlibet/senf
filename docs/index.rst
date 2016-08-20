@@ -6,6 +6,7 @@
     :hidden:
     :titlesonly:
 
+    tutorial
     api
 
 .. currentmodule:: senf
@@ -33,7 +34,7 @@ macOS and only depends on the stdlib.
     for entry in os.listdir(argv[1]):
         print_(u"File: ", entry)
 
-The above example prints wrongly encoded filenames on Unix and all unicode
+The above example prints wrongly encoded filenames on Unix and unicode
 filenames on Windows.
 
 **senf** does not monkey patch stdlib functions, it just provides alternatives

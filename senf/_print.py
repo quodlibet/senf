@@ -39,6 +39,8 @@ def print_(*objects, **kwargs):
     * Emulates ANSI escape sequence support under Windows
     * Never fails due to encoding/decoding errors. Tries hard to get everything
       on screen as is, but will fall back to "?" if all fails.
+
+    This does not conflict with ``colorama``, but will not use it on Windows.
     """
 
     sep = kwargs.get("sep", " ")
@@ -183,15 +185,15 @@ def _print_windows(objects, sep, end, file, flush):
 def input_(prompt=None):
     """
     Args:
-        prompt (object): Prints the passed text to stdout without
-            a trailing newline
+        prompt (object): Prints the passed object to stdout without
+            adding a trailing newline
     Returns:
         `fsnative`
 
     Like :func:`python3:input` but returns a `fsnative` and allows printing
-    `fsnative` as prompt to stdout.
+    filenames as prompt to stdout.
 
-    Use :func:`fsn2text` on the output if you just want to process text.
+    Use :func:`fsn2text` on the result if you just want to deal with text.
     """
 
     if prompt is not None:

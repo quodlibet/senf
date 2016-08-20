@@ -97,6 +97,6 @@ types depending on the Python version and platform used.
 
 .. class:: pathlike()
 
-    Anything the Python stdlib allows as a path. This includes `fsnative`,
-    ASCII :obj:`python:str` under Python 2 + Windows and :obj:`python3:bytes`
-    under Python 3 + Unix.
+    Anything the Python stdlib allows as a path. In addition to `fsnative`
+    this allows ASCII :obj:`python:str` under Python 2 + Windows and
+    :obj:`python3:bytes` under Python 3 + Unix.

@@ -114,7 +114,8 @@ def path2fsn(path):
     Returns a fsnative path for a path-like.
 
     If the passed in path is a fsnative path simply returns it.
-    This will not fail for a valid path.
+    This will not fail for a valid path (Either retrieved from stdlib functions
+    or `argv` or `environ` or through the `fsnative` helper)
     """
 
     # allow ascii str on py2+win and bytes on py3
@@ -150,9 +151,7 @@ def fsn2text(path):
 
     On Python 3 the resulting `str` will not contain surrogates.
 
-    This is not needed for printing to stdout, use `senf.print_` there.
-
-    This can't fail.
+    This can't fail if a valid `fsnative` gets passed.
     """
 
     if not isinstance(path, fsnative_type):
@@ -179,7 +178,7 @@ def fsn2bytes(path, encoding):
         ValueError: On Windows if no valid encoding is passed or encoding fails
 
     Turns a path to bytes. If the path is not associated with an encoding
-    the passed encoding is used (under Windows for example)
+    the passed encoding is used (under Windows for example).
     """
 
     if not isinstance(path, fsnative_type):

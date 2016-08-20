@@ -18,7 +18,12 @@ from ._fsnative import path2fsn, fsnative
 
 
 def gettempdir():
-    """Like tempfile.gettempdir(), but always returns a `fsnative` path"""
+    """
+    Returns:
+        `fsntaive`
+
+    Like tempfile.gettempdir(), but always returns a `fsnative` path
+    """
 
     # FIXME: I don't want to reimplement all that logic, reading env vars etc.
     # At least for the default it works.
@@ -26,7 +31,12 @@ def gettempdir():
 
 
 def gettempprefix():
-    """Like tempfile.gettempprefix(), but always returns a `fsnative` path"""
+    """
+    Returns:
+        `fsnative`
+
+    Like tempfile.gettempprefix(), but always returns a `fsnative` path
+    """
 
     return path2fsn(tempfile.gettempprefix())
 
