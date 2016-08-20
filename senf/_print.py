@@ -16,6 +16,7 @@ import sys
 import os
 import ctypes
 import re
+import atexit
 
 from ._fsnative import _encoding, path2fsn
 from ._compat import text_type, PY2, PY3
@@ -101,19 +102,202 @@ def _print_default(objects, sep, end, file, flush):
 
 class ANSI(object):
 
-    NO_COLOR = '\033[0m'
-    MAGENTA = '\033[95m'
-    BLUE = '\033[94m'
-    CYAN = '\033[96m'
-    WHITE = '\033[97m'
-    YELLOW = '\033[93m'
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    BLACK = '\033[90m'
-    GRAY = '\033[2m'
+    SET_BOLD = '\033[1m'
+    SET_DIM = '\033[2m'
+    SET_ITALIC = '\033[3m'
+    SET_UNDERLINE = '\033[4m'
+    SET_BLINK = '\033[5m'
+    SET_BLINK_FAST = '\033[6m'
+    SET_REVERSE = '\033[7m'
+    SET_HIDDEN = '\033[8m'
+
+    RESET_ALL = '\033[0m'
+
+    RESET_BOLD = '\033[21m'
+    RESET_DIM = '\033[22m'
+    RESET_ITALIC = '\033[23m'
+    RESET_UNDERLINE = '\033[24m'
+    RESET_BLINK = '\033[25m'
+    RESET_BLINK_FAST = '\033[26m'
+    RESET_REVERSE = '\033[27m'
+    RESET_HIDDEN = '\033[28m'
+
+    FG_BLACK= '\033[30m'
+    FG_RED = '\033[31m'
+    FG_GREEN = '\033[32m'
+    FG_YELLOW = '\033[33m'
+    FG_BLUE = '\033[34m'
+    FG_MAGENTA = '\033[35m'
+    FG_CYAN = '\033[36m'
+    FG_WHITE = '\033[37m'
+
+    FG_DEFAULT = '\033[39m'
+
+    FG_LIGHT_BLACK= '\033[90m'
+    FG_LIGHT_RED = '\033[91m'
+    FG_LIGHT_GREEN = '\033[92m'
+    FG_LIGHT_YELLOW = '\033[93m'
+    FG_LIGHT_BLUE = '\033[94m'
+    FG_LIGHT_MAGENTA = '\033[95m'
+    FG_LIGHT_CYAN = '\033[96m'
+    FG_LIGHT_WHITE = '\033[97m'
+
+    BG_BLACK= '\033[40m'
+    BG_RED = '\033[41m'
+    BG_GREEN = '\033[42m'
+    BG_YELLOW = '\033[43m'
+    BG_BLUE = '\033[44m'
+    BG_MAGENTA = '\033[45m'
+    BG_CYAN = '\033[46m'
+    BG_WHITE = '\033[47m'
+
+    BG_DEFAULT = '\033[49m'
+
+    BG_LIGHT_BLACK= '\033[100m'
+    BG_LIGHT_RED = '\033[101m'
+    BG_LIGHT_GREEN = '\033[102m'
+    BG_LIGHT_YELLOW = '\033[103m'
+    BG_LIGHT_BLUE = '\033[104m'
+    BG_LIGHT_MAGENTA = '\033[105m'
+    BG_LIGHT_CYAN = '\033[106m'
+    BG_LIGHT_WHITE = '\033[107m'
+
+_ANSI_ESC_RE = re.compile(u"(\x1b\[\d{1,3}m)")
 
 
-_ANSI_ESC_RE = re.compile(u"(\x1b\[\d\d?m)")
+class AnsiState(object):
+
+    def __init__(self):
+        self.default = None
+        self.bold = False
+        self.bg_light = False
+        self.fg_light = False
+
+    def apply(self, buffer_info, handle, code):
+        attrs = buffer_info.wAttributes
+
+        # We take the first attrs we see as default
+        if self.default is None:
+            self.default = attrs
+            # Make sure that like with linux terminals the program doesn't
+            # affect the prompt after it exits
+            atexit.register(winapi.SetConsoleTextAttribute, handle, attrs)
+
+        # In case the external state has changed, apply it it to ours.
+        # Mostly the first time this is called.
+        if attrs & winapi.FOREGROUND_INTENSITY and not self.fg_light \
+                and not self.bold:
+            self.fg_light = True
+        if attrs & winapi.BACKGROUND_INTENSITY and not self.bg_light:
+            self.bg_light = True
+
+        fg_mask = attrs & (~0xF)
+        bg_mask = attrs & (~0xF0)
+
+        dark_fg = {
+            ANSI.FG_BLACK: 0,
+            ANSI.FG_RED: winapi.FOREGROUND_RED,
+            ANSI.FG_GREEN: winapi.FOREGROUND_GREEN,
+            ANSI.FG_YELLOW: winapi.FOREGROUND_GREEN | winapi.FOREGROUND_RED,
+            ANSI.FG_BLUE: winapi.FOREGROUND_BLUE,
+            ANSI.FG_MAGENTA: winapi.FOREGROUND_BLUE | winapi.FOREGROUND_RED,
+            ANSI.FG_CYAN: winapi.FOREGROUND_BLUE | winapi.FOREGROUND_GREEN,
+            ANSI.FG_WHITE: winapi.FOREGROUND_BLUE | winapi.FOREGROUND_GREEN |
+                winapi.FOREGROUND_RED,
+        }
+
+        dark_bg = {
+            ANSI.BG_BLACK: 0,
+            ANSI.BG_RED: winapi.BACKGROUND_RED,
+            ANSI.BG_GREEN: winapi.BACKGROUND_GREEN,
+            ANSI.BG_YELLOW: winapi.BACKGROUND_GREEN | winapi.BACKGROUND_RED,
+            ANSI.BG_BLUE: winapi.BACKGROUND_BLUE,
+            ANSI.BG_MAGENTA: winapi.BACKGROUND_BLUE | winapi.BACKGROUND_RED,
+            ANSI.BG_CYAN: winapi.BACKGROUND_BLUE | winapi.BACKGROUND_GREEN,
+            ANSI.BG_WHITE: winapi.BACKGROUND_BLUE | winapi.BACKGROUND_GREEN |
+                winapi.BACKGROUND_RED,
+        }
+
+        light_fg = {
+            ANSI.FG_LIGHT_BLACK: 0,
+            ANSI.FG_LIGHT_RED: winapi.FOREGROUND_RED,
+            ANSI.FG_LIGHT_GREEN: winapi.FOREGROUND_GREEN,
+            ANSI.FG_LIGHT_YELLOW: winapi.FOREGROUND_GREEN |
+                winapi.FOREGROUND_RED,
+            ANSI.FG_LIGHT_BLUE: winapi.FOREGROUND_BLUE,
+            ANSI.FG_LIGHT_MAGENTA: winapi.FOREGROUND_BLUE |
+                winapi.FOREGROUND_RED,
+            ANSI.FG_LIGHT_CYAN: winapi.FOREGROUND_BLUE |
+                winapi.FOREGROUND_GREEN,
+            ANSI.FG_LIGHT_WHITE: winapi.FOREGROUND_BLUE |
+                winapi.FOREGROUND_GREEN | winapi.FOREGROUND_RED,
+        }
+
+        light_bg = {
+            ANSI.BG_LIGHT_BLACK: 0,
+            ANSI.BG_LIGHT_RED: winapi.BACKGROUND_RED,
+            ANSI.BG_LIGHT_GREEN: winapi.BACKGROUND_GREEN,
+            ANSI.BG_LIGHT_YELLOW: winapi.BACKGROUND_GREEN |
+                                  winapi.BACKGROUND_RED,
+            ANSI.BG_LIGHT_BLUE: winapi.BACKGROUND_BLUE,
+            ANSI.BG_LIGHT_MAGENTA: winapi.BACKGROUND_BLUE |
+                winapi.BACKGROUND_RED,
+            ANSI.BG_LIGHT_CYAN: winapi.BACKGROUND_BLUE |
+                winapi.BACKGROUND_GREEN,
+            ANSI.BG_LIGHT_WHITE: winapi.BACKGROUND_BLUE |
+                winapi.BACKGROUND_GREEN | winapi.BACKGROUND_RED,
+        }
+
+        if code == ANSI.RESET_ALL:
+            attrs = self.default
+            self.bold = self.fg_light = self.bg_light = False
+        elif code == ANSI.SET_BOLD:
+            self.bold = True
+        elif code == ANSI.RESET_BOLD:
+            self.bold = False
+        elif code == ANSI.SET_DIM:
+            self.bold = False
+        elif code == ANSI.SET_REVERSE:
+            attrs |= winapi.COMMON_LVB_REVERSE_VIDEO
+        elif code == ANSI.RESET_REVERSE:
+            attrs &= ~winapi.COMMON_LVB_REVERSE_VIDEO
+        elif code == ANSI.SET_UNDERLINE:
+            attrs |= winapi.COMMON_LVB_UNDERSCORE
+        elif code == ANSI.RESET_UNDERLINE:
+            attrs &= ~winapi.COMMON_LVB_UNDERSCORE
+        elif code == ANSI.FG_DEFAULT:
+            attrs = (attrs & ~0xF) | (self.default & 0xF)
+            self.fg_light = False
+        elif code == ANSI.BG_DEFAULT:
+            attrs = (attrs & ~0xF0) | (self.default & 0xF0)
+            self.bg_light = False
+        elif code in dark_fg:
+            attrs = (attrs & ~0xF) | dark_fg[code]
+            self.fg_light = False
+        elif code in dark_bg:
+            attrs = (attrs & ~0xF0) | dark_bg[code]
+            self.bg_light = False
+        elif code in light_fg:
+            attrs = (attrs & ~0xF) | light_fg[code]
+            self.fg_light = True
+        elif code in light_bg:
+            attrs = (attrs & ~0xF0) | light_bg[code]
+            self.bg_light = True
+
+        if self.fg_light or self.bold:
+            attrs |= winapi.FOREGROUND_INTENSITY
+        else:
+            attrs &= ~winapi.FOREGROUND_INTENSITY
+
+        if self.bg_light:
+            attrs |= winapi.BACKGROUND_INTENSITY
+        else:
+            attrs &= ~winapi.BACKGROUND_INTENSITY
+
+        winapi.SetConsoleTextAttribute(handle, attrs)
+
+
+ansi_state = AnsiState()
 
 
 def _print_windows(objects, sep, end, file, flush):
@@ -135,34 +319,24 @@ def _print_windows(objects, sep, end, file, flush):
         # not a console, fallback (e.g. redirect to file)
         return _print_default(objects, sep, end, file, flush)
 
-    mapping = {
-        ANSI.NO_COLOR: info.wAttributes & 0xF,
-        ANSI.MAGENTA: (winapi.FOREGROUND_BLUE | winapi.FOREGROUND_RED |
-                        winapi.FOREGROUND_INTENSITY),
-        ANSI.BLUE: winapi.FOREGROUND_BLUE | winapi.FOREGROUND_INTENSITY,
-        ANSI.CYAN: (winapi.FOREGROUND_BLUE | winapi.FOREGROUND_GREEN |
-                     winapi.FOREGROUND_INTENSITY),
-        ANSI.WHITE: (winapi.FOREGROUND_BLUE | winapi.FOREGROUND_GREEN |
-                      winapi.FOREGROUND_RED | winapi.FOREGROUND_INTENSITY),
-        ANSI.YELLOW: (winapi.FOREGROUND_GREEN | winapi.FOREGROUND_RED |
-                       winapi.FOREGROUND_INTENSITY),
-        ANSI.GREEN: winapi.FOREGROUND_GREEN | winapi.FOREGROUND_INTENSITY,
-        ANSI.RED: winapi.FOREGROUND_RED | winapi.FOREGROUND_INTENSITY,
-        ANSI.BLACK: 0,
-        ANSI.GRAY: winapi.FOREGROUND_INTENSITY,
-    }
-
     parts = []
     for obj in objects:
         if isinstance(obj, bytes):
             obj = obj.decode("ascii", "replace")
+        if not isinstance(obj, text_type):
+            obj = text_type(obj)
         parts.append(obj)
+
+    sep = path2fsn(sep)
+    end = path2fsn(end)
 
     text = sep.join(parts) + end
     assert isinstance(text, text_type)
 
-    fileno = file.fileno()
+    # make sure we flush before we apply any console attributes
     file.flush()
+
+    fileno = file.fileno()
 
     # try to force a utf-8 code page
     old_cp = winapi.GetConsoleOutputCP()
@@ -171,14 +345,11 @@ def _print_windows(objects, sep, end, file, flush):
         encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
         old_cp = None
 
-    bg = info.wAttributes & (~0xF)
     for part in _ANSI_ESC_RE.split(text):
-        if part in mapping:
-            winapi.SetConsoleTextAttribute(h, mapping[part] | bg)
-        elif not _ANSI_ESC_RE.match(part):
+        if _ANSI_ESC_RE.match(part):
+            ansi_state.apply(info, h, part)
+        else:
             os.write(fileno, part.encode(encoding, 'replace'))
-
-    file.flush()
 
     # reset the code page to what we had before
     if old_cp is not None:

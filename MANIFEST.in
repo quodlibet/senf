@@ -1,5 +1,6 @@
 include senf/*.py
 include tests/*.py
+include examples/*.py
 include LICENSE
 include MANIFEST.in
 recursive-include docs *.py Makefile *.rst *.png *.svg *.ico
