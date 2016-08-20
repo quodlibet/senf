@@ -125,6 +125,36 @@ def test_print():
     print_(u"foo", file=f, flush=True)
 
 
+def test_print_ansi():
+    for i in range(1, 110):
+        print_("\033[%dm" % i, end="")
+    other = ["\033[A", "\033[B", "\033[C", "\033[D", "\033[s", "\033[u",
+             "\033[H", "\033[f"]
+    for c in other:
+        print_(c, end="")
+
+
+def test_print_anything():
+    with capture_output():
+        print_(u"\u1234")
+
+    with capture_output() as (out, err):
+        print_(5, end="")
+        assert out.getvalue() == b"5"
+
+    with capture_output() as (out, err):
+        print_([], end="")
+        assert out.getvalue() == b"[]"
+
+
+def test_print_error():
+    with pytest.raises(TypeError):
+        print_(end=4)
+
+    with pytest.raises(TypeError):
+        print_(sep=4)
+
+
 @pytest.mark.skipif(os.name == "nt" or PY2, reason="unix+py3 only")
 def test_print_strict_strio():
     f = StringIO()

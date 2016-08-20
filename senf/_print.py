@@ -26,18 +26,19 @@ def print_(*objects, **kwargs):
     """print_(*objects, sep=None, end=None, file=None, flush=False)
 
     Arguments:
-        objects: none or more `bytes` or `text`
-        sep (fsnative): Object separator to use, defaults to ``" "``
-        end (fsnative): Trailing string to use, defaults to ``"\\n"``.
+        objects (object): zero or more objects to print
+        sep (str): Object separator to use, defaults to ``" "``
+        end (str): Trailing string to use, defaults to ``"\\n"``.
             If end is ``"\\n"`` then `os.linesep` is used.
         file (object): A file-like object, defaults to `sys.stdout`
         flush (bool): If the file stream should be flushed
 
-    A print which supports printing bytes under Unix + Python 3 and Unicode
-    under Windows + Python 2.
+    Like print(), but:
 
-    In addition it interprets ANSI escape sequences on platforms which
-    don't support them.
+    * Supports printing filenames under Unix + Python 3 and Windows + Python 2
+    * Emulates ANSI escape sequence support under Windows
+    * Never fails due to encoding/decoding errors. Tries hard to get everything
+      on screen as is, but will fall back to "?" if all fails.
     """
 
     sep = kwargs.get("sep", " ")
@@ -64,20 +65,31 @@ def _print_default(objects, sep, end, file, flush):
 
     if isinstance(sep, text_type):
         sep = sep.encode(encoding, "replace")
+    if not isinstance(sep, bytes):
+        raise TypeError
 
     if isinstance(end, text_type):
         end = end.encode(encoding, "replace")
+    if not isinstance(end, bytes):
+        raise TypeError
 
     parts = []
     for obj in objects:
+        if not isinstance(obj, text_type) and not isinstance(obj, bytes):
+            obj = text_type(obj)
         if isinstance(obj, text_type):
             if PY2:
                 obj = obj.encode(encoding, "replace")
             else:
-                obj = obj.encode(encoding, "surrogateescape")
+                try:
+                    obj = obj.encode(encoding, "surrogateescape")
+                except UnicodeEncodeError:
+                    obj = obj.encode(encoding, "replace")
+        assert isinstance(obj, bytes)
         parts.append(obj)
 
     data = sep.join(parts) + end
+    assert isinstance(data, bytes)
 
     file = getattr(file, "buffer", file)
 
@@ -134,8 +146,15 @@ def _print_windows(objects, sep, end, file, flush):
             obj = text_type(obj)
         parts.append(obj)
 
-    sep = path2fsn(sep)
-    end = path2fsn(end)
+    if isinstance(sep, bytes):
+        sep = sep.decode(encoding, "replace")
+    if not isinstance(sep, text_type):
+        raise TypeError
+
+    if isinstance(end, bytes):
+        end = end.decode(encoding, "replace")
+    if not isinstance(end, text_type):
+        raise TypeError
 
     text = sep.join(parts) + end
     assert isinstance(text, text_type)
@@ -164,7 +183,7 @@ def _print_windows(objects, sep, end, file, flush):
 def input_(prompt=None):
     """
     Args:
-        prompt (`bytes` or `text`): Prints the passed text to stdout without
+        prompt (object): Prints the passed text to stdout without
             a trailing newline
     Returns:
         `fsnative`
