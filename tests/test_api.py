@@ -26,6 +26,7 @@ from senf import fsnative, sep, pathsep, curdir, pardir, \
 from senf._compat import iteritems, PY3, PY2, BytesIO, StringIO, text_type
 from senf._environ import set_windows_env_var, get_windows_env_var, \
     del_windows_env_var
+from senf._print import ansi_parse, ansi_split
 
 
 linesepb = os.linesep
@@ -57,6 +58,22 @@ def capture_output(data=None):
         sys.stdin = old_in
         sys.stderr = old_err
         sys.stdout = old_out
+
+
+def test_ansi_matching():
+    to_match = [u"\033[39m", u"\033[3m", u"\033[m", u"\033[;m", u"\033[;2;m"]
+    for t in to_match:
+        assert list(ansi_split(t)) == [(True, t)]
+
+    assert list(ansi_split("foo\033[;2;mbla")) == [
+        (False, "foo"), (True, "\033[;2;m"), (False, "bla")]
+
+    assert ansi_parse(u"\033[;2;m") == ("m", (0, 2, 0))
+    assert ansi_parse(u"\033[;m") == ("m", (0, 0))
+    assert ansi_parse(u"\033[k") == ("k", (0,))
+    assert ansi_parse(u"\033[;;k") == ("k", (0, 0, 0))
+    assert ansi_parse(u"\033[100k") == ("k", (100,))
+    assert ansi_parse(u"\033[m") == ("m", (0,))
 
 
 @pytest.mark.skipif(os.name != "nt" or PY3, reason="win+py2 only")
