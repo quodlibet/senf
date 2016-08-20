@@ -14,25 +14,27 @@
 What?
 -----
 
-**senf** makes filename handing easier by papering over platform differences
-in Python 2 and by making it easier to migrate to Python 3 or to have a mixed
-Py2/Py3 code base. While at it, it improves the Unicode support for Python 2
-under Windows to be on par with Python 3.
+**senf** makes filename handling easier by providing a set of filename
+handling functions which works the same across all Python versions and
+supported platforms. It also provides a print() function which can print
+all filenames.
 
-You can think of it as `six <https://pypi.org/project/six/>`__ for file path
+You can think of it as `six <https://pypi.org/project/six/>`__ for filename
 handling.
 
-It supports Python 2.6, 2.7, 3.3+, works with PyPy, and only depends on the
-stdlib.
+It supports Python 2.6, 2.7, 3.3+, works with PyPy, works on Linux, Windows,
+macOS and only depends on the stdlib.
 
 ::
 
     import os
-    from senf import fsnative, print_
+    from senf import argv, print_
 
-    # This supports unicode file names under Py2/3 on Linux/macOS/Windows
-    for entry in os.listdir(fsnative(u"my_dir")):
+    for entry in os.listdir(argv[1]):
         print_(u"File: ", entry)
+
+The above example prints wrongly encoded filenames on Unix and all unicode
+filenames on Windows.
 
 **senf** does not monkey patch stdlib functions, it just provides alternatives
 and wrappers.
@@ -59,7 +61,7 @@ It introduces a virtual type called `fsnative` which actually represents
 - :obj:`python3:str` under Py3 + Windows
 - :obj:`python3:str` + ``surrogates`` under Py3 on other platforms [#]_
 
-The type is used for file names, environment variables and process arguments
+The type is used for filenames, environment variables and process arguments
 and senf provides functions so you can tread it as an opaque type and not have
 to worry about its content or encoding.
 
