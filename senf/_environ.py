@@ -168,6 +168,9 @@ class Environ(collections.MutableMapping):
     def __repr__(self):
         return repr(self._env)
 
+    def copy(self):
+        return self._env.copy()
+
 
 environ = Environ()
 

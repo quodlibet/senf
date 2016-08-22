@@ -76,6 +76,15 @@ A similar problem arises with stdlib collections. We provides alternatives for
     >>> isinstance(senf.environ["PATH"], senf.fsnative)
     True
 
+Also for `os.environ` related functions:
+
+::
+
+    >>> isinstance(senf.getenv("HOME"), fsnative)
+    True
+    >>> isinstance(senf.expanduser("~"), fsnative)
+    True
+
 
 If you work with files a lot your unit tests will probably need temporary
 files. We provide wrappers for `tempfile` functions which always return a

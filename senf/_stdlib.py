@@ -14,8 +14,9 @@
 
 import os
 
-from ._fsnative import path2fsn
+from ._fsnative import path2fsn, fsnative
 from ._compat import PY2
+from ._environ import environ
 
 
 sep = path2fsn(os.sep)
@@ -38,3 +39,85 @@ def getcwd():
     if os.name == "nt" and PY2:
         return os.getcwdu()
     return os.getcwd()
+
+
+def _get_userdir(user=None):
+    """Returns the user dir or None"""
+
+    if user is not None and not isinstance(user, fsnative):
+        raise TypeError
+
+    if os.name == "nt":
+        if "HOME" in environ:
+            path = environ["HOME"]
+        elif "USERPROFILE" in environ:
+            path = environ["USERPROFILE"]
+        elif "HOMEPATH" in environ and "HOMEDRIVE" in environ:
+            path = os.path.join(environ["HOMEDRIVE"], environ["HOMEPATH"])
+        else:
+            return
+
+        if user is None:
+            return path
+        else:
+            return os.path.join(os.path.dirname(path), user)
+    else:
+        import pwd
+
+        if user is None:
+            if "HOME" in environ:
+                return environ["HOME"]
+            else:
+                try:
+                    return path2fsn(pwd.getpwuid(os.getuid()).pw_dir)
+                except KeyError:
+                    return
+        else:
+            try:
+                return path2fsn(pwd.getpwnam(user).pw_dir)
+            except KeyError:
+                return
+
+
+def expanduser(path):
+    """
+    Args:
+        path (pathlike): A path to expand
+    Returns:
+        `fsnative`
+
+    Like :func:`python:os.path.expanduser` but supports unicode home
+    directories under Windows + Python 2 and always returns a `fsnative`.
+    """
+
+    path = path2fsn(path)
+
+    if path == "~":
+        return _get_userdir()
+    elif path.startswith("~" + sep) or (
+            altsep is not None and path.startswith("~" + altsep)):
+        userdir = _get_userdir()
+        if userdir is None:
+            return path
+        return userdir + path[1:]
+    elif path.startswith("~"):
+        sep_index = path.find(sep)
+        if altsep is not None:
+            alt_index = path.find(altsep)
+            if alt_index != -1 and alt_index < sep_index:
+                sep_index = alt_index
+
+        if sep_index == -1:
+            user = path[1:]
+            rest = ""
+        else:
+            user = path[1:sep_index]
+            rest = path[sep_index:]
+
+        userdir = _get_userdir(user)
+        if userdir is not None:
+            return userdir + rest
+        else:
+            return path
+    else:
+        return path

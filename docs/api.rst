@@ -75,6 +75,8 @@ default arguments) or Unicode support for Windows is added (sys.argv)
 
 .. autofunction:: input_
 
+.. autofunction:: expanduser
+
 
 Documentation Types
 -------------------

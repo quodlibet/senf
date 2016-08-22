@@ -22,16 +22,41 @@ import senf
 from senf import fsnative, sep, pathsep, curdir, pardir, \
     altsep, extsep, devnull, defpath, argv, getcwd, environ, getenv, \
     unsetenv, putenv, uri2fsn, fsn2uri, path2fsn, mkstemp, mkdtemp, \
-    fsn2uri_ascii, fsn2text, fsn2bytes, bytes2fsn, print_, input_
+    fsn2uri_ascii, fsn2text, fsn2bytes, bytes2fsn, print_, input_, expanduser
 from senf._compat import iteritems, PY3, PY2, BytesIO, StringIO, text_type
 from senf._environ import set_windows_env_var, get_windows_env_var, \
     del_windows_env_var
 from senf._winansi import ansi_parse, ansi_split
+from senf._stdlib import _get_userdir
 
 
 linesepb = os.linesep
 if PY3:
     linesepb = linesepb.encode("ascii")
+
+
+def notfsnative(text=u""):
+    fsn = fsnative(text)
+    if isinstance(fsn, bytes):
+        return fsn2text(fsn)
+    else:
+        return fsn2bytes(fsn, "utf-8")
+
+assert not isinstance(notfsnative(), fsnative)
+
+
+@contextlib.contextmanager
+def preserve_environ():
+    old = environ.copy()
+    yield
+    # don't touch existing values as os.environ is broken for empty
+    # keys on Windows: http://bugs.python.org/issue20658
+    for key, value in list(environ.items()):
+        if key not in old:
+            del environ[key]
+    for key, value in list(old.items()):
+        if key not in environ or environ[key] != value:
+            environ[key] = value
 
 
 @contextlib.contextmanager
@@ -58,6 +83,80 @@ def capture_output(data=None):
         sys.stdin = old_in
         sys.stderr = old_err
         sys.stdout = old_out
+
+
+def test_getuserdir():
+    userdir = _get_userdir()
+    assert isinstance(userdir, fsnative)
+
+    with pytest.raises(TypeError):
+        _get_userdir(notfsnative(u"foo"))
+
+    if os.name == "nt":
+        otherdir = _get_userdir(u"foo")
+        assert otherdir == os.path.join(os.path.dirname(userdir), u"foo")
+    else:
+        user = os.path.basename(userdir)
+        assert _get_userdir() == _get_userdir(user)
+
+    with preserve_environ():
+        environ["HOME"] = "bla"
+        assert _get_userdir() == "bla"
+
+    with preserve_environ():
+        environ.pop("HOME", None)
+        if os.name != "nt":
+            assert _get_userdir()
+        else:
+            environ["USERPROFILE"] = "uprof"
+            assert _get_userdir() == "uprof"
+
+    with preserve_environ():
+        environ.pop("HOME", None)
+        environ.pop("USERPROFILE", None)
+        if os.name == "nt":
+            environ["HOMEPATH"] = "hpath"
+            environ["HOMEDRIVE"] = "C:\\"
+            assert _get_userdir() == "C:\\hpath"
+            assert _get_userdir(u"bla") == "C:\\bla"
+
+    with preserve_environ():
+        environ.pop("HOME", None)
+        environ.pop("USERPROFILE", None)
+        environ.pop("HOMEPATH", None)
+        if os.name == "nt":
+            assert _get_userdir() is None
+
+
+def test_expanduser_simple():
+    home = _get_userdir()
+    assert expanduser("~") == home
+    assert isinstance(expanduser("~"), fsnative)
+    assert expanduser(os.path.join("~", "a", "b")) == \
+        os.path.join(home, "a", "b")
+    assert expanduser(senf.sep + "~") == senf.sep + "~"
+    if senf.altsep is not None:
+        assert expanduser("~" + senf.altsep) == home + senf.altsep
+
+
+def test_expanduser_user():
+    home = _get_userdir()
+    user = os.path.basename(home)
+
+    assert expanduser("~" + user) == home
+    assert expanduser(os.path.join("~" + user, "foo")) == \
+        os.path.join(home, "foo")
+
+    if senf.altsep is not None:
+        assert expanduser("~" + senf.altsep + "foo") == \
+            home + senf.altsep + "foo"
+
+        assert expanduser("~" + user + senf.altsep + "a" + senf.sep) == \
+            home + senf.altsep + "a" + senf.sep
+
+    if os.name == "nt":
+        assert expanduser(os.path.join("~nope", "foo")) == \
+            os.path.join(os.path.dirname(home), "nope", "foo")
 
 
 def test_ansi_matching():
