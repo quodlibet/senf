@@ -22,7 +22,8 @@ import senf
 from senf import fsnative, sep, pathsep, curdir, pardir, \
     altsep, extsep, devnull, defpath, argv, getcwd, environ, getenv, \
     unsetenv, putenv, uri2fsn, fsn2uri, path2fsn, mkstemp, mkdtemp, \
-    fsn2uri_ascii, fsn2text, fsn2bytes, bytes2fsn, print_, input_, expanduser
+    fsn2uri_ascii, fsn2text, fsn2bytes, bytes2fsn, print_, input_, \
+    expanduser, text2fsn
 from senf._compat import iteritems, PY3, PY2, BytesIO, StringIO, text_type
 from senf._environ import set_windows_env_var, get_windows_env_var, \
     del_windows_env_var
@@ -357,6 +358,14 @@ def test_fsn2text():
     assert fsn2text(fsnative(u"foo")) == u"foo"
     with pytest.raises(TypeError):
         fsn2text(object())
+    with pytest.raises(TypeError):
+        fsn2text(notfsnative(u"foo"))
+
+
+def test_text2fsn():
+    with pytest.raises(TypeError):
+        text2fsn(b"foo")
+    assert text2fsn(u"foo") == fsnative(u"foo")
 
 
 def test_fsn2bytes():

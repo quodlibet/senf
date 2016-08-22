@@ -23,6 +23,8 @@ Helper functions to work with the fsnative type
 
 .. autofunction:: fsn2text
 
+.. autofunction:: text2fsn
+
 .. autofunction:: fsn2bytes
 
 .. autofunction:: bytes2fsn

@@ -166,6 +166,23 @@ def fsn2text(path):
             return os.fsencode(path).decode(_encoding(), "replace")
 
 
+def text2fsn(text):
+    """
+    Args:
+        text (text): The text to convert
+    Returns:
+        `fsnative`
+
+    Takes `text` and converts it to a `fsnative`. This operation is not
+    reversible and can't fail.
+
+    This is the same as calling ``fsnative(text)`` and available for
+    consistency.
+    """
+
+    return fsnative(text)
+
+
 def fsn2bytes(path, encoding):
     """
     Args:
