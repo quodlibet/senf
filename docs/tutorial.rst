@@ -12,7 +12,7 @@ There are various ways to create fsnative instances:
     >>> senf.fsnative(u"foo")
     'foo'
 
-    # create form some serialzed format
+    # create form some serialized format
     >>> senf.bytes2fsn(b"foo", "utf-8")
     'foo'
 
@@ -20,9 +20,21 @@ There are various ways to create fsnative instances:
     >>> senf.uri2fsn("file:///foo")
     '/foo'
 
-    # create from some Python path like
+    # create from some Python path-like
     >>> senf.path2fsn(b"foo")
     'foo'
+
+You can mix and match the fsnative type with ASCII str on all Python versions
+and platforms:
+
+::
+
+    >>> senf.fsnative(u"foo") + "bar"
+    'foobar'
+    >>> senf.fsnative(u"foo").endswith("foo")
+    True
+    >>> "File: %s" % senf.fsnative(u"foo")
+    'File: foo'
 
 Now that we have a `fsnative`, what can we do with it?
 
@@ -50,7 +62,7 @@ Now that we have a `fsnative`, what can we do with it?
     b'/foo'
 
 The functions in the stdlib usually return the same type which was passed in.
-If we pass in a `fsnative`, we get one back as well.
+If we pass in a `fsnative` to `os.listdir`, we get one back as well.
 
 ::
 
@@ -76,7 +88,7 @@ A similar problem arises with stdlib collections. We provides alternatives for
     >>> isinstance(senf.environ["PATH"], senf.fsnative)
     True
 
-Also for `os.environ` related functions:
+Also for `os.environ` related functions.
 
 ::
 

@@ -72,13 +72,10 @@ if __name__ == "__main__":
         name="senf",
         version=senf.version_string,
         url="https://github.com/lazka/senf",
-        description="like six but for paths and other environment data",
+        description=("Consistent filename handling for all Python versions "
+                     "and platforms"),
         author="Christoph Reiter",
         author_email="reiter.christoph@gmail.com",
-        long_description="""\
-senf makes it easy to handle file paths in a mixed py2/3 code base and while
-at it backports some Python 3 improvements like unicode environ/argv to Python
-2.""",
         packages=[
             "senf",
         ],

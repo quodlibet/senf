@@ -3,5 +3,8 @@ include tests/*.py
 include examples/*.py
 include LICENSE
 include MANIFEST.in
+include README.rst
+include HACKING.rst
+include NEWS.rst
 recursive-include docs *.py Makefile *.rst *.png *.svg *.ico
 prune docs/_build

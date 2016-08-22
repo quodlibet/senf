@@ -6,6 +6,7 @@
     :hidden:
     :titlesonly:
 
+    changelog
     tutorial
     api
 
@@ -16,9 +17,9 @@ What?
 -----
 
 **senf** makes filename handling easier by providing a set of filename
-handling functions which works the same across all Python versions and
-supported platforms. It also provides a print() function which can print
-all filenames.
+handling functions which work the same across all Python versions and
+supported platforms. It also provides a print() function which can print all
+filenames.
 
 You can think of it as `six <https://pypi.org/project/six/>`__ for filename
 handling.
@@ -39,6 +40,8 @@ filenames on Windows.
 
 **senf** does not monkey patch stdlib functions, it just provides alternatives
 and wrappers.
+
+See the :doc:`tutorial` or :doc:`api` for more details.
 
 
 Who?
@@ -81,10 +84,6 @@ For non-ASCII text you will need to use the `fsnative` helper:
 ::
 
     os.path.join(some_fsnative_path, fsnative(u"Gewürze"))
-
-
-See the :doc:`api` for more details.
-
 
 ----
 
