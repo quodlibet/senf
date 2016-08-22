@@ -130,6 +130,10 @@ def path2fsn(path):
         # TODO: If it ever gets added to Python we should call os.fspath() here
         if isinstance(path, bytes):
             path = os.fsdecode(path)
+        if os.name != "nt":
+            # make sure we can encode it and this is not just some random
+            # unicode string
+            os.fsencode(path)
 
     if not isinstance(path, fsnative_type):
         raise TypeError("path needs to be %s", fsnative_type.__name__)
