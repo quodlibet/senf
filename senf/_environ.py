@@ -17,7 +17,7 @@ import ctypes
 import collections
 
 from ._compat import text_type, PY2
-from ._fsnative import path2fsn
+from ._fsnative import path2fsn, is_win
 from . import _winapi as winapi
 
 
@@ -120,7 +120,7 @@ class Environ(collections.MutableMapping):
     """
 
     def __init__(self):
-        if os.name == "nt" and PY2:
+        if is_win and PY2:
             try:
                 env = read_windows_environ()
             except WindowsError:
@@ -137,7 +137,7 @@ class Environ(collections.MutableMapping):
         key = path2fsn(key)
         value = path2fsn(value)
 
-        if os.name == "nt" and PY2:
+        if is_win and PY2:
             try:
                 set_windows_env_var(key, value)
             except WindowsError:
@@ -151,7 +151,7 @@ class Environ(collections.MutableMapping):
     def __delitem__(self, key):
         key = path2fsn(key)
 
-        if os.name == "nt" and PY2:
+        if is_win and PY2:
             try:
                 del_windows_env_var(key)
             except WindowsError:
@@ -187,7 +187,7 @@ def getenv(key, value=None):
     """
 
     key = path2fsn(key)
-    if os.name == "nt" and PY2:
+    if is_win and PY2:
         return environ.get(key, value)
     return os.getenv(key, value)
 
@@ -200,7 +200,7 @@ def unsetenv(key):
     """
 
     key = path2fsn(key)
-    if os.name == "nt":
+    if is_win:
         # python 3 has no unsetenv under Windows -> use our ctypes one as well
         try:
             del_windows_env_var(key)
@@ -223,7 +223,7 @@ def putenv(key, value):
     key = path2fsn(key)
     value = path2fsn(value)
 
-    if os.name == "nt" and PY2:
+    if is_win and PY2:
         try:
             set_windows_env_var(key, value)
         except WindowsError:

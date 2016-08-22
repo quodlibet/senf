@@ -16,7 +16,7 @@ import sys
 import os
 import ctypes
 
-from ._fsnative import _encoding, path2fsn
+from ._fsnative import _encoding, path2fsn, is_win, is_unix
 from ._compat import text_type, PY2, PY3
 from ._winansi import AnsiState, ansi_split
 from . import _winapi as winapi
@@ -51,7 +51,7 @@ def print_(*objects, **kwargs):
     if end == "\n":
         end = os.linesep
 
-    if os.name == "nt":
+    if is_win:
         _print_windows(objects, sep, end, file, flush)
     else:
         _print_default(objects, sep, end, file, flush)
@@ -60,7 +60,7 @@ def print_(*objects, **kwargs):
 def _print_default(objects, sep, end, file, flush):
     """A print_() implementation which writes bytes"""
 
-    if os.name == "nt":
+    if is_win:
         encoding = "utf-8"
     else:
         encoding = _encoding()
@@ -98,7 +98,7 @@ def _print_default(objects, sep, end, file, flush):
     try:
         file.write(data)
     except TypeError:
-        if os.name != "nt" and PY3:
+        if is_unix and PY3:
             # For StringIO, first try with surrogates
             surr_data = os.fsdecode(data)
             try:

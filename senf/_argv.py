@@ -12,18 +12,18 @@
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
-import os
 import sys
 import ctypes
 
 from ._compat import PY2
+from ._fsnative import is_unix
 from . import _winapi as winapi
 
 
 def create_argv():
     """Returns a unicode argv under Windows and standard sys.argv otherwise"""
 
-    if os.name != "nt" or not PY2:
+    if is_unix or not PY2:
         return sys.argv
 
     argc = ctypes.c_int()

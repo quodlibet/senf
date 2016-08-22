@@ -20,11 +20,15 @@ from . import _winapi as winapi
 from ._compat import text_type, PY3, PY2, url2pathname, urlparse, quote
 
 
+is_win = os.name == "nt"
+is_unix = not is_win
+
+
 def _fsnative(text):
     if not isinstance(text, text_type):
         raise TypeError("%r needs to be a text type (%r)" % (text, text_type))
 
-    if os.name != "nt":
+    if is_unix:
         # First we go to bytes so we can be sure we have a valid source.
         # Theoretically we should fail here in case we have a non-unicode
         # encoding. But this would make everything complicated and there is
@@ -89,14 +93,14 @@ def _create_fsnative(type_):
     return new_type
 
 
-fsnative_type = text_type if os.name == "nt" or PY3 else bytes
+fsnative_type = text_type if is_win or PY3 else bytes
 fsnative = _create_fsnative(fsnative_type)
 
 
 def _encoding():
     """The encoding used for paths, argv, environ, stdout and stdin"""
 
-    assert os.name != "nt", "only call on unix code paths"
+    assert is_unix, "only call on unix code paths"
 
     return sys.getfilesystemencoding() or "utf-8"
 
@@ -120,7 +124,7 @@ def path2fsn(path):
 
     # allow mbcs str on py2+win and bytes on py3
     if PY2:
-        if os.name == "nt":
+        if is_win:
             if isinstance(path, str):
                 path = path.decode("mbcs")
         else:
@@ -130,7 +134,7 @@ def path2fsn(path):
         # TODO: If it ever gets added to Python we should call os.fspath() here
         if isinstance(path, bytes):
             path = os.fsdecode(path)
-        if os.name != "nt":
+        if is_unix:
             # make sure we can encode it and this is not just some random
             # unicode string
             os.fsencode(path)
@@ -164,7 +168,7 @@ def fsn2text(path):
     if fsnative_type is bytes:
         return path.decode(_encoding(), "replace")
     else:
-        if PY2 or os.name == "nt":
+        if PY2 or is_win:
             return path
         else:
             return os.fsencode(path).decode(_encoding(), "replace")
@@ -205,7 +209,7 @@ def fsn2bytes(path, encoding):
     if not isinstance(path, fsnative_type):
         raise TypeError("path needs to be %s", fsnative_type.__name__)
 
-    if os.name == "nt":
+    if is_win:
         if encoding is None:
             raise ValueError("invalid encoding %r" % encoding)
         try:
@@ -236,7 +240,7 @@ def bytes2fsn(data, encoding):
     if not isinstance(data, bytes):
         raise TypeError("data needs to be bytes")
 
-    if os.name == "nt":
+    if is_win:
         if encoding is None:
             raise ValueError("invalid encoding %r" % encoding)
         try:
@@ -279,7 +283,7 @@ def uri2fsn(uri):
     if scheme != "file":
         raise ValueError("Not a file URI")
 
-    if os.name == "nt":
+    if is_win:
         path = url2pathname(netloc + path)
         if netloc:
             path = "\\\\" + path
@@ -312,7 +316,7 @@ def fsn2uri(path):
     if not isinstance(path, fsnative_type):
         raise TypeError("path needs to be %s", fsnative_type.__name__)
 
-    if os.name == "nt":
+    if is_win:
         buf = ctypes.create_unicode_buffer(winapi.INTERNET_MAX_URL_LENGTH)
         length = winapi.DWORD(winapi.INTERNET_MAX_URL_LENGTH)
         flags = 0
@@ -344,7 +348,7 @@ def fsn2uri_ascii(path):
     will be encoded using utf-8 and then percent encoded.
     """
 
-    if os.name == "nt":
+    if is_win:
         uri = fsn2uri(path)
 
         def quoter(c):

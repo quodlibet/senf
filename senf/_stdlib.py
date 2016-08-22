@@ -14,7 +14,7 @@
 
 import os
 
-from ._fsnative import path2fsn, fsnative
+from ._fsnative import path2fsn, fsnative, is_win
 from ._compat import PY2
 from ._environ import environ
 
@@ -36,7 +36,7 @@ def getcwd():
         `fsnative`
     """
 
-    if os.name == "nt" and PY2:
+    if is_win and PY2:
         return os.getcwdu()
     return os.getcwd()
 
@@ -47,7 +47,7 @@ def _get_userdir(user=None):
     if user is not None and not isinstance(user, fsnative):
         raise TypeError
 
-    if os.name == "nt":
+    if is_win:
         if "HOME" in environ:
             path = environ["HOME"]
         elif "USERPROFILE" in environ:
