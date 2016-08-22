@@ -22,6 +22,7 @@ from ._compat import text_type, PY3, PY2, url2pathname, urlparse, quote
 
 is_win = os.name == "nt"
 is_unix = not is_win
+is_darwin = sys.platform == "darwin"
 
 
 def _fsnative(text):
@@ -102,7 +103,10 @@ def _encoding():
 
     assert is_unix, "only call on unix code paths"
 
-    return sys.getfilesystemencoding() or "utf-8"
+    encoding = sys.getfilesystemencoding()
+    if encoding is None:
+        encoding = "utf-8" if is_darwin else "ascii"
+    return encoding
 
 
 def path2fsn(path):
