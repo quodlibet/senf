@@ -113,16 +113,16 @@ def path2fsn(path):
 
     Returns a fsnative path for a path-like.
 
-    If the passed in path is a fsnative path simply returns it.
+    If the passed in path is a `fsnative` path it simply returns it.
     This will not fail for a valid path (Either retrieved from stdlib functions
     or `argv` or `environ` or through the `fsnative` helper)
     """
 
-    # allow ascii str on py2+win and bytes on py3
+    # allow mbcs str on py2+win and bytes on py3
     if PY2:
         if os.name == "nt":
             if isinstance(path, str):
-                path = path.decode("ascii")
+                path = path.decode("mbcs")
         else:
             if isinstance(path, unicode):
                 path = path.encode(_encoding())

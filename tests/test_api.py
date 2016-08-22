@@ -346,6 +346,14 @@ def test_path2fsn():
         assert path2fsn("abc") == u"abc"
         assert isinstance(path2fsn("abc"), fsnative)
         assert path2fsn(b"abc") == u"abc"
+
+        try:
+            path = u"\xf6".encode("mbcs")
+        except UnicodeEncodeError:
+            pass
+        else:
+            assert path2fsn(path) == u"\xf6"
+
     else:
         assert path2fsn(u"foo") == fsnative(u"foo")
         assert path2fsn(b"foo") == fsnative(u"foo")
