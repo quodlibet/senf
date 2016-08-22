@@ -21,6 +21,11 @@ handling functions which work the same across all Python versions and
 supported platforms. It also provides a print() function which can print all
 filenames.
 
+::
+
+    pip install senf
+
+
 You can think of it as `six <https://pypi.org/project/six/>`__ for filename
 handling.
 
@@ -41,7 +46,8 @@ filenames on Windows.
 **senf** does not monkey patch stdlib functions, it just provides alternatives
 and wrappers.
 
-See the :doc:`tutorial` or :doc:`api` for more details.
+See the :doc:`tutorial` or :doc:`api` or `GitHub repo
+<https://github.com/lazka/senf>`__ for more details.
 
 
 Who?
