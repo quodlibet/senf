@@ -34,7 +34,7 @@ fsnative, print_, getcwd, getenv, unsetenv, putenv, environ, \
     text2fsn
 
 
-version = (0, 0, 0)
+version = (0, 1, 0)
 """Tuple[`int`, `int`, `int`]: The version tuple (major, minor, micro)"""
 
 
