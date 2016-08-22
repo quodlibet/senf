@@ -143,18 +143,18 @@ def _print_windows(objects, sep, end, file, flush):
     parts = []
     for obj in objects:
         if isinstance(obj, bytes):
-            obj = obj.decode("ascii", "replace")
+            obj = obj.decode("mbcs", "replace")
         if not isinstance(obj, text_type):
             obj = text_type(obj)
         parts.append(obj)
 
     if isinstance(sep, bytes):
-        sep = sep.decode("ascii", "replace")
+        sep = sep.decode("mbcs", "replace")
     if not isinstance(sep, text_type):
         raise TypeError
 
     if isinstance(end, bytes):
-        end = end.decode("ascii", "replace")
+        end = end.decode("mbcs", "replace")
     if not isinstance(end, text_type):
         raise TypeError
 
