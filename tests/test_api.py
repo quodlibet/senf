@@ -31,6 +31,8 @@ from senf._winansi import ansi_parse, ansi_split
 from senf._stdlib import _get_userdir
 
 
+is_wine = "WINEDEBUG" in os.environ
+
 linesepb = os.linesep
 if PY3:
     linesepb = linesepb.encode("ascii")
@@ -205,8 +207,9 @@ def test_del_windows_env_var():
     with pytest.raises(TypeError):
         del_windows_env_var("")
 
-    with pytest.raises(WindowsError):
-        del_windows_env_var(u"nopenopenopenope")
+    if is_wine:
+        with pytest.raises(WindowsError):
+            del_windows_env_var(u"nopenopenopenope")
 
 
 def test_print():
