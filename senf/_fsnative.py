@@ -36,7 +36,7 @@ def _fsnative(text):
         # no good way to handle a failure from the user side. Instead
         # fall back to utf-8 which is the most likely the right choice in
         # a mis-configured environment
-        encoding = _encoding()
+        encoding = _encoding
         try:
             path = text.encode(encoding)
         except UnicodeEncodeError:
@@ -98,7 +98,7 @@ fsnative_type = text_type if is_win or PY3 else bytes
 fsnative = _create_fsnative(fsnative_type)
 
 
-def _encoding():
+def _get_encoding():
     """The encoding used for paths, argv, environ, stdout and stdin"""
 
     encoding = sys.getfilesystemencoding()
@@ -110,6 +110,8 @@ def _encoding():
         else:
             return "ascii"
     return encoding
+
+_encoding = _get_encoding()
 
 
 def path2fsn(path):
@@ -133,10 +135,10 @@ def path2fsn(path):
     if PY2:
         if is_win:
             if isinstance(path, str):
-                path = path.decode(_encoding())
+                path = path.decode(_encoding)
         else:
             if isinstance(path, unicode):
-                path = path.encode(_encoding())
+                path = path.encode(_encoding)
     else:
         # TODO: If it ever gets added to Python we should call os.fspath() here
         if isinstance(path, bytes):
@@ -173,12 +175,12 @@ def fsn2text(path):
         raise TypeError("path needs to be %s", fsnative_type.__name__)
 
     if fsnative_type is bytes:
-        return path.decode(_encoding(), "replace")
+        return path.decode(_encoding, "replace")
     else:
         if PY2 or is_win:
             return path
         else:
-            return os.fsencode(path).decode(_encoding(), "replace")
+            return os.fsencode(path).decode(_encoding, "replace")
 
 
 def text2fsn(text):

@@ -352,7 +352,7 @@ def test_path2fsn():
         assert path2fsn(b"abc") == u"abc"
 
         try:
-            path = u"\xf6".encode(_encoding())
+            path = u"\xf6".encode(_encoding)
         except UnicodeEncodeError:
             pass
         else:

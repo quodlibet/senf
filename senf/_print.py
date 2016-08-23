@@ -63,7 +63,7 @@ def _print_default(objects, sep, end, file, flush):
     if is_win:
         encoding = "utf-8"
     else:
-        encoding = _encoding()
+        encoding = _encoding
 
     if isinstance(sep, text_type):
         sep = sep.encode(encoding, "replace")
@@ -140,7 +140,7 @@ def _print_windows(objects, sep, end, file, flush):
         # not a console, fallback (e.g. redirect to file)
         return _print_default(objects, sep, end, file, flush)
 
-    encoding = _encoding()
+    encoding = _encoding
 
     parts = []
     for obj in objects:
