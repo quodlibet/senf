@@ -101,11 +101,14 @@ fsnative = _create_fsnative(fsnative_type)
 def _encoding():
     """The encoding used for paths, argv, environ, stdout and stdin"""
 
-    assert is_unix, "only call on unix code paths"
-
     encoding = sys.getfilesystemencoding()
     if encoding is None:
-        encoding = "utf-8" if is_darwin else "ascii"
+        if is_darwin:
+            return "utf-8"
+        elif is_win:
+            return "mbcs"
+        else:
+            return "ascii"
     return encoding
 
 
@@ -130,7 +133,7 @@ def path2fsn(path):
     if PY2:
         if is_win:
             if isinstance(path, str):
-                path = path.decode("mbcs")
+                path = path.decode(_encoding())
         else:
             if isinstance(path, unicode):
                 path = path.encode(_encoding())

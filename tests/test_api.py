@@ -29,6 +29,7 @@ from senf._environ import set_windows_env_var, get_windows_env_var, \
     del_windows_env_var
 from senf._winansi import ansi_parse, ansi_split
 from senf._stdlib import _get_userdir
+from senf._fsnative import _encoding
 
 
 is_wine = "WINEDEBUG" in os.environ
@@ -351,7 +352,7 @@ def test_path2fsn():
         assert path2fsn(b"abc") == u"abc"
 
         try:
-            path = u"\xf6".encode("mbcs")
+            path = u"\xf6".encode(_encoding())
         except UnicodeEncodeError:
             pass
         else:
