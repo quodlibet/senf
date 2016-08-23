@@ -100,7 +100,7 @@ def _print_default(objects, sep, end, file, flush):
     except TypeError:
         if is_unix and PY3:
             # For StringIO, first try with surrogates
-            surr_data = os.fsdecode(data)
+            surr_data = data.decode(encoding, "surrogateescape")
             try:
                 file.write(surr_data)
             except (TypeError, ValueError):

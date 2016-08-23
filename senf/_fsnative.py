@@ -42,7 +42,7 @@ def _fsnative(text):
         except UnicodeEncodeError:
             path = text.encode("utf-8")
         if PY3:
-            return os.fsdecode(path)
+            return path.decode(_encoding, "surrogateescape")
         return path
     else:
         return text
@@ -142,11 +142,11 @@ def path2fsn(path):
     else:
         # TODO: If it ever gets added to Python we should call os.fspath() here
         if isinstance(path, bytes):
-            path = os.fsdecode(path)
-        if is_unix:
+            path = path.decode(_encoding, "surrogateescape")
+        elif is_unix and isinstance(path, str):
             # make sure we can encode it and this is not just some random
             # unicode string
-            os.fsencode(path)
+            path.encode(_encoding, "surrogateescape")
 
     if not isinstance(path, fsnative_type):
         raise TypeError("path needs to be %s", fsnative_type.__name__)
@@ -180,7 +180,8 @@ def fsn2text(path):
         if PY2 or is_win:
             return path
         else:
-            return os.fsencode(path).decode(_encoding, "replace")
+            return path.encode(
+                _encoding, "surrogateescape").decode(_encoding, "replace")
 
 
 def text2fsn(text):
@@ -228,7 +229,7 @@ def fsn2bytes(path, encoding):
     elif PY2:
         return path
     else:
-        return os.fsencode(path)
+        return path.encode(_encoding, "surrogateescape")
 
 
 def bytes2fsn(data, encoding):
@@ -259,7 +260,7 @@ def bytes2fsn(data, encoding):
     elif PY2:
         return data
     else:
-        return os.fsdecode(data)
+        return data.decode(_encoding, "surrogateescape")
 
 
 def uri2fsn(uri):
@@ -338,7 +339,7 @@ def fsn2uri(path):
         if PY2:
             return "file://" + quote(path)
         else:
-            return "file://" + quote(os.fsencode(path))
+            return "file://" + quote(path.encode(_encoding, "surrogateescape"))
 
 
 def fsn2uri_ascii(path):

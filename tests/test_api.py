@@ -272,7 +272,7 @@ def test_print_strict_strio():
 
     f.write = strict_write
 
-    print_(os.fsdecode(b"\xff\xfe"), file=f)
+    print_(b"\xff\xfe".decode(_encoding, "surrogateescape"), file=f)
     assert f.getvalue() == u"\ufffd\ufffd\n"
 
 
@@ -303,7 +303,8 @@ def test_print_py3_stringio():
     if os.name != "nt" and PY3:
         f = StringIO()
         print_(b"\xff\xfe", file=f)
-        assert f.getvalue() == os.fsdecode(b"\xff\xfe\n")
+        assert f.getvalue() == \
+            b"\xff\xfe\n".decode(_encoding, "surrogateescape")
 
 
 def test_input():
