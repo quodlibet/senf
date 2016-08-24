@@ -20,9 +20,10 @@ from ._fsnative import path2fsn, fsnative
 def gettempdir():
     """
     Returns:
-        `fsntaive`
+        `fsnative`
 
-    Like tempfile.gettempdir(), but always returns a `fsnative` path
+    Like :func:`python3:tempfile.gettempdir`, but always returns a `fsnative`
+    path
     """
 
     # FIXME: I don't want to reimplement all that logic, reading env vars etc.
@@ -35,7 +36,8 @@ def gettempprefix():
     Returns:
         `fsnative`
 
-    Like tempfile.gettempprefix(), but always returns a `fsnative` path
+    Like :func:`python3:tempfile.gettempprefix`, but always returns a
+    `fsnative` path
     """
 
     return path2fsn(tempfile.gettempprefix())
@@ -55,7 +57,8 @@ def mkstemp(suffix=None, prefix=None, dir=None, text=False):
         OSError
         IOError
 
-    Like tempfile.mkstemp but always returns a `fsnative` path.
+    Like :func:`python3:tempfile.mkstemp` but always returns a `fsnative`
+    path.
     """
 
     suffix = fsnative() if suffix is None else path2fsn(suffix)
@@ -77,7 +80,7 @@ def mkdtemp(suffix=None, prefix=None, dir=None):
         OSError
         IOError
 
-    Like tempfile.mkstemp but always returns a `fsnative` path.
+    Like :func:`python3:tempfile.mkstemp` but always returns a `fsnative` path.
     """
 
     suffix = fsnative() if suffix is None else path2fsn(suffix)

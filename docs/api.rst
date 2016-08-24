@@ -4,18 +4,69 @@ API Documentation
 
 .. currentmodule:: senf
 
+Fsnative Related
+----------------
+
+Helper functions for working with the `fsnative` type
+
+======================= =================================
+:func:`fsnative`        Virtual path type and constructor
+:func:`path2fsn`        Convert `pathlike` to `fsnative`
+:func:`fsn2text`        Convert `fsnative` to `text`
+:func:`text2fsn`        Convert `text` to `fsnative`
+:func:`fsn2bytes`       Convert `fsnative` to `bytes`
+:func:`bytes2fsn`       Convert `bytes` to `fsnative`
+:func:`uri2fsn`         Convert URI to `fsnative`
+:func:`fsn2uri`         Convert `fsnative` to URI
+:func:`fsn2uri_ascii`   Convert `fsnative` to ASCII URI
+======================= =================================
+
+
+Stdlib Replacements
+-------------------
+
+Alternative implementations or wrappers of stdlib functions and constants. In
+some cases their default is changed to return an fsnative path (mkdtemp() with
+default arguments) or Unicode support for Windows is added (sys.argv)
+
+======================= =======================================================
+:data:`environ`         `os.environ` replacement
+:data:`argv`            `sys.argv` replacement
+:data:`sep`             `os.sep` replacement
+:data:`pathsep`         `os.pathsep` replacement
+:data:`curdir`          `os.curdir` replacement
+:data:`pardir`          `os.pardir` replacement
+:data:`altsep`          `os.altsep` replacement
+:data:`extsep`          `os.extsep` replacement
+:data:`devnull`         `os.devnull` replacement
+:data:`defpath`         `os.defpath` replacement
+:func:`getcwd`          `os.getcwd` replacement
+:func:`getenv`          `os.getenv` replacement
+:func:`putenv`          `os.putenv` replacement
+:func:`unsetenv`        `os.unsetenv` replacement
+:func:`print_`          :func:`print` replacement
+:func:`input_`          :func:`input` replacement
+:func:`expanduser`      :func:`os.path.expanduser` replacement
+:func:`gettempdir`      :func:`tempfile.gettempdir` replacement
+:func:`gettempprefix`   :func:`tempfile.gettempprefix` replacement
+:func:`mkstemp`         :func:`tempfile.mkstemp` replacement
+:func:`mkdtemp`         :func:`tempfile.mkdtemp` replacement
+======================= =======================================================
+
 Package Related
 ---------------
+
+===================== ===============
+`senf.version`        Version tuple
+`senf.version_string` Version string
+===================== ===============
+
+
+----
 
 .. autodata:: version
 
 .. autodata:: version_string
-
-
-Fsnative Related
-----------------
-
-Helper functions to work with the fsnative type
 
 .. autoclass:: fsnative
 
@@ -34,14 +85,6 @@ Helper functions to work with the fsnative type
 .. autofunction:: fsn2uri
 
 .. autofunction:: fsn2uri_ascii
-
-
-Stdlib Replacements
--------------------
-
-Alternative implementations or wrappers of stdlib functions and constants. In
-some cases their default is changed to return an fsnative path (mkdtemp() with
-default arguments) or Unicode support for Windows is added (sys.argv)
 
 .. autodata:: environ
     :annotation: = {}
@@ -79,6 +122,14 @@ default arguments) or Unicode support for Windows is added (sys.argv)
 
 .. autofunction:: expanduser
 
+.. autofunction:: gettempdir
+
+.. autofunction:: gettempprefix
+
+.. autofunction:: mkstemp
+
+.. autofunction:: mkdtemp
+
 
 Documentation Types
 -------------------
@@ -102,5 +153,6 @@ types depending on the Python version and platform used.
 .. class:: pathlike()
 
     Anything the Python stdlib allows as a path. In addition to `fsnative`
-    this allows MBCS :obj:`python:str` under Python 2 + Windows and
+    this allows :obj:`python:str` encoded with the default file system
+    encoding (usually ``mbcs``) under Python 2 + Windows and
     :obj:`python3:bytes` under Python 3 + Unix.
