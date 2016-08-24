@@ -265,7 +265,7 @@ def _encode_codepage(codepage, text):
     if not text:
         return b""
 
-    size = len(text.encode("utf-16-le")) / ctypes.sizeof(winapi.WCHAR)
+    size = len(text.encode("utf-16-le")) // ctypes.sizeof(winapi.WCHAR)
 
     # get the required buffer size
     length = winapi.WideCharToMultiByte(
