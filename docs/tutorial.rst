@@ -6,7 +6,7 @@ Tutorial
 
 There are various ways to create fsnative instances:
 
-::
+.. code-block:: pycon
 
     # create from unicode text
     >>> senf.fsnative(u"foo")
@@ -27,7 +27,7 @@ There are various ways to create fsnative instances:
 You can mix and match the fsnative type with ASCII str on all Python versions
 and platforms:
 
-::
+.. code-block:: pycon
 
     >>> senf.fsnative(u"foo") + "bar"
     'foobar'
@@ -38,12 +38,13 @@ and platforms:
 
 Now that we have a `fsnative`, what can we do with it?
 
-::
+.. code-block:: pycon
 
     >>> path = senf.fsnative(u"/foo")
 
     # We can print it
     >>> senf.print_(path)
+    /foo
 
     # We can convert it to text for our favorite GUI toolkit
     >>> senf.fsn2text(path)
@@ -61,8 +62,8 @@ Now that we have a `fsnative`, what can we do with it?
     >>> senf.fsn2bytes("/foo", "utf-8")
     b'/foo'
 
-The functions in the stdlib usually return the same type which was passed in.
-If we pass in a `fsnative` to `os.listdir`, we get one back as well.
+The functions in the stdlib usually return the same type as was passed in. If
+we pass in a `fsnative` to `os.listdir`, we get one back as well.
 
 ::
 
@@ -71,15 +72,15 @@ If we pass in a `fsnative` to `os.listdir`, we get one back as well.
     True
 
 In some cases the stdlib functions don't take arguments and always return the
-same type. For those cases we provide alternative implementations.
+same type. For those cases Senf provide alternative implementations.
 
 ::
 
     >>> isinstance(senf.getcwd(), senf.fsnative)
     True
 
-A similar problem arises with stdlib collections. We provides alternatives for
-`sys.argv` and `os.environ`.
+A similar problem arises with stdlib collections. Senf provides alternatives
+for `sys.argv` and `os.environ`.
 
 ::
 
@@ -99,7 +100,7 @@ Also for `os.environ` related functions.
 
 
 If you work with files a lot your unit tests will probably need temporary
-files. We provide wrappers for `tempfile` functions which always return a
+files. Senf provides wrappers for `tempfile` functions which always return a
 `fsnative`.
 
 ::

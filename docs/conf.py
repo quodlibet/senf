@@ -21,7 +21,7 @@ intersphinx_mapping = {
 }
 source_suffix = '.rst'
 master_doc = 'index'
-project = 'senf'
+project = 'Senf'
 copyright = u'2016, Christoph Reiter'
 version = senf.version_string
 release = senf.version_string

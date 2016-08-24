@@ -16,15 +16,9 @@
 What?
 -----
 
-**senf** makes filename handling easier by providing a set of filename
+**Senf** makes filename handling easier by providing a set of filename
 handling functions which work the same across all Python versions and
-supported platforms. It also provides a print() function which can print all
-filenames.
-
-::
-
-    pip install senf
-
+platforms. It also provides a print() function which can print filenames.
 
 You can think of it as `six <https://pypi.org/project/six/>`__ for filename
 handling.
@@ -34,26 +28,35 @@ macOS, is MIT licensed, and only depends on the stdlib.
 
 ::
 
+    pip install senf
+
+The following example prints wrongly encoded filenames on Unix, Unicode
+filenames on Windows and supports Unicode command line arguments on Windows +
+Python 2.
+
+::
+
     import os
-    from senf import argv, print_
+    from senf import argv, print_, fsn2text, fsn2uri
 
-    for entry in os.listdir(argv[1]):
-        print_(u"File: ", entry)
+    dir_ = os.path.abspath(argv[1])
+    for entry in os.listdir(dir_):
+        path = os.path.join(dir_, entry)
+        print_(u"File: ", path)
+        print_(u"Text: ", fsn2text(path))
+        print_(u"URI: ", fsn2uri(path))
 
-The above example prints wrongly encoded filenames on Unix and unicode
-filenames on Windows.
+**Senf** does not monkey patch anything in the stdlib, it just provides
+alternatives and wrappers.
 
-**senf** does not monkey patch stdlib functions, it just provides alternatives
-and wrappers.
-
-See the :doc:`tutorial` or :doc:`api` or `GitHub repo
+See the :doc:`tutorial`, :doc:`api` and `GitHub repo
 <https://github.com/lazka/senf>`__ for more details.
 
 
 Who?
 ----
 
-You might want to use senf if you
+You might want to use Senf if you
 
 * use Python 2 and want to improve your Windows support
 * use Python 2 and want to move (gradually) to Python 3
@@ -66,13 +69,14 @@ How?
 
 It introduces a virtual type called `fsnative` which actually represents
 
-- :obj:`python:unicode`  under Py2 + Windows
-- :obj:`python:str` under Py2 on other platforms
-- :obj:`python3:str` under Py3 + Windows
-- :obj:`python3:str` + ``surrogates`` under Py3 on other platforms [#]_
+- :obj:`python:unicode` under Python 2 + Windows
+- :obj:`python:str` under Python 2 + Unix
+- :obj:`python3:str` under Python 3 + Windows
+- :obj:`python3:str` + ``surrogates`` (only containing code points which can
+  be encoded with the locale encoding) under Python 3 + Unix [#]_
 
 The type is used for filenames, environment variables and process arguments
-and senf provides functions so you can tread it as an opaque type and not have
+and Senf provides functions so you can tread it as an opaque type and not have
 to worry about its content or encoding.
 
 The other nice thing about the `fsnative` type is that you can mix it with
@@ -84,6 +88,7 @@ change to your code:
     os.path.join(some_fsnative_path, "somefile")
     some_fsnative_path.endswith(".txt")
     some_fsnative_path == "foo.txt"
+    "File: %s" % some_fsnative_path
 
 For non-ASCII text you will need to use the `fsnative` helper:
 
@@ -94,8 +99,8 @@ For non-ASCII text you will need to use the `fsnative` helper:
 ----
 
 .. [#] Under Python 3, bytes is also a valid type for paths under Unix.
-       We decide to not use/allow it as there are stdlib modules, like
-       pathlib, which don't support bytes and mixing bytes with
-       str + surrogateescape doesn't work.
-.. [#] As long as you don't use "unicode_literals", which we strongly
+       Senf does not use/allow it as there are stdlib modules, like pathlib,
+       which don't support bytes and mixing bytes with str + surrogates
+       doesn't work.
+.. [#] As long as you don't use "unicode_literals", which I strongly
        recommend you don't use.
