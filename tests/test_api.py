@@ -30,6 +30,7 @@ from senf._environ import set_windows_env_var, get_windows_env_var, \
 from senf._winansi import ansi_parse, ansi_split
 from senf._stdlib import _get_userdir
 from senf._fsnative import _encoding
+from senf._print import _encode_codepage, _decode_codepage
 
 
 is_wine = "WINEDEBUG" in os.environ
@@ -257,6 +258,16 @@ def test_print_error():
 
     with pytest.raises(TypeError):
         print_(sep=4)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="windows only")
+def test_win_cp_encodings():
+    assert _encode_codepage(437, u"foo") == b"foo"
+    assert _encode_codepage(437, u"\xe4") == b"\x84"
+    assert _encode_codepage(437, u"") == b""
+    assert _decode_codepage(437, b"foo") == u"foo"
+    assert _decode_codepage(437, b"\x84") == u"\xe4"
+    assert _decode_codepage(437, b"") == u""
 
 
 @pytest.mark.skipif(os.name == "nt" or PY2, reason="unix+py3 only")
