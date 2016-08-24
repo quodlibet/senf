@@ -35,19 +35,26 @@ LocalFree.restype = wintypes.HLOCAL
 
 # https://msdn.microsoft.com/en-us/library/windows/desktop/aa383751.aspx
 LPCTSTR = ctypes.c_wchar_p
-LPTSTR = wintypes.LPWSTR
+LPWSTR = wintypes.LPWSTR
+LPCWSTR = ctypes.c_wchar_p
+LPTSTR = LPWSTR
 PCWSTR = ctypes.c_wchar_p
 PCTSTR = PCWSTR
 PWSTR = ctypes.c_wchar_p
 PTSTR = PWSTR
+LPVOID = wintypes.LPVOID
+WCHAR = wintypes.WCHAR
+LPSTR = ctypes.c_char_p
 
 BOOL = wintypes.BOOL
+LPBOOL = ctypes.POINTER(BOOL)
 UINT = wintypes.UINT
 WORD = wintypes.WORD
 DWORD = wintypes.DWORD
 SHORT = wintypes.SHORT
 HANDLE = wintypes.HANDLE
 ULONG = wintypes.ULONG
+LPCSTR = wintypes.LPCSTR
 
 STD_INPUT_HANDLE = DWORD(-10)
 STD_OUTPUT_HANDLE = DWORD(-11)
@@ -141,6 +148,14 @@ SetConsoleOutputCP = kernel32.SetConsoleOutputCP
 SetConsoleOutputCP.argtypes = [UINT]
 SetConsoleOutputCP.restype = BOOL
 
+GetConsoleCP = kernel32.GetConsoleCP
+GetConsoleCP.argtypes = []
+GetConsoleCP.restype = UINT
+
+SetConsoleCP = kernel32.SetConsoleCP
+SetConsoleCP.argtypes = [UINT]
+SetConsoleCP.restype = BOOL
+
 SetConsoleTextAttribute = kernel32.SetConsoleTextAttribute
 SetConsoleTextAttribute.argtypes = [HANDLE, WORD]
 SetConsoleTextAttribute.restype = BOOL
@@ -148,3 +163,17 @@ SetConsoleTextAttribute.restype = BOOL
 SetConsoleCursorPosition = kernel32.SetConsoleCursorPosition
 SetConsoleCursorPosition.argtypes = [HANDLE, COORD]
 SetConsoleCursorPosition.restype = BOOL
+
+ReadConsoleW = kernel32.ReadConsoleW
+ReadConsoleW.argtypes = [HANDLE, LPVOID, DWORD, ctypes.POINTER(DWORD), LPVOID]
+ReadConsoleW.restype = BOOL
+
+MultiByteToWideChar = kernel32.MultiByteToWideChar
+MultiByteToWideChar.argtypes = [
+    UINT, DWORD, LPCSTR, ctypes.c_int, LPWSTR, ctypes.c_int]
+MultiByteToWideChar.restype = ctypes.c_int
+
+WideCharToMultiByte = kernel32.WideCharToMultiByte
+WideCharToMultiByte.argtypes = [
+    UINT, DWORD, LPCWSTR, ctypes.c_int, LPSTR, ctypes.c_int, LPCSTR, LPBOOL]
+WideCharToMultiByte.restpye = ctypes.c_int

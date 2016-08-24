@@ -16,7 +16,7 @@ import sys
 import os
 import ctypes
 
-from ._fsnative import _encoding, path2fsn, is_win, is_unix
+from ._fsnative import _encoding, is_win, is_unix
 from ._compat import text_type, PY2, PY3
 from ._winansi import AnsiState, ansi_split
 from . import _winapi as winapi
@@ -60,10 +60,7 @@ def print_(*objects, **kwargs):
 def _print_default(objects, sep, end, file, flush):
     """A print_() implementation which writes bytes"""
 
-    if is_win:
-        encoding = "utf-8"
-    else:
-        encoding = _encoding
+    encoding = _encoding
 
     if isinstance(sep, text_type):
         sep = sep.encode(encoding, "replace")
@@ -166,22 +163,140 @@ def _print_windows(objects, sep, end, file, flush):
     # make sure we flush before we apply any console attributes
     file.flush()
 
-    # try to force a utf-8 code page
-    old_cp = winapi.GetConsoleOutputCP()
+    # try to force a utf-8 code page, use the output CP if that fails
+    cp = winapi.GetConsoleOutputCP()
     encoding = "utf-8"
     if winapi.SetConsoleOutputCP(65001) == 0:
-        encoding = getattr(sys.stdout, "encoding", None) or "utf-8"
-        old_cp = None
+        encoding = None
 
     for is_ansi, part in ansi_split(text):
         if is_ansi:
             ansi_state.apply(h, part)
         else:
-            os.write(fileno, part.encode(encoding, 'replace'))
+            if encoding is not None:
+                data = part.encode(encoding, 'replace')
+            else:
+                data = _encode_codepage(cp, part)
+            os.write(fileno, data)
 
     # reset the code page to what we had before
-    if old_cp is not None:
-        winapi.SetConsoleOutputCP(old_cp)
+    winapi.SetConsoleOutputCP(cp)
+
+
+def _readline_windows():
+    """Raises OSError"""
+
+    h = winapi.GetStdHandle(winapi.STD_INPUT_HANDLE)
+    if h == winapi.INVALID_HANDLE_VALUE:
+        return _readline_windows_fallback()
+
+    buf_size = 1024
+    buf = ctypes.create_string_buffer(buf_size * ctypes.sizeof(winapi.WCHAR))
+    read = winapi.DWORD()
+
+    text = u""
+    while True:
+        if winapi.ReadConsoleW(
+                h, buf, buf_size, ctypes.byref(read), None) == 0:
+            if not text:
+                return _readline_windows_fallback()
+            raise ctypes.WinError()
+        data = buf[:read.value * ctypes.sizeof(winapi.WCHAR)]
+        text += data.decode("utf-16-le", "replace")
+        if text.endswith(u"\r\n"):
+            return text[:-2]
+
+
+def _decode_codepage(codepage, data):
+    """
+    Args:
+        codepage (int)
+        data (bytes)
+    Returns:
+        `text`
+
+    Decodes data using the given codepage. If some data can't be decoded
+    using the codepage it will not fail.
+    """
+
+    assert isinstance(data, bytes)
+
+    if not data:
+        return u""
+
+    # get the required buffer length first
+    length = winapi.MultiByteToWideChar(codepage, 0, data, len(data), None, 0)
+    if length == 0:
+        raise ctypes.WinError()
+
+    # now decode
+    buf = ctypes.create_unicode_buffer(length)
+    length = winapi.MultiByteToWideChar(
+        codepage, 0, data, len(data), buf, length)
+    if length == 0:
+        raise ctypes.WinError()
+
+    return buf[:]
+
+
+def _encode_codepage(codepage, text):
+    """
+    Args:
+        codepage (int)
+        text (text)
+    Returns:
+        `bytes`
+
+    Encode text using the given code page. Will not fail if a char
+    can't be encoded using that codepage.
+    """
+
+    assert isinstance(text, text_type)
+
+    if not text:
+        return b""
+
+    size = len(text.encode("utf-16-le")) / ctypes.sizeof(winapi.WCHAR)
+
+    # get the required buffer size
+    length = winapi.WideCharToMultiByte(
+        codepage, 0, text, size, None, 0, None, None)
+    if length == 0:
+        raise ctypes.WinError()
+
+    # decode to the buffer
+    buf = ctypes.create_string_buffer(length)
+    length = winapi.WideCharToMultiByte(
+        codepage, 0, text, size, buf, length, None, None)
+    if length == 0:
+        raise ctypes.WinError()
+    return buf[:length]
+
+
+def _readline_windows_fallback():
+    # In case reading from the console failed (maybe we get piped data)
+    # we assume the input was generated according to the output encoding.
+    # Got any better ideas?
+    assert is_win
+    cp = winapi.GetConsoleOutputCP()
+    data = getattr(sys.stdin, "buffer", sys.stdin).readline().rstrip(b"\r\n")
+    return _decode_codepage(cp, data)
+
+
+def _readline_default():
+    assert is_unix
+    data = getattr(sys.stdin, "buffer", sys.stdin).readline().rstrip(b"\r\n")
+    if PY3:
+        return data.decode(_encoding, "surrogateescape")
+    else:
+        return data
+
+
+def _readline():
+    if is_win:
+        return _readline_windows()
+    else:
+        return _readline_default()
 
 
 def input_(prompt=None):
@@ -201,5 +316,4 @@ def input_(prompt=None):
     if prompt is not None:
         print_(prompt, end="")
 
-    data = getattr(sys.stdin, "buffer", sys.stdin).readline().rstrip(b"\r\n")
-    return path2fsn(data)
+    return _readline()
