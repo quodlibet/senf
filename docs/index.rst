@@ -18,7 +18,8 @@ What?
 
 **Senf** makes filename handling easier by providing a set of filename
 handling functions which work the same across all Python versions and
-platforms. It also provides a print() function which can print filenames.
+platforms. It also provides a print() function which can print filenames and
+an input() function which can read filenames.
 
 You can think of it as `six <https://pypi.org/project/six/>`__ for filename
 handling.
