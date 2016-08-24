@@ -186,6 +186,15 @@ def _print_windows(objects, sep, end, file, flush):
 def _readline_windows():
     """Raises OSError"""
 
+    try:
+        fileno = sys.stdin.fileno()
+    except (IOError, AttributeError):
+        fileno = -1
+
+    # In case stdin is replaced, read from that
+    if fileno != 0:
+        return _readline_windows_fallback()
+
     h = winapi.GetStdHandle(winapi.STD_INPUT_HANDLE)
     if h == winapi.INVALID_HANDLE_VALUE:
         return _readline_windows_fallback()
