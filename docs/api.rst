@@ -153,6 +153,10 @@ types depending on the Python version and platform used.
 .. class:: pathlike()
 
     Anything the Python stdlib allows as a path. In addition to `fsnative`
-    this allows :obj:`python:str` encoded with the default file system
-    encoding (usually ``mbcs``) under Python 2 + Windows and
-    :obj:`python3:bytes` under Python 3 + Unix.
+    this allows
+
+    * :obj:`bytes` encoded with the default file system encoding
+      (usually ``mbcs``) on Windows.
+    * :obj:`bytes` under Python 3 + Unix.
+    * :obj:`unicode` under Python 2 + Unix if it can be encoded with the
+      default file system encoding.
