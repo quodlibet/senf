@@ -94,7 +94,7 @@ if __name__ == "__main__":
             'License :: OSI Approved :: MIT License',
         ],
         tests_require=['pytest'],
-        cmdclass = {
+        cmdclass={
             'test': pytest_command,
             'coverage': coverage_command,
         },

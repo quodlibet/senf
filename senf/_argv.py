@@ -29,7 +29,7 @@ def create_argv():
     argc = ctypes.c_int()
     try:
         argv = winapi.CommandLineToArgvW(
-           winapi.GetCommandLineW(), ctypes.byref(argc))
+            winapi.GetCommandLineW(), ctypes.byref(argc))
     except WindowsError:
         return []
 

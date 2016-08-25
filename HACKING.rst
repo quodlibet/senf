@@ -1,3 +1,11 @@
+Code Quality
+------------
+
+::
+
+    flake8
+
+
 Testing
 -------
 
