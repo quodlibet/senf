@@ -10,6 +10,8 @@
     tutorial
     api
 
+.. title:: Overview
+
 .. currentmodule:: senf
 
 

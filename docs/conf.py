@@ -23,8 +23,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 project = 'Senf'
 copyright = u'2016, Christoph Reiter'
-version = senf.version_string
-release = senf.version_string
+html_title = "Senf Python Library"
 exclude_patterns = ['_build']
 
 autodoc_member_order = "bysource"
