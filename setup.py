@@ -68,12 +68,17 @@ class pytest_command(Command):
 
 
 if __name__ == "__main__":
+
+    with open('README.rst') as h:
+        long_description = h.read()
+
     setup(
         name="senf",
         version=senf.version_string,
         url="https://github.com/lazka/senf",
         description=("Consistent filename handling for all Python versions "
                      "and platforms"),
+        long_description=long_description,
         author="Christoph Reiter",
         author_email="reiter.christoph@gmail.com",
         packages=[
