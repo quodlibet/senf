@@ -61,7 +61,7 @@ def _create_fsnative(type_):
             return issubclass(subclass, type_)
 
     class impl(object):
-        """fsnative(text)
+        """fsnative(text=u"")
 
         Args:
             text (text): The text to convert to a path
@@ -73,17 +73,25 @@ def _create_fsnative(type_):
             TypeError: In case something other then `text` has been passed
 
         This type is a virtual base class for the real path type.
-        Instantiating it returns an instance of the real path type
-        and it overrides instance and subclass checks so that
+        Instantiating it returns an instance of the real path type and it
+        overrides instance and subclass checks so that `isinstance` and
+        `issubclass` checks work:
 
         ::
 
             isinstance(fsnative(u"foo"), fsnative) == True
             issubclass(type(fsnative(u"foo")), fsnative) == True
 
-        works as well.
+        The real returned type is:
 
-        Can't fail.
+        - :obj:`python:unicode` under Python 2 + Windows
+        - :obj:`python:str` under Python 2 + Unix
+        - :obj:`python3:str` under Python 3 + Windows
+        - :obj:`python3:str` + ``surrogates`` (only containing code points
+          which can be encoded with the locale encoding) under Python 3 +
+          Unix
+
+        Constructing a `fsnative` can't fail as long as `text` is passed.
         """
 
         def __new__(cls, text=u""):
