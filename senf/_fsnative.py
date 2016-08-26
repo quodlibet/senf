@@ -244,7 +244,7 @@ def fsn2bytes(path, encoding):
         `bytes`
     Raises:
         TypeError: If no `fsnative` path is passed
-        ValueError: On Windows if no valid encoding is passed or encoding fails
+        ValueError: If encoding fails or no encoding is given
 
     Turns a `fsnative` path to `bytes`.
 
@@ -276,7 +276,6 @@ def bytes2fsn(data, encoding):
         `fsnative`
     Raises:
         TypeError: If no `bytes` path is passed
-        LookupError: In case the passed encoding is unknown
         ValueError: If decoding fails or no encoding is given
 
     Turns `bytes` to a `fsnative` path.

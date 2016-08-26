@@ -384,6 +384,7 @@ def test_path2fsn():
     else:
         assert path2fsn(u"foo") == fsnative(u"foo")
         assert path2fsn(b"foo") == fsnative(u"foo")
+
         if PY3:
             # non unicode encoding, e.g. ascii
             if fsnative(u"\u1234") != u"\u1234":
@@ -402,14 +403,9 @@ def test_fsn2text():
     with pytest.raises(TypeError):
         fsn2text(notfsnative(u"foo"))
 
-    if PY3 and is_unix:
-        try:
-            u"\u1234".encode(_encoding)
-        except UnicodeEncodeError:
-            # in case we have a ascii encoding, this should fail with type
-            # error
-            with pytest.raises(TypeError):
-                fsn2text(u"\u1234")
+    for path in iternotfsn():
+        with pytest.raises(TypeError):
+            fsn2text(path)
 
 
 def test_text2fsn():
@@ -431,6 +427,10 @@ def test_fsn2bytes():
             fsn2bytes(fsnative(u"foo"), None)
         with pytest.raises(TypeError):
             fsn2bytes(fsnative(u"foo"), object())
+
+    for path in iternotfsn():
+        with pytest.raises(TypeError):
+            fsn2bytes(path)
 
 
 def test_bytes2fsn():
