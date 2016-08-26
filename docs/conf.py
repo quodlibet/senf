@@ -6,7 +6,6 @@ import sys
 dir_ = os.path.dirname(os.path.realpath(__file__))
 sys.path.insert(0, dir_)
 sys.path.insert(0, os.path.abspath(os.path.join(dir_, "..")))
-import senf
 
 needs_sphinx = "1.3"
 
