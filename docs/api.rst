@@ -142,6 +142,8 @@ types depending on the Python version and platform used.
 .. class:: text()
 
     Represents :obj:`unicode` under Python 2 and :obj:`str` under Python 3.
+    Does not include `surrogates
+    <https://www.python.org/dev/peps/pep-0383/>`__.
 
 
 .. class:: bytes()

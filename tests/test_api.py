@@ -29,7 +29,7 @@ from senf._environ import set_windows_env_var, get_windows_env_var, \
     del_windows_env_var
 from senf._winansi import ansi_parse, ansi_split
 from senf._stdlib import _get_userdir
-from senf._fsnative import _encoding
+from senf._fsnative import _encoding, is_unix
 from senf._print import _encode_codepage, _decode_codepage
 
 
@@ -48,6 +48,17 @@ def notfsnative(text=u""):
         return fsn2bytes(fsn, "utf-8")
 
 assert not isinstance(notfsnative(), fsnative)
+
+
+def iternotfsn():
+    yield notfsnative(u"foo")
+
+    if PY3 and is_unix:
+        try:
+            u"\u1234".encode(_encoding)
+        except UnicodeEncodeError:
+            # in case we have a ascii encoding this is an invalid path
+            yield u"\u1234"
 
 
 @contextlib.contextmanager
@@ -390,6 +401,15 @@ def test_fsn2text():
         fsn2text(object())
     with pytest.raises(TypeError):
         fsn2text(notfsnative(u"foo"))
+
+    if PY3 and is_unix:
+        try:
+            u"\u1234".encode(_encoding)
+        except UnicodeEncodeError:
+            # in case we have a ascii encoding, this should fail with type
+            # error
+            with pytest.raises(TypeError):
+                fsn2text(u"\u1234")
 
 
 def test_text2fsn():

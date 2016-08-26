@@ -25,13 +25,16 @@ from . import _winapi as winapi
 def print_(*objects, **kwargs):
     """print_(*objects, sep=None, end=None, file=None, flush=False)
 
-    Arguments:
+    Args:
         objects (object): zero or more objects to print
         sep (str): Object separator to use, defaults to ``" "``
         end (str): Trailing string to use, defaults to ``"\\n"``.
             If end is ``"\\n"`` then `os.linesep` is used.
         file (object): A file-like object, defaults to `sys.stdout`
         flush (bool): If the file stream should be flushed
+    Raises:
+        OSError
+        IOError
 
     Like print(), but:
 
@@ -315,6 +318,9 @@ def input_(prompt=None):
             adding a trailing newline
     Returns:
         `fsnative`
+    Raises:
+        OSError
+        IOError
 
     Like :func:`python3:input` but returns a `fsnative` and allows printing
     filenames as prompt to stdout.

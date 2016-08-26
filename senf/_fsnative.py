@@ -55,6 +55,12 @@ def _create_fsnative(type_):
     class meta(type):
 
         def __instancecheck__(self, instance):
+            # XXX: invalid str on Unix + Py3 still returns True here, but
+            # might fail when passed to fsnative API. We could be more strict
+            # here and call _validate_fsnative(), but then we could
+            # have a value not being an instance of fsnative, while its type
+            # is still a subclass of fsnative.. and this is enough magic
+            # already.
             return isinstance(instance, type_)
 
         def __subclasscheck__(self, subclass):
@@ -66,9 +72,7 @@ def _create_fsnative(type_):
         Args:
             text (text): The text to convert to a path
         Returns:
-            fsnative:
-                The new path. Depending on the Python version and platform
-                this is either `text` or `bytes`.
+            fsnative: The new path.
         Raises:
             TypeError: In case something other then `text` has been passed
 
@@ -91,7 +95,7 @@ def _create_fsnative(type_):
           which can be encoded with the locale encoding) under Python 3 +
           Unix
 
-        Constructing a `fsnative` can't fail as long as `text` is passed.
+        Constructing a `fsnative` can't fail.
         """
 
         def __new__(cls, text=u""):
@@ -104,6 +108,39 @@ def _create_fsnative(type_):
 
 fsnative_type = text_type if is_win or PY3 else bytes
 fsnative = _create_fsnative(fsnative_type)
+
+
+def _validate_fsnative(path):
+    """
+    Args:
+        path (fsnative)
+    Returns:
+        `text` on Windows, `bytes` on Unix
+    Raises:
+        TypeError: in case the type is wrong or the ´str` on Py3 + Unix
+            can't be converted to `bytes`
+
+    This helper allows to validate the type and content of a path.
+    To reduce overhead the encoded value for Py3 + Unix is returned so
+    it can be reused.
+    """
+
+    if not isinstance(path, fsnative_type):
+        raise TypeError("path needs to be %s, not %s" % (
+            fsnative_type.__name__, type(path).__name__))
+
+    if PY3 and is_unix:
+        try:
+            return path.encode(_encoding, "surrogateescape")
+        except UnicodeEncodeError:
+            # This look more like ValueError, but raising only one error
+            # makes things simpler... also one could say str + surrogates
+            # is its own type
+            raise TypeError("path contained Unicode code points not valid in"
+                            "the current path encoding. To create a valid "
+                            "path from Unicode use text2fsn()")
+
+    return path
 
 
 def _get_encoding():
@@ -132,11 +169,7 @@ def path2fsn(path):
         TypeError: In case the type can't be converted to a `fsnative`
         ValueError: In case conversion fails
 
-    Returns a fsnative path for a path-like.
-
-    If the passed in path is a `fsnative` path it simply returns it.
-    This will not fail for a valid path (Either retrieved from stdlib functions
-    or `argv` or `environ` or through the `fsnative` helper)
+    Returns a `fsnative` path for a `pathlike`.
     """
 
     # allow mbcs str on py2+win and bytes on py3
@@ -171,25 +204,18 @@ def fsn2text(path):
     Raises:
         TypeError: In case no `fsnative` has been passed
 
-    Converts a path to text. This process is not reversible and should
-    only be used for display purposes.
+    Converts a `fsnative` path to `text`.
 
-    On Python 3 the resulting `str` will not contain surrogates.
-
-    This can't fail if a valid `fsnative` gets passed.
+    This process is not reversible and should only be used for display
+    purposes.
     """
 
-    if not isinstance(path, fsnative_type):
-        raise TypeError("path needs to be %s", fsnative_type.__name__)
+    path = _validate_fsnative(path)
 
-    if fsnative_type is bytes:
-        return path.decode(_encoding, "replace")
+    if is_win:
+        return path
     else:
-        if PY2 or is_win:
-            return path
-        else:
-            return path.encode(
-                _encoding, "surrogateescape").decode(_encoding, "replace")
+        return path.decode(_encoding, "replace")
 
 
 def text2fsn(text):
@@ -198,12 +224,12 @@ def text2fsn(text):
         text (text): The text to convert
     Returns:
         `fsnative`
+    Raises:
+        TypeError: In case no `text` has been passed
 
-    Takes `text` and converts it to a `fsnative`. This operation is not
-    reversible and can't fail.
+    Takes `text` and converts it to a `fsnative`.
 
-    This is the same as calling ``fsnative(text)`` and available for
-    consistency.
+    This operation is not reversible and can't fail.
     """
 
     return fsnative(text)
@@ -220,24 +246,25 @@ def fsn2bytes(path, encoding):
         TypeError: If no `fsnative` path is passed
         ValueError: On Windows if no valid encoding is passed or encoding fails
 
-    Turns a path to bytes. If the path is not associated with an encoding
-    the passed encoding is used (under Windows for example).
+    Turns a `fsnative` path to `bytes`.
+
+    The passed *encoding* is only used on platforms where paths are not
+    associated with an encoding (Windows for example). If you don't care about
+    Windows you can pass `None`.
     """
 
-    if not isinstance(path, fsnative_type):
-        raise TypeError("path needs to be %s", fsnative_type.__name__)
+    path = _validate_fsnative(path)
 
     if is_win:
         if encoding is None:
             raise ValueError("invalid encoding %r" % encoding)
+
         try:
             return path.encode(encoding)
         except LookupError:
             raise ValueError("invalid encoding %r" % encoding)
-    elif PY2:
-        return path
     else:
-        return path.encode(_encoding, "surrogateescape")
+        return path
 
 
 def bytes2fsn(data, encoding):
@@ -249,10 +276,14 @@ def bytes2fsn(data, encoding):
         `fsnative`
     Raises:
         TypeError: If no `bytes` path is passed
-        ValueError: On Windows if no valid encoding is passed or decoding fails
+        LookupError: In case the passed encoding is unknown
+        ValueError: If decoding fails or no encoding is given
 
-    Turns bytes to a path. If the path is not associated with an encoding
-    the passed encoding is used (under Windows for example)
+    Turns `bytes` to a `fsnative` path.
+
+    The passed *encoding* is only used on platforms where paths are not
+    associated with an encoding (Windows for example). If you don't care about
+    Windows you can pass `None`.
     """
 
     if not isinstance(data, bytes):
@@ -281,7 +312,7 @@ def uri2fsn(uri):
         TypeError: In case an invalid type is passed
         ValueError: In case the URI isn't a valid file URI
 
-    Takes a file URI and returns a fsnative path
+    Takes a file URI and returns a `fsnative` path
     """
 
     if PY2:
@@ -325,14 +356,16 @@ def fsn2uri(path):
         TypeError: If no `fsnative` was passed
         ValueError: If the path can't be converted
 
-    Takes a fsnative path and returns a file URI.
+    Takes a `fsnative` path and returns a file URI.
 
-    On Windows this returns a unicode URI. If you want an ASCII URI
+    On Windows this returns a Unicode URI. If you want an ASCII URI
     use :func:`fsn2uri_ascii` instead.
+
+    The returned type is a subset of `fsnative`, it has the same type but
+    does not contains surrogates.
     """
 
-    if not isinstance(path, fsnative_type):
-        raise TypeError("path needs to be %s", fsnative_type.__name__)
+    path = _validate_fsnative(path)
 
     if is_win:
         buf = ctypes.create_unicode_buffer(winapi.INTERNET_MAX_URL_LENGTH)
@@ -344,10 +377,7 @@ def fsn2uri(path):
             raise ValueError(e)
         return buf[:length.value]
     else:
-        if PY2:
-            return "file://" + quote(path)
-        else:
-            return "file://" + quote(path.encode(_encoding, "surrogateescape"))
+        return "file://" + quote(path)
 
 
 def fsn2uri_ascii(path):
@@ -360,7 +390,7 @@ def fsn2uri_ascii(path):
         TypeError: If no `fsnative` was passed
         ValueError: If the path can't be converted
 
-    Takes a fsnative path and returns a file URI.
+    Takes a `fsnative` path and returns a file URI.
 
     Like fsn2uri() but returns ASCII only. On Windows non-ASCII characters
     will be encoded using utf-8 and then percent encoded.
