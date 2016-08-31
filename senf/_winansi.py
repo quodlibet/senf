@@ -134,60 +134,64 @@ class AnsiState(object):
             TextAction.FG_BLACK: 0,
             TextAction.FG_RED: winapi.FOREGROUND_RED,
             TextAction.FG_GREEN: winapi.FOREGROUND_GREEN,
-            TextAction.FG_YELLOW: winapi.FOREGROUND_GREEN |
-                winapi.FOREGROUND_RED,
+            TextAction.FG_YELLOW:
+                winapi.FOREGROUND_GREEN | winapi.FOREGROUND_RED,
             TextAction.FG_BLUE: winapi.FOREGROUND_BLUE,
             TextAction.FG_MAGENTA: winapi.FOREGROUND_BLUE |
                 winapi.FOREGROUND_RED,
-            TextAction.FG_CYAN: winapi.FOREGROUND_BLUE |
-                winapi.FOREGROUND_GREEN,
-            TextAction.FG_WHITE: winapi.FOREGROUND_BLUE |
-                winapi.FOREGROUND_GREEN | winapi.FOREGROUND_RED,
+            TextAction.FG_CYAN:
+                winapi.FOREGROUND_BLUE | winapi.FOREGROUND_GREEN,
+            TextAction.FG_WHITE:
+                winapi.FOREGROUND_BLUE | winapi.FOREGROUND_GREEN |
+                winapi.FOREGROUND_RED,
         }
 
         dark_bg = {
             TextAction.BG_BLACK: 0,
             TextAction.BG_RED: winapi.BACKGROUND_RED,
             TextAction.BG_GREEN: winapi.BACKGROUND_GREEN,
-            TextAction.BG_YELLOW: winapi.BACKGROUND_GREEN |
-                winapi.BACKGROUND_RED,
-            TextAction.BG_BLUE: winapi.BACKGROUND_BLUE,
-            TextAction.BG_MAGENTA: winapi.BACKGROUND_BLUE |
-                winapi.BACKGROUND_RED,
-            TextAction.BG_CYAN: winapi.BACKGROUND_BLUE |
-                winapi.BACKGROUND_GREEN,
-            TextAction.BG_WHITE: winapi.BACKGROUND_BLUE |
+            TextAction.BG_YELLOW:
                 winapi.BACKGROUND_GREEN | winapi.BACKGROUND_RED,
+            TextAction.BG_BLUE: winapi.BACKGROUND_BLUE,
+            TextAction.BG_MAGENTA:
+                winapi.BACKGROUND_BLUE | winapi.BACKGROUND_RED,
+            TextAction.BG_CYAN:
+                winapi.BACKGROUND_BLUE | winapi.BACKGROUND_GREEN,
+            TextAction.BG_WHITE:
+                winapi.BACKGROUND_BLUE | winapi.BACKGROUND_GREEN |
+                winapi.BACKGROUND_RED,
         }
 
         light_fg = {
             TextAction.FG_LIGHT_BLACK: 0,
             TextAction.FG_LIGHT_RED: winapi.FOREGROUND_RED,
             TextAction.FG_LIGHT_GREEN: winapi.FOREGROUND_GREEN,
-            TextAction.FG_LIGHT_YELLOW: winapi.FOREGROUND_GREEN |
-                winapi.FOREGROUND_RED,
-            TextAction.FG_LIGHT_BLUE: winapi.FOREGROUND_BLUE,
-            TextAction.FG_LIGHT_MAGENTA: winapi.FOREGROUND_BLUE |
-                winapi.FOREGROUND_RED,
-            TextAction.FG_LIGHT_CYAN: winapi.FOREGROUND_BLUE |
-                winapi.FOREGROUND_GREEN,
-            TextAction.FG_LIGHT_WHITE: winapi.FOREGROUND_BLUE |
+            TextAction.FG_LIGHT_YELLOW:
                 winapi.FOREGROUND_GREEN | winapi.FOREGROUND_RED,
+            TextAction.FG_LIGHT_BLUE: winapi.FOREGROUND_BLUE,
+            TextAction.FG_LIGHT_MAGENTA:
+                winapi.FOREGROUND_BLUE | winapi.FOREGROUND_RED,
+            TextAction.FG_LIGHT_CYAN:
+                winapi.FOREGROUND_BLUE | winapi.FOREGROUND_GREEN,
+            TextAction.FG_LIGHT_WHITE:
+                winapi.FOREGROUND_BLUE | winapi.FOREGROUND_GREEN |
+                winapi.FOREGROUND_RED,
         }
 
         light_bg = {
             TextAction.BG_LIGHT_BLACK: 0,
             TextAction.BG_LIGHT_RED: winapi.BACKGROUND_RED,
             TextAction.BG_LIGHT_GREEN: winapi.BACKGROUND_GREEN,
-            TextAction.BG_LIGHT_YELLOW: winapi.BACKGROUND_GREEN |
-                                  winapi.BACKGROUND_RED,
-            TextAction.BG_LIGHT_BLUE: winapi.BACKGROUND_BLUE,
-            TextAction.BG_LIGHT_MAGENTA: winapi.BACKGROUND_BLUE |
-                winapi.BACKGROUND_RED,
-            TextAction.BG_LIGHT_CYAN: winapi.BACKGROUND_BLUE |
-                winapi.BACKGROUND_GREEN,
-            TextAction.BG_LIGHT_WHITE: winapi.BACKGROUND_BLUE |
+            TextAction.BG_LIGHT_YELLOW:
                 winapi.BACKGROUND_GREEN | winapi.BACKGROUND_RED,
+            TextAction.BG_LIGHT_BLUE: winapi.BACKGROUND_BLUE,
+            TextAction.BG_LIGHT_MAGENTA:
+                winapi.BACKGROUND_BLUE | winapi.BACKGROUND_RED,
+            TextAction.BG_LIGHT_CYAN:
+                winapi.BACKGROUND_BLUE | winapi.BACKGROUND_GREEN,
+            TextAction.BG_LIGHT_WHITE:
+                winapi.BACKGROUND_BLUE | winapi.BACKGROUND_GREEN |
+                winapi.BACKGROUND_RED,
         }
 
         if action == TextAction.RESET_ALL:
