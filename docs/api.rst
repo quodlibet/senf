@@ -162,3 +162,6 @@ types depending on the Python version and platform used.
     * :obj:`bytes` under Python 3 + Unix.
     * :obj:`unicode` under Python 2 + Unix if it can be encoded with the
       default file system encoding.
+    * (Python 3.6+) Instances where its type implements the ``__fspath__``
+      protocol. See `PEP 519 <http://legacy.python.org/dev/peps/pep-0519/>`__
+      for details.

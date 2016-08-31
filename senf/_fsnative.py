@@ -181,7 +181,7 @@ def path2fsn(path):
             if isinstance(path, unicode):
                 path = path.encode(_encoding)
     else:
-        # TODO: If it ever gets added to Python we should call os.fspath() here
+        path = getattr(os, "fspath", lambda x: x)(path)
         if isinstance(path, bytes):
             path = path.decode(_encoding, "surrogateescape")
         elif is_unix and isinstance(path, str):

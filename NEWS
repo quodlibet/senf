@@ -1,3 +1,10 @@
+0.3.0 - ???-??-??
+-----------------
+
+* Support ``__fspath__`` in :func:`path2fsn`. See `PEP 519
+  <http://legacy.python.org/dev/peps/pep-0519/>`__ for details.
+
+
 0.2.0 - 2016-08-25
 ------------------
 

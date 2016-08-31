@@ -61,6 +61,15 @@ def iternotfsn():
             yield u"\u1234"
 
 
+class PathLike(object):
+
+    def __init__(self, path):
+        self._path = path
+
+    def __fspath__(self):
+        return self._path
+
+
 @contextlib.contextmanager
 def preserve_environ():
     old = environ.copy()
@@ -394,6 +403,23 @@ def test_path2fsn():
 
     with pytest.raises(TypeError):
         path2fsn(object())
+
+
+@pytest.mark.skipif(not hasattr(os, "fspath"), reason="python3.6 only")
+def test_path2fsn_pathlike():
+    # basic tests for os.fspath
+    with pytest.raises(TypeError):
+        os.fspath(PathLike(None))
+    assert os.fspath(PathLike(fsnative(u"foo"))) == fsnative(u"foo")
+    assert os.fspath(PathLike(u"\u1234")) == u"\u1234"
+
+    # now support in path2fsn
+    pathlike = PathLike(fsnative(u"foo"))
+    assert path2fsn(pathlike) == fsnative(u"foo")
+
+    # pathlib should also work..
+    from pathlib import Path
+    assert path2fsn(Path(".")) == fsnative(u".")
 
 
 def test_fsn2text():
