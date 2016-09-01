@@ -599,6 +599,8 @@ def test_fsn2uri():
         assert isinstance(fsn2uri(fsnative(u"/foo")), fsnative)
         assert fsn2uri(fsnative(u"/:@&=+$,")) == "file:///:@&=+$,"
     else:
+        assert fsn2uri(u"C:\\ö") == u"file:///C:/ö"
+        assert fsn2uri(u"C:\\ö ä%") == u"file:///C:/ö%20ä%25"
         assert fsn2uri(fsnative(u"C:\\foo")) == "file:///C:/foo"
         assert isinstance(fsn2uri(fsnative(u"C:\\foo")), fsnative)
         assert \
@@ -615,6 +617,7 @@ def test_fsn2uri_ascii():
         fsn2uri(object())
 
     if os.name == "nt":
+        assert fsn2uri_ascii(u"C:\\ö ä%") == "file:///C:/%C3%B6%20%C3%A4%25"
         assert (fsn2uri_ascii(u"C:\\foo-\u1234") ==
                 "file:///C:/foo-%E1%88%B4")
         assert isinstance(fsn2uri_ascii(u"C:\\foo-\u1234"), str)
@@ -632,7 +635,7 @@ def test_fsn2uri_ascii():
 def test_uri_roundtrip():
     if os.name == "nt":
         for path in [u"C:\\foo-\u1234", u"C:\\bla\\quux ha",
-                     u"\\\\\u1234\\foo\\\u1423"]:
+                     u"\\\\\u1234\\foo\\\u1423", u"\\\\foo;\\f"]:
             path = fsnative(path)
             assert uri2fsn(fsn2uri(path)) == path
             assert isinstance(uri2fsn(fsn2uri(path)), fsnative)
