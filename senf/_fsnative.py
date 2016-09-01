@@ -345,6 +345,11 @@ def uri2fsn(uri):
             return fsnative(url2pathname(path))
 
 
+def _quote_path(path):
+    # RFC 2396
+    return quote(path, "/:@&=+$,")
+
+
 def fsn2uri(path):
     """
     Args:
@@ -376,7 +381,7 @@ def fsn2uri(path):
             raise ValueError(e)
         return buf[:length.value]
     else:
-        return "file://" + quote(path)
+        return "file://" + _quote_path(path)
 
 
 def fsn2uri_ascii(path):

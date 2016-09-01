@@ -597,6 +597,7 @@ def test_fsn2uri():
     if os.name != "nt":
         assert fsn2uri(fsnative(u"/foo")) == "file:///foo"
         assert isinstance(fsn2uri(fsnative(u"/foo")), fsnative)
+        assert fsn2uri(fsnative(u"/:@&=+$,")) == "file:///:@&=+$,"
     else:
         assert fsn2uri(fsnative(u"C:\\foo")) == "file:///C:/foo"
         assert isinstance(fsn2uri(fsnative(u"C:\\foo")), fsnative)
