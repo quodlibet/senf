@@ -22,7 +22,7 @@ import senf
 from senf import fsnative, sep, pathsep, curdir, pardir, \
     altsep, extsep, devnull, defpath, argv, getcwd, environ, getenv, \
     unsetenv, putenv, uri2fsn, fsn2uri, path2fsn, mkstemp, mkdtemp, \
-    fsn2uri_ascii, fsn2text, fsn2bytes, bytes2fsn, print_, input_, \
+    fsn2text, fsn2bytes, bytes2fsn, print_, input_, \
     expanduser, text2fsn
 from senf._compat import iteritems, PY3, PY2, BytesIO, StringIO, text_type
 from senf._environ import set_windows_env_var, get_windows_env_var, \
@@ -590,46 +590,31 @@ def test_uri2fsn():
 
 
 def test_fsn2uri():
-
     with pytest.raises(TypeError):
         fsn2uri(object())
 
-    if os.name != "nt":
-        assert fsn2uri(fsnative(u"/foo")) == "file:///foo"
-        assert isinstance(fsn2uri(fsnative(u"/foo")), fsnative)
-        assert fsn2uri(fsnative(u"/:@&=+$,")) == "file:///:@&=+$,"
-    else:
-        assert fsn2uri(u"C:\\ö") == u"file:///C:/ö"
-        assert fsn2uri(u"C:\\ö ä%") == u"file:///C:/ö%20ä%25"
+    if os.name == "nt":
         assert fsn2uri(fsnative(u"C:\\foo")) == "file:///C:/foo"
-        assert isinstance(fsn2uri(fsnative(u"C:\\foo")), fsnative)
+        assert fsn2uri(u"C:\\ö ä%") == "file:///C:/%C3%B6%20%C3%A4%25"
+        assert (fsn2uri(u"C:\\foo-\u1234") ==
+                "file:///C:/foo-%E1%88%B4")
+        assert isinstance(fsn2uri(u"C:\\foo-\u1234"), str)
+        assert fsn2uri(u"\\\serv\\share\\") == "file://serv/share/"
+        assert fsn2uri(u"\\\serv\\\u1234\\") == "file://serv/%E1%88%B4/"
         assert \
             fsn2uri(fsnative(u"\\\\UNC\\foo\\bar")) == u"file://UNC/foo/bar"
-        assert fsn2uri(fsnative(u"C:\\foo\u1234")) == u"file:///C:/foo\u1234"
 
         # winapi can't handle too large paths. make sure we raise properly
         with pytest.raises(ValueError):
             fsn2uri(u"C:\\" + 4000 * u"a")
 
-
-def test_fsn2uri_ascii():
-    with pytest.raises(TypeError):
-        fsn2uri(object())
-
-    if os.name == "nt":
-        assert fsn2uri_ascii(u"C:\\ö ä%") == "file:///C:/%C3%B6%20%C3%A4%25"
-        assert (fsn2uri_ascii(u"C:\\foo-\u1234") ==
-                "file:///C:/foo-%E1%88%B4")
-        assert isinstance(fsn2uri_ascii(u"C:\\foo-\u1234"), str)
-        assert fsn2uri_ascii(u"\\\serv\\share\\") == "file://serv/share/"
-        assert fsn2uri_ascii(u"\\\serv\\\u1234\\") == "file://serv/%E1%88%B4/"
     else:
         if PY2:
             path = "/foo-\xe1\x88\xb4"
         else:
             path = fsnative(u"/foo-\u1234")
-        assert fsn2uri_ascii(path) == "file:///foo-%E1%88%B4"
-        assert isinstance(fsn2uri_ascii(path), str)
+        assert fsn2uri(path) == "file:///foo-%E1%88%B4"
+        assert isinstance(fsn2uri(path), str)
 
 
 def test_uri_roundtrip():
@@ -639,18 +624,12 @@ def test_uri_roundtrip():
             path = fsnative(path)
             assert uri2fsn(fsn2uri(path)) == path
             assert isinstance(uri2fsn(fsn2uri(path)), fsnative)
-            assert uri2fsn(fsn2uri_ascii(path)) == path
-            assert isinstance(uri2fsn(fsn2uri_ascii(path)), fsnative)
     else:
         path = path2fsn(b"/foo-\xe1\x88\xb4")
 
         assert uri2fsn(fsn2uri(fsnative(u"/foo"))) == "/foo"
         assert uri2fsn(fsn2uri(path)) == path
         assert isinstance(uri2fsn(fsn2uri(path)), fsnative)
-
-        assert uri2fsn(fsn2uri_ascii(fsnative(u"/foo"))) == "/foo"
-        assert uri2fsn(fsn2uri_ascii(path)) == path
-        assert isinstance(uri2fsn(fsn2uri_ascii(path)), fsnative)
 
 
 def test_mkdtemp():

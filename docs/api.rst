@@ -17,8 +17,7 @@ Helper functions for working with the `fsnative` type
 :func:`fsn2bytes`       Convert `fsnative` to `bytes`
 :func:`bytes2fsn`       Convert `bytes` to `fsnative`
 :func:`uri2fsn`         Convert URI to `fsnative`
-:func:`fsn2uri`         Convert `fsnative` to URI
-:func:`fsn2uri_ascii`   Convert `fsnative` to ASCII URI
+:func:`fsn2uri`         Convert `fsnative` to ASCII URI
 ======================= =================================
 
 
@@ -83,8 +82,6 @@ Package Related
 .. autofunction:: uri2fsn
 
 .. autofunction:: fsn2uri
-
-.. autofunction:: fsn2uri_ascii
 
 .. autodata:: environ
     :annotation: = {}
