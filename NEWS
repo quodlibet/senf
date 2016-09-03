@@ -1,14 +1,17 @@
-0.3.0 - ???-??-??
------------------
+0.3.0 - 2016-09-03
+------------------
 
 * Support ``__fspath__`` in :func:`path2fsn`. See `PEP 519
   <http://legacy.python.org/dev/peps/pep-0519/>`__ for details.
+* Rename fsn2uri_ascii to :func:`fsn2uri`, remove the later.
+* Fix :func:`fsn2uri` output on Windows for certain unicode ranges.
+* Add :func:`expandvars`
 
 
 0.2.0 - 2016-08-25
 ------------------
 
-* input_(): Add Windows Unicode support
+* :func:`input_`: Add Windows Unicode support
 
 
 0.1.0 - 2016-08-22
