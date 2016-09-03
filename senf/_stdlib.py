@@ -140,7 +140,7 @@ def expandvars(path):
     def repl_func(match):
         return environ.get(match.group(1), match.group(0))
 
-    path = re.sub(r"\$(\w+)", repl_func, path, flags=re.UNICODE)
+    path = re.compile(r"\$(\w+)", flags=re.UNICODE).sub(repl_func, path)
     if os.name == "nt":
         path = re.sub(r"%([^%]+)%", repl_func, path)
     return re.sub(r"\$\{([^\}]+)\}", repl_func, path)
