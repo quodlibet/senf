@@ -50,12 +50,8 @@ Now that we have a `fsnative`, what can we do with it?
     >>> senf.fsn2text(path)
     '/foo'
 
-    # We can convert it to an URI
-    >>> senf.fsn2uri(path)
-    'file:///foo'
-
     # We can convert it to an ASCII only URI
-    >>> senf.fsn2uri_ascii(path)
+    >>> senf.fsn2uri(path)
     'file:///foo'
 
     # We can serialize the path so we can save it somewhere

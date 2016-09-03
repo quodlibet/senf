@@ -165,7 +165,7 @@ def path2fsn(path):
     Args:
         path (pathlike): The path to convert
     Returns:
-        fsnative
+        `fsnative`
     Raises:
         TypeError: In case the type can't be converted to a `fsnative`
         ValueError: In case conversion fails
