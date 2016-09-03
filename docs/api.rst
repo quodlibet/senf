@@ -46,6 +46,7 @@ default arguments) or Unicode support for Windows is added (sys.argv)
 :func:`print_`          :func:`print` replacement
 :func:`input_`          :func:`input` replacement
 :func:`expanduser`      :func:`os.path.expanduser` replacement
+:func:`expandvars`      :func:`os.path.expandvars` replacement
 :func:`gettempdir`      :func:`tempfile.gettempdir` replacement
 :func:`gettempprefix`   :func:`tempfile.gettempprefix` replacement
 :func:`mkstemp`         :func:`tempfile.mkstemp` replacement

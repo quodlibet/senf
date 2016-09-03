@@ -23,7 +23,7 @@ from senf import fsnative, sep, pathsep, curdir, pardir, \
     altsep, extsep, devnull, defpath, argv, getcwd, environ, getenv, \
     unsetenv, putenv, uri2fsn, fsn2uri, path2fsn, mkstemp, mkdtemp, \
     fsn2text, fsn2bytes, bytes2fsn, print_, input_, \
-    expanduser, text2fsn
+    expanduser, text2fsn, expandvars
 from senf._compat import iteritems, PY3, PY2, BytesIO, StringIO, text_type
 from senf._environ import set_windows_env_var, get_windows_env_var, \
     del_windows_env_var
@@ -654,3 +654,38 @@ def test_test_mkstemp():
     fsn.endswith("foo")
     assert isinstance(fsn, fsnative)
     os.remove(fsn)
+
+
+def test_expandvars():
+    with preserve_environ():
+        environ["foo"] = "bar"
+        environ["nope b"] = "xxx"
+        environ["f/oo"] = "bar"
+        environ.pop("nope", "")
+
+        assert expandvars("$foo") == "bar"
+        assert expandvars("$nope b") == "$nope b"
+        assert expandvars("/$foo/") == "/bar/"
+        assert expandvars("$f/oo") == "$f/oo"
+        assert expandvars("$nope") == "$nope"
+        assert expandvars("$foo_") == "$foo_"
+
+        assert expandvars("${f/oo}") == "bar"
+        assert expandvars("${nope b}") == "xxx"
+        assert expandvars("${nope}") == "${nope}"
+        assert isinstance(expandvars("$foo"), fsnative)
+
+    with preserve_environ():
+        if os.name == "nt":
+            environ[u"ö"] = u"ä"
+            environ.pop(u"ä", "")
+            assert isinstance(expandvars("$ö"), fsnative)
+            assert expandvars(u"$ö") == u"ä"
+            assert expandvars(u"${ö}") == u"ä"
+            assert expandvars(u"${ä}") == u"${ä}"
+            assert expandvars(u"$ä") == u"$ä"
+
+            assert expandvars(u"%ö") == u"%ö"
+            assert expandvars(u"ö%") == u"ö%"
+            assert expandvars(u"%ö%") == u"ä"
+            assert expandvars(u"%ä%") == u"%ä%"
