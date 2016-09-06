@@ -288,6 +288,7 @@ def test_win_cp_encodings():
     assert _encode_codepage(437, u"foo") == b"foo"
     assert _encode_codepage(437, u"\xe4") == b"\x84"
     assert _encode_codepage(437, u"") == b""
+    assert _encode_codepage(437, u"\ud83d") == b"?"
     assert _decode_codepage(437, b"foo") == u"foo"
     assert _decode_codepage(437, b"\x84") == u"\xe4"
     assert _decode_codepage(437, b"") == u""
@@ -316,6 +317,7 @@ def test_print_real():
     print_(u"\033[94mfoo", u"\033[0m")
     print_(b"foo")
     print_(u"foo", flush=True)
+    print_(u"\ud83d")
 
 
 def test_print_capture():
