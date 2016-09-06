@@ -474,6 +474,7 @@ def test_surrogates():
         assert bytes2fsn(b"\xed\xa0\xbd", "utf-8") == u"\ud83d"
 
         assert fsnative(u"\ud83d") == u"\ud83d"
+        assert fsn2text(u"\ud83d") == u"\ufffd"
     else:
         # this shouldn't fail and produce the same result on py2/3 at least.
         assert fsn2bytes(fsnative(u"\ud83d"), None) == b"\xed\xa0\xbd"

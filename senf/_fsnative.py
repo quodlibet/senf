@@ -207,7 +207,7 @@ def fsn2text(path):
     Raises:
         TypeError: In case no `fsnative` has been passed
 
-    Converts a `fsnative` path to `text`.
+    Converts a `fsnative` path to `text` (without surrogates)
 
     This process is not reversible and should only be used for display
     purposes.
@@ -216,7 +216,8 @@ def fsn2text(path):
     path = _validate_fsnative(path)
 
     if is_win:
-        return path
+        return path.encode("utf-16-le", _surrogatepass).decode("utf-16-le",
+                                                               "replace")
     else:
         return path.decode(_encoding, "replace")
 
