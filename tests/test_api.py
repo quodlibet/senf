@@ -475,6 +475,9 @@ def test_surrogates():
 
         assert fsnative(u"\ud83d") == u"\ud83d"
         assert fsn2text(u"\ud83d") == u"\ufffd"
+
+        # at least don't fail...
+        assert fsn2uri(u"C:\\\ud83d") == u"file:///C:/%ED%A0%BD"
     else:
         # this shouldn't fail and produce the same result on py2/3 at least.
         assert fsn2bytes(fsnative(u"\ud83d"), None) == b"\xed\xa0\xbd"
@@ -628,7 +631,6 @@ def test_fsn2uri():
         # winapi can't handle too large paths. make sure we raise properly
         with pytest.raises(ValueError):
             fsn2uri(u"C:\\" + 4000 * u"a")
-
     else:
         if PY2:
             path = "/foo-\xe1\x88\xb4"

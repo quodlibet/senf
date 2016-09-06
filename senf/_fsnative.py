@@ -390,7 +390,7 @@ def fsn2uri(path):
             # Python 2 does what we want by default
             uri = unquote(uri)
 
-        return _quote_path(uri.encode("utf-8"))
+        return _quote_path(uri.encode("utf-8", _surrogatepass))
 
     else:
         return "file://" + _quote_path(path)
