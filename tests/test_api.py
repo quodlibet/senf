@@ -15,6 +15,8 @@
 import os
 import sys
 import contextlib
+import ctypes
+import shutil
 
 import pytest
 
@@ -29,8 +31,9 @@ from senf._environ import set_windows_env_var, get_windows_env_var, \
     del_windows_env_var
 from senf._winansi import ansi_parse, ansi_split
 from senf._stdlib import _get_userdir
-from senf._fsnative import _encoding, is_unix
+from senf._fsnative import _encoding, is_unix, _surrogatepass
 from senf._print import _encode_codepage, _decode_codepage
+from senf import _winapi as winapi
 
 
 is_wine = "WINEDEBUG" in os.environ
@@ -459,6 +462,23 @@ def test_fsn2bytes():
             fsn2bytes(path)
 
 
+def test_surrogates():
+    if os.name == "nt":
+        assert fsn2bytes(u"\ud83d", "utf-16-le") == b"=\xd8"
+        if PY3:
+            # decoding lone surrogates is broken on PY2 with utf-16
+            # https://bugs.python.org/issue27971
+            assert bytes2fsn(b"=\xd8", "utf-16-le") == u"\ud83d"
+
+        assert fsn2bytes(u"\ud83d", "utf-8") == b"\xed\xa0\xbd"
+        assert bytes2fsn(b"\xed\xa0\xbd", "utf-8") == u"\ud83d"
+
+        assert fsnative(u"\ud83d") == u"\ud83d"
+    else:
+        # this shouldn't fail and produce the same result on py2/3 at least.
+        assert fsn2bytes(fsnative(u"\ud83d"), None) == b"\xed\xa0\xbd"
+
+
 def test_bytes2fsn():
     assert bytes2fsn(b"foo", "utf-8") == fsnative(u"foo")
     assert (bytes2fsn(fsn2bytes(fsnative(u"\u1234"), "utf-8"), "utf-8") ==
@@ -689,3 +709,33 @@ def test_expandvars():
             assert expandvars(u"ö%") == u"ö%"
             assert expandvars(u"%ö%") == u"ä"
             assert expandvars(u"%ä%") == u"%ä%"
+
+
+def test_python_handling_broken_utf16():
+    # Create a file with an invalid utf-16 name.
+    # Mainly to see how Python handles it
+
+    tmp = mkdtemp()
+    try:
+        path = os.path.join(tmp, "foo")
+        with open(path, "wb") as h:
+            h.write(b"content")
+        assert "foo" in os.listdir(tmp)
+
+        if os.name == "nt":
+            faulty = (path.encode("utf-16-le") + b"=\xd8\x01\xde" +
+                      b"=\xd8-\x00\x01\xde")
+            buf = ctypes.create_string_buffer(faulty + b"\x00\x00")
+
+            if winapi.MoveFileW(path, ctypes.cast(buf, ctypes.c_wchar_p)) == 0:
+                raise ctypes.WinError()
+            assert "foo" not in os.listdir(tmp)
+
+            newpath = os.path.join(tmp, os.listdir(tmp)[0])
+            if not is_wine:  # this is broken on wine..
+                assert newpath.encode("utf-16-le", _surrogatepass) == faulty
+
+            with open(newpath, "rb") as h:
+                assert h.read() == b"content"
+    finally:
+        shutil.rmtree(tmp)

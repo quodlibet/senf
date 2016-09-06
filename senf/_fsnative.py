@@ -25,6 +25,8 @@ is_win = os.name == "nt"
 is_unix = not is_win
 is_darwin = sys.platform == "darwin"
 
+_surrogatepass = "strict" if PY2 else "surrogatepass"
+
 
 def _fsnative(text):
     if not isinstance(text, text_type):
@@ -39,9 +41,9 @@ def _fsnative(text):
         # a mis-configured environment
         encoding = _encoding
         try:
-            path = text.encode(encoding)
+            path = text.encode(encoding, _surrogatepass)
         except UnicodeEncodeError:
-            path = text.encode("utf-8")
+            path = text.encode("utf-8", _surrogatepass)
         if PY3:
             return path.decode(_encoding, "surrogateescape")
         return path
@@ -261,7 +263,7 @@ def fsn2bytes(path, encoding):
             raise ValueError("invalid encoding %r" % encoding)
 
         try:
-            return path.encode(encoding)
+            return path.encode(encoding, _surrogatepass)
         except LookupError:
             raise ValueError("invalid encoding %r" % encoding)
     else:
@@ -293,7 +295,7 @@ def bytes2fsn(data, encoding):
         if encoding is None:
             raise ValueError("invalid encoding %r" % encoding)
         try:
-            return data.decode(encoding)
+            return data.decode(encoding, _surrogatepass)
         except LookupError:
             raise ValueError("invalid encoding %r" % encoding)
     elif PY2:
