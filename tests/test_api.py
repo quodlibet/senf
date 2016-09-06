@@ -465,8 +465,8 @@ def test_fsn2bytes():
 def test_surrogates():
     if os.name == "nt":
         assert fsn2bytes(u"\ud83d", "utf-16-le") == b"=\xd8"
-        if PY3:
-            # decoding lone surrogates is broken on PY2 with utf-16
+        if sys.version_info[:2] >= (3, 4):
+            # decoding lone surrogates is broken on PY < 3.4 with utf-16
             # https://bugs.python.org/issue27971
             assert bytes2fsn(b"=\xd8", "utf-16-le") == u"\ud83d"
 
