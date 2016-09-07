@@ -475,7 +475,15 @@ def test_surrogates():
         if sys.version_info[:2] >= (3, 4):
             # decoding lone surrogates is broken on PY < 3.4 with utf-16
             # https://bugs.python.org/issue27971
-            assert bytes2fsn(b"=\xd8", "utf-16-le") == u"\ud83d"
+            assert bytes2fsn(b"\xd8=", "utf-16-be") == u"\ud83d"
+
+        # for utf-16-le we have a workaround
+        assert bytes2fsn(b"=\xd8", "utf-16-le") == u"\ud83d"
+        assert bytes2fsn(b"=\xd8=\xd8", "utf-16-le") == u"\ud83d\ud83d"
+        assert bytes2fsn(b"=\xd8\x00\x00", "utf-16-le") == u"\ud83d\x00"
+
+        with pytest.raises(UnicodeDecodeError):
+            bytes2fsn(b"a", "utf-16-le")
 
         assert fsn2bytes(u"\ud83d", "utf-8") == b"\xed\xa0\xbd"
         assert bytes2fsn(b"\xed\xa0\xbd", "utf-8") == u"\ud83d"
