@@ -91,12 +91,11 @@ def _create_fsnative(type_):
 
         The real returned type is:
 
-        - :obj:`python:unicode` under Python 2 + Windows
-        - :obj:`python:str` under Python 2 + Unix
-        - :obj:`python3:str` under Python 3 + Windows
-        - :obj:`python3:str` + ``surrogates`` (only containing code points
-          which can be encoded with the locale encoding) under Python 3 +
-          Unix
+        - Python 2 + Windows: :obj:`python:unicode` with ``surrogates``
+        - Python 2 + Unix: :obj:`python:str`
+        - Python 3 + Windows: :obj:`python3:str` with ``surrogates``
+        - Python 3 + Unix: :obj:`python3:str` with ``surrogates`` (only
+          containing code points which can be encoded with the locale encoding)
 
         Constructing a `fsnative` can't fail.
         """

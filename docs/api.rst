@@ -120,6 +120,8 @@ Package Related
 
 .. autofunction:: expanduser
 
+.. autofunction:: expandvars
+
 .. autofunction:: gettempdir
 
 .. autofunction:: gettempprefix
