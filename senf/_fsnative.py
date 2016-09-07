@@ -206,10 +206,11 @@ def fsn2text(path):
     Raises:
         TypeError: In case no `fsnative` has been passed
 
-    Converts a `fsnative` path to `text` (without surrogates)
+    Converts a `fsnative` path to `text`.
 
     This process is not reversible and should only be used for display
     purposes.
+    Encoding with a Unicode encoding will always succeed with the result.
     """
 
     path = _validate_fsnative(path)

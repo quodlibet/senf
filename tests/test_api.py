@@ -53,15 +53,20 @@ def notfsnative(text=u""):
 assert not isinstance(notfsnative(), fsnative)
 
 
+def isunicodeencoding():
+    try:
+        u"\u1234".encode(_encoding)
+    except UnicodeEncodeError:
+        return False
+    return True
+
+
 def iternotfsn():
     yield notfsnative(u"foo")
 
-    if PY3 and is_unix:
-        try:
-            u"\u1234".encode(_encoding)
-        except UnicodeEncodeError:
-            # in case we have a ascii encoding this is an invalid path
-            yield u"\u1234"
+    if PY3 and is_unix and not isunicodeencoding():
+        # in case we have a ascii encoding this is an invalid path
+        yield u"\u1234"
 
 
 class PathLike(object):
@@ -483,6 +488,15 @@ def test_surrogates():
     else:
         # this shouldn't fail and produce the same result on py2/3 at least.
         assert fsn2bytes(fsnative(u"\ud83d"), None) == b"\xed\xa0\xbd"
+        text2fsn(fsn2text(fsnative(u"\ud83d")))
+
+        if PY2 and isunicodeencoding():
+            # under Python 2 we get surrogates, but we can't do anything about
+            # it since most codecs don't treat that as an error
+            assert fsn2text(fsnative(u"\ud83d")) == u"\ud83d"
+        else:
+            # under Python 3 the decoder don't allow surrogates
+            assert fsn2text(fsnative(u"\ud83d")) == u"\ufffd\ufffd\ufffd"
 
 
 def test_bytes2fsn():
