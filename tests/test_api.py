@@ -17,6 +17,7 @@ import sys
 import contextlib
 import ctypes
 import shutil
+import codecs
 
 import pytest
 
@@ -31,7 +32,7 @@ from senf._environ import set_windows_env_var, get_windows_env_var, \
     del_windows_env_var
 from senf._winansi import ansi_parse, ansi_split
 from senf._stdlib import _get_userdir
-from senf._fsnative import _encoding, is_unix, _surrogatepass
+from senf._fsnative import _encoding, is_unix, _surrogatepass, _get_encoding
 from senf._print import _encode_codepage, _decode_codepage
 from senf import _winapi as winapi
 
@@ -116,6 +117,15 @@ def capture_output(data=None):
         sys.stdin = old_in
         sys.stderr = old_err
         sys.stdout = old_out
+
+
+def test__get_encoding():
+    orig = sys.getfilesystemencoding
+    sys.getfilesystemencoding = lambda: None
+    try:
+        codecs.lookup(_get_encoding())
+    finally:
+        sys.getfilesystemencoding = orig
 
 
 def test_getuserdir():
@@ -481,6 +491,14 @@ def test_surrogates():
         assert bytes2fsn(b"=\xd8", "utf-16-le") == u"\ud83d"
         assert bytes2fsn(b"=\xd8=\xd8", "utf-16-le") == u"\ud83d\ud83d"
         assert bytes2fsn(b"=\xd8\x00\x00", "utf-16-le") == u"\ud83d\x00"
+
+        # 4 byte code point
+        assert fsn2bytes(u"\U0001f600", "utf-16-le") == b"=\xd8\x00\xde"
+        assert bytes2fsn(b"=\xd8\x00\xde", "utf-16-le") == u"\U0001f600"
+
+        # 4 byte codepoint + lone surrogate
+        assert bytes2fsn(b"=\xd8\x00\xde=\xd8", "utf-16-le") == \
+            u"\U0001f600\ud83d"
 
         with pytest.raises(UnicodeDecodeError):
             bytes2fsn(b"a", "utf-16-le")
