@@ -268,6 +268,16 @@ def test_print():
     print_(u"foo", file=f, flush=True)
 
 
+def test_print_defaults_none():
+    # python 3 print takes None as default, try to do the same
+    with capture_output() as (out, err):
+        print_("foo", "bar")
+    first = out.getvalue()
+    with capture_output() as (out, err):
+        print_("foo", "bar", end=None, sep=None, file=None)
+    assert out.getvalue() == first
+
+
 def test_print_ansi():
     for i in range(1, 110):
         print_("\033[%dm" % i, end="")

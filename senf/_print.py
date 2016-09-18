@@ -46,10 +46,13 @@ def print_(*objects, **kwargs):
     This does not conflict with ``colorama``, but will not use it on Windows.
     """
 
-    sep = kwargs.get("sep", " ")
-    end = kwargs.get("end", "\n")
-    file = kwargs.get("file", sys.stdout)
-    flush = kwargs.get("flush", False)
+    sep = kwargs.get("sep")
+    sep = sep if sep is not None else " "
+    end = kwargs.get("end")
+    end = end if end is not None else "\n"
+    file = kwargs.get("file")
+    file = file if file is not None else sys.stdout
+    flush = bool(kwargs.get("flush", False))
 
     if end == "\n":
         end = os.linesep
