@@ -27,7 +27,7 @@ an input() function which can read filenames.
 You can think of it as `six <https://pypi.org/project/six/>`__ for filename
 handling.
 
-It supports Python 2.6, 2.7, 3.3+, works with PyPy, works on Linux, Windows,
+It supports Python 2.7, 3.3+, works with PyPy, works on Linux, Windows,
 macOS, is MIT licensed, and only depends on the stdlib.
 
 ::
