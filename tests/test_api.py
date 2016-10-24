@@ -27,7 +27,8 @@ from senf import fsnative, sep, pathsep, curdir, pardir, \
     unsetenv, putenv, uri2fsn, fsn2uri, path2fsn, mkstemp, mkdtemp, \
     fsn2text, fsn2bytes, bytes2fsn, print_, input_, \
     expanduser, text2fsn, expandvars
-from senf._compat import iteritems, PY3, PY2, BytesIO, StringIO, text_type
+from senf._compat import iteritems, PY3, PY2, BytesIO, StringIO, text_type, \
+    TextIO
 from senf._environ import set_windows_env_var, get_windows_env_var, \
     del_windows_env_var
 from senf._winansi import ansi_parse, ansi_split
@@ -40,8 +41,11 @@ from senf import _winapi as winapi
 is_wine = "WINEDEBUG" in os.environ
 
 linesepb = os.linesep
+linesepu = os.linesep
 if PY3:
     linesepb = linesepb.encode("ascii")
+if PY2:
+    linesepu = linesepu.decode("ascii")
 
 
 def notfsnative(text=u""):
@@ -266,6 +270,27 @@ def test_print():
     assert out == "foo" + os.linesep
 
     print_(u"foo", file=f, flush=True)
+
+    f = TextIO()
+    print_(u"foo", file=f)
+    out = f.getvalue()
+    assert isinstance(out, text_type)
+    assert out == u"foo" + linesepu
+
+
+@pytest.mark.skipif(os.name != "nt", reason="win only")
+def test_print_windows():
+    f = BytesIO()
+    print_(u"öäü\ud83d", file=f)
+    out = f.getvalue()
+    assert isinstance(out, bytes)
+    assert out == b"\xc3\xb6\xc3\xa4\xc3\xbc\xed\xa0\xbd" + linesepb
+
+    f = TextIO()
+    print_(u"öäü\ud83d", file=f)
+    out = f.getvalue()
+    assert isinstance(out, text_type)
+    assert out == u"öäü\ud83d" + linesepu
 
 
 def test_print_defaults_none():

@@ -12,33 +12,43 @@
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
-import pytest
-
 try:
     import hypothesis
     from hypothesis import given, strategies
 except ImportError:
     hypothesis = None
 
-from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes
-from senf._compat import text_type
+from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes, print_
+from senf._compat import text_type, StringIO, BytesIO
 
 
 if hypothesis:
+
+    @given(strategies.lists(strategies.text()), strategies.text(),
+           strategies.text(), strategies.booleans())
+    def test_print(objects, sep, end, flush):
+        h = StringIO()
+        print_(*objects, sep=sep, end=end, flush=flush, file=h)
+        h.getvalue()
+
+    @given(strategies.lists(strategies.binary()), strategies.binary(),
+           strategies.binary(), strategies.booleans())
+    def test_print_bytes(objects, sep, end, flush):
+        h = StringIO()
+        print_(*objects, sep=sep, end=end, flush=flush, file=h)
+        h.getvalue()
+
     @given(strategies.text())
     def test_fsnative(text):
         assert isinstance(fsnative(text), fsnative)
-
 
     @given(strategies.text())
     def test_text2fsn(text):
         assert isinstance(text2fsn(text), fsnative)
 
-
     @given(strategies.text())
     def test_text_fsn_roudntrip(text):
         assert isinstance(fsn2text(text2fsn(text)), text_type)
-
 
     @given(strategies.binary(),
            strategies.sampled_from(("utf-8", "utf-16-le",
