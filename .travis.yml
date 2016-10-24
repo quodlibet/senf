@@ -53,9 +53,11 @@ matrix:
       dist: trusty
       env: TYPE="windows" PYVER="3.4.4" PYARGS="-R"
     - os: osx
+      osx_image: xcode6.4
       language: generic
       env: TYPE="osx" PYVER="3" PYARGS="-R"
     - os: osx
+      osx_image: xcode6.4
       language: generic
       env: TYPE="osx" PYVER="2" PYARGS="-R"
 
