@@ -277,6 +277,18 @@ def test_print():
     assert isinstance(out, text_type)
     assert out == u"foo" + linesepu
 
+    f = TextIO()
+    print_(u"", file=f, end=b"\n")
+    out = f.getvalue()
+    assert isinstance(out, text_type)
+    assert out == linesepu
+
+    f = BytesIO()
+    print_("", file=f, end=b"\n")
+    out = f.getvalue()
+    assert isinstance(out, bytes)
+    assert out == linesepb
+
 
 @pytest.mark.skipif(os.name != "nt", reason="win only")
 def test_print_windows():

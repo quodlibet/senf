@@ -54,9 +54,6 @@ def print_(*objects, **kwargs):
     file = file if file is not None else sys.stdout
     flush = bool(kwargs.get("flush", False))
 
-    if end == "\n":
-        end = os.linesep
-
     if is_win:
         _print_windows(objects, sep, end, file, flush)
     else:
@@ -77,6 +74,11 @@ def _print_unix(objects, sep, end, file, flush):
         end = end.encode(encoding, "replace")
     if not isinstance(end, bytes):
         raise TypeError
+
+    if end == b"\n":
+        end = os.linesep
+        if PY3:
+            end = end.encode("ascii")
 
     parts = []
     for obj in objects:
@@ -153,6 +155,9 @@ def _print_windows(objects, sep, end, file, flush):
         end = end.decode(encoding, "replace")
     if not isinstance(end, text_type):
         raise TypeError
+
+    if end == u"\n":
+        end = os.linesep
 
     text = sep.join(parts) + end
     assert isinstance(text, text_type)
