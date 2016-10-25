@@ -1,3 +1,11 @@
+1.0.1 - 2016-10-25
+------------------
+
+* Python 2.6 support removed
+* :func:`print_`: allow None for `end`, `sep` and `file` arguments
+* :func:`print_`: always output utf-8 when redirected on Windows
+
+
 1.0.0 - 2016-09-09
 ------------------
 
