@@ -37,5 +37,6 @@ def main(argv):
         senf.print_("%6d %13s %s%s%s" % (size, mtime_format, color,
                                          entry, reset))
 
+
 if __name__ == "__main__":
     main(senf.argv)

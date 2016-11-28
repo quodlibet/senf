@@ -55,6 +55,7 @@ def notfsnative(text=u""):
     else:
         return fsn2bytes(fsn, "utf-8")
 
+
 assert not isinstance(notfsnative(), fsnative)
 
 
