@@ -17,8 +17,24 @@ import ctypes
 import collections
 
 from ._compat import text_type, PY2
-from ._fsnative import path2fsn, is_win
+from ._fsnative import path2fsn, is_win, _encoding
 from . import _winapi as winapi
+
+
+def _fsn2legacy(path):
+    """Takes a fsnative path and returns a path that can be put into os.environ
+    or sys.argv. Might result in a mangled path on Python2 + Windows.
+    Can't fail.
+
+    Args:
+        path (fsnative)
+    Returns:
+        str
+    """
+
+    if PY2 and is_win:
+        return path.encode(_encoding, "replace")
+    return path
 
 
 def get_windows_env_var(key):
@@ -138,6 +154,12 @@ class Environ(collections.MutableMapping):
         value = path2fsn(value)
 
         if is_win and PY2:
+            # this calls putenv, so do it first and replace later
+            try:
+                os.environ[_fsn2legacy(key)] = _fsn2legacy(value)
+            except OSError:
+                raise ValueError
+
             try:
                 set_windows_env_var(key, value)
             except WindowsError:
@@ -155,6 +177,11 @@ class Environ(collections.MutableMapping):
             try:
                 del_windows_env_var(key)
             except WindowsError:
+                pass
+
+            try:
+                del os.environ[_fsn2legacy(key)]
+            except KeyError:
                 pass
 
         del self._env[key]

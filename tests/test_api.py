@@ -85,9 +85,13 @@ class PathLike(object):
 
 
 @contextlib.contextmanager
-def preserve_environ():
+def preserve_environ(environ=environ):
     old = environ.copy()
-    yield
+    if environ is not os.environ:
+        with preserve_environ(os.environ):
+            yield
+    else:
+        yield
     # don't touch existing values as os.environ is broken for empty
     # keys on Windows: http://bugs.python.org/issue20658
     for key, value in list(environ.items()):
@@ -640,6 +644,19 @@ def test_environ():
 
     assert len(environ) == len(environ.keys())
     repr(environ)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="win only")
+def test_environ_mirror():
+    with preserve_environ():
+        os.environ.pop("BLA", None)
+        environ["BLA"] = u"\ud83d"
+        assert "BLA" in os.environ
+        assert os.environ["BLA"] in (u"\ud83d", "?")
+        assert get_windows_env_var(u"BLA") == u"\ud83d"
+        del environ["BLA"]
+        assert "BLA" not in os.environ
+        assert getenv("BLA") is None
 
 
 def test_getenv():
