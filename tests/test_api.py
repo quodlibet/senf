@@ -517,6 +517,17 @@ def test_fsn2text():
             fsn2text(path)
 
 
+def test_fsn2text_strict():
+    if os.name != "nt":
+        path = bytes2fsn(b"\xff", None)
+    else:
+        path = u"\ud83d"
+
+    if text2fsn(fsn2text(path)) != path:
+        with pytest.raises(ValueError):
+            fsn2text(path, strict=True)
+
+
 def test_text2fsn():
     with pytest.raises(TypeError):
         text2fsn(b"foo")
