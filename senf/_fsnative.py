@@ -52,6 +52,22 @@ def _decode_surrogatepass(data, codec):
             raise
 
 
+def _fsn2legacy(path):
+    """Takes a fsnative path and returns a path that can be put into os.environ
+    or sys.argv. Might result in a mangled path on Python2 + Windows.
+    Can't fail.
+
+    Args:
+        path (fsnative)
+    Returns:
+        str
+    """
+
+    if PY2 and is_win:
+        return path.encode(_encoding, "replace")
+    return path
+
+
 def _fsnative(text):
     if not isinstance(text, text_type):
         raise TypeError("%r needs to be a text type (%r)" % (text, text_type))

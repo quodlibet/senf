@@ -103,6 +103,17 @@ def preserve_environ(environ=environ):
 
 
 @contextlib.contextmanager
+def preserve_argv(argv=argv):
+    old = argv[:]
+    if argv is not sys.argv:
+        with preserve_argv(sys.argv):
+            yield
+    else:
+        yield
+    argv[:] = old
+
+
+@contextlib.contextmanager
 def capture_output(data=None):
     """
     with capture_output as (stdout, stderr):
@@ -612,6 +623,25 @@ def test_argv():
     assert isinstance(argv, list)
     assert len(sys.argv) == len(argv)
     assert all(isinstance(v, fsnative) for v in argv)
+
+
+def test_argv_change():
+    with preserve_argv():
+        argv.append(fsnative(u"\u1234"))
+        assert argv[-1] == fsnative(u"\u1234")
+        assert len(sys.argv) == len(argv)
+        assert sys.argv[-1] in (fsnative(u"\u1234"), "?")
+        argv[-1] = fsnative(u"X")
+        assert path2fsn(sys.argv[-1]) == argv[-1]
+        del argv[-1]
+        assert len(sys.argv) == len(argv)
+
+    with preserve_argv():
+        sys.argv[0] = sys.argv[0] + sys.argv[0]
+        if path2fsn(sys.argv[0]) != argv[0]:
+            del sys.argv[:]
+            argv[0] = fsnative(u"")
+            del argv[0]
 
 
 def test_getcwd():

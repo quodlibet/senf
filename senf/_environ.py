@@ -17,24 +17,8 @@ import ctypes
 import collections
 
 from ._compat import text_type, PY2
-from ._fsnative import path2fsn, is_win, _encoding
+from ._fsnative import path2fsn, is_win, _fsn2legacy
 from . import _winapi as winapi
-
-
-def _fsn2legacy(path):
-    """Takes a fsnative path and returns a path that can be put into os.environ
-    or sys.argv. Might result in a mangled path on Python2 + Windows.
-    Can't fail.
-
-    Args:
-        path (fsnative)
-    Returns:
-        str
-    """
-
-    if PY2 and is_win:
-        return path.encode(_encoding, "replace")
-    return path
 
 
 def get_windows_env_var(key):
