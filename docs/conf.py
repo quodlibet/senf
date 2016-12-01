@@ -13,6 +13,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.extlinks',
 ]
 intersphinx_mapping = {
     'python': ('https://docs.python.org/2.7', None),
@@ -32,4 +33,10 @@ html_theme = "sphinx_rtd_theme"
 html_favicon = "images/favicon.ico"
 html_theme_options = {
     "display_version": False,
+}
+
+extlinks = {
+    'bug': ('https://github.com/lazka/senf/issues/%s', '#'),
+    'pr': ('https://github.com/lazka/senf/pull/%s', '#'),
+    'user': ('https://github.com/%s', ''),
 }

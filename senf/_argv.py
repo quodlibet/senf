@@ -49,7 +49,9 @@ def _get_win_argv():
 
 class Argv(collections.MutableSequence, list):
     """List[`fsnative`]: Like `sys.argv` but contains unicode
-    keys and values under Windows + Python 2
+    keys and values under Windows + Python 2.
+
+    Any changes made will be forwarded to `sys.argv`.
     """
 
     def __init__(self):

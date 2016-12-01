@@ -247,16 +247,16 @@ def fsn2text(path, strict=False):
         `text`
     Raises:
         TypeError: In case no `fsnative` has been passed
-        ValueError: In case `strict` was True and the conversion failed
+        ValueError: In case ``strict`` was True and the conversion failed
 
     Converts a `fsnative` path to `text`.
 
     Can be used to pass a path to some unicode API, like for example a GUI
     toolkit.
 
-    If `strict` is True the conversion will fail in case it is not reversible.
-    This can be useful for converting program arguments that are supposed to
-    be text and erroring out in case they are not.
+    If ``strict`` is True the conversion will fail in case it is not
+    reversible. This can be useful for converting program arguments that are
+    supposed to be text and erroring out in case they are not.
 
     Encoding with a Unicode encoding will always succeed with the result.
     """

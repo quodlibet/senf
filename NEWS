@@ -1,8 +1,17 @@
+1.1.0 - ????-??-??
+------------------
+
+* :func:`print_`: Don't ignore ``flush`` in Windows redirect mode
+* :obj:`argv`: Forwards changes to `sys.argv` :bug:`2`
+* :obj:`environ`: Forwards changes to `os.environ` :bug:`2`
+* :func:`fsn2text`: Add a ``strict`` mode
+
+
 1.0.1 - 2016-10-25
 ------------------
 
 * Python 2.6 support removed
-* :func:`print_`: allow None for `end`, `sep` and `file` arguments
+* :func:`print_`: allow `None` for ``end``, ``sep`` and ``file`` arguments
 * :func:`print_`: always output utf-8 when redirected on Windows
 
 

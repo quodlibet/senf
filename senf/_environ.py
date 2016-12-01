@@ -116,7 +116,9 @@ def read_windows_environ():
 
 class Environ(collections.MutableMapping):
     """Dict[`fsnative`, `fsnative`]: Like `os.environ` but contains unicode
-    keys and values under Windows + Python 2
+    keys and values under Windows + Python 2.
+
+    Any changes made will be forwarded to `os.environ`.
     """
 
     def __init__(self):
