@@ -102,6 +102,13 @@ def preserve_environ(environ=environ):
             environ[key] = value
 
 
+environ_case_sensitive = True
+with preserve_environ():
+    os.environ.pop("senf", None)
+    os.environ["SENF"] = "foo"
+    environ_case_sensitive = not ("senf" in os.environ)
+
+
 @contextlib.contextmanager
 def preserve_argv(argv=argv):
     old = argv[:]
@@ -706,6 +713,21 @@ def test_environ():
     repr(environ)
 
 
+def test_environ_case():
+    if not environ_case_sensitive:
+        with preserve_environ():
+            environ.pop("foo", None)
+            environ["FoO"] = "bla"
+            assert environ["foo"] == "bla"
+            assert sorted(os.environ.keys()) == sorted(environ.keys())
+    else:
+        with preserve_environ():
+            environ["foo"] = "1"
+            environ["FOO"] = "2"
+            assert environ["foo"] != environ["FOO"]
+            assert sorted(os.environ.keys()) == sorted(environ.keys())
+
+
 @pytest.mark.skipif(os.name != "nt", reason="win only")
 def test_environ_mirror():
     with preserve_environ():
@@ -879,6 +901,21 @@ def test_expandvars():
             assert expandvars(u"ö%") == u"ö%"
             assert expandvars(u"%ö%") == u"ä"
             assert expandvars(u"%ä%") == u"%ä%"
+
+
+def test_expandvars_case():
+    if not environ_case_sensitive:
+        with preserve_environ():
+            environ.pop("foo", None)
+            environ["FOO"] = "bar"
+            assert expandvars("$foo") == "bar"
+            environ["FOo"] = "baz"
+            assert expandvars("$fOO") == "baz"
+    else:
+        with preserve_environ():
+            environ.pop("foo", None)
+            environ["FOO"] = "bar"
+            assert expandvars("$foo") == "$foo"
 
 
 def test_python_handling_broken_utf16():

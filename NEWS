@@ -4,6 +4,7 @@
 * :func:`print_`: Don't ignore ``flush`` in Windows redirect mode
 * :obj:`argv`: Forwards changes to `sys.argv` :bug:`2`
 * :obj:`environ`: Forwards changes to `os.environ` :bug:`2`
+* :obj:`environ`: Handle case insensitive env vars on Windows
 * :func:`fsn2text`: Add a ``strict`` mode
 
 
