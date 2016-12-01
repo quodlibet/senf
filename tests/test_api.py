@@ -631,9 +631,9 @@ def test_constants():
 
 
 def test_argv():
-    assert isinstance(argv, list)
     assert len(sys.argv) == len(argv)
     assert all(isinstance(v, fsnative) for v in argv)
+    assert all(isinstance(v, fsnative) for v in argv[:])
 
 
 def test_argv_change():
@@ -653,6 +653,25 @@ def test_argv_change():
             del sys.argv[:]
             argv[0] = fsnative(u"")
             del argv[0]
+
+    with preserve_argv():
+        argv[:] = [fsnative(u"foo")]
+        assert repr(argv).replace("u'", "'") == repr(sys.argv)
+        assert argv[:] == argv
+
+    with preserve_argv():
+        del argv[:]
+        assert not argv
+        assert argv == []
+        assert argv == argv
+        assert not argv != argv
+        argv.append("")
+        assert len(argv) == 1
+        assert isinstance(argv[-1], fsnative)
+        argv.insert(0, "")
+        assert isinstance(argv[0], fsnative)
+        assert len(argv) == 2
+        assert not argv > argv
 
 
 def test_getcwd():
