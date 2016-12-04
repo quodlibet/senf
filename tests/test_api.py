@@ -826,7 +826,7 @@ def test_fsn2uri():
         else:
             path = fsnative(u"/foo-\u1234")
         assert fsn2uri(path) == "file:///foo-%E1%88%B4"
-        assert isinstance(fsn2uri(path), str)
+        assert isinstance(fsn2uri(path), text_type)
 
 
 def test_uri_roundtrip():
