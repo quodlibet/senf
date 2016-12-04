@@ -34,6 +34,14 @@ html_favicon = "images/favicon.ico"
 html_theme_options = {
     "display_version": False,
 }
+html_context = {
+    'extra_css_files': [
+        '_static/extra.css',
+    ],
+}
+html_static_path = [
+    "extra.css",
+]
 
 extlinks = {
     'bug': ('https://github.com/lazka/senf/issues/%s', '#'),

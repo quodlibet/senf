@@ -6,5 +6,5 @@ include MANIFEST.in
 include README.rst
 include HACKING.rst
 include NEWS.rst
-recursive-include docs *.py Makefile *.rst *.png *.svg *.ico
+recursive-include docs *.py Makefile *.rst *.png *.svg *.ico *.css
 prune docs/_build
