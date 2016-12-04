@@ -811,7 +811,7 @@ def test_fsn2uri():
         assert fsn2uri(u"C:\\ö ä%") == "file:///C:/%C3%B6%20%C3%A4%25"
         assert (fsn2uri(u"C:\\foo-\u1234") ==
                 "file:///C:/foo-%E1%88%B4")
-        assert isinstance(fsn2uri(u"C:\\foo-\u1234"), str)
+        assert isinstance(fsn2uri(u"C:\\foo-\u1234"), text_type)
         assert fsn2uri(u"\\\serv\\share\\") == "file://serv/share/"
         assert fsn2uri(u"\\\serv\\\u1234\\") == "file://serv/%E1%88%B4/"
         assert \
