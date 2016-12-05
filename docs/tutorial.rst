@@ -55,7 +55,7 @@ Now that we have a `fsnative`, what can we do with it?
     'file:///foo'
 
     # We can serialize the path so we can save it somewhere
-    >>> senf.fsn2bytes("/foo", "utf-8")
+    >>> senf.fsn2bytes(path, "utf-8")
     b'/foo'
 
 The functions in the stdlib usually return the same type as was passed in. If
