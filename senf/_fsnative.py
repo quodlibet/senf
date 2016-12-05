@@ -29,7 +29,17 @@ is_darwin = sys.platform == "darwin"
 _surrogatepass = "strict" if PY2 else "surrogatepass"
 
 
-def _decode_surrogatepass(data, codec):
+def _normalize_codec(codec, _cache={}):
+    """Raises LookupError"""
+
+    try:
+        return _cache[codec]
+    except KeyError:
+        _cache[codec] = codecs.lookup(codec).name
+        return _cache[codec]
+
+
+def _bytes2winpath(data, codec):
     """Like data.decode(codec, 'surrogatepass') but makes utf-16-le work
     on Python < 3.4 + Windows
 
@@ -42,7 +52,7 @@ def _decode_surrogatepass(data, codec):
         return data.decode(codec, _surrogatepass)
     except UnicodeDecodeError:
         if os.name == "nt" and sys.version_info[:2] < (3, 4) and \
-                codecs.lookup(codec).name == "utf-16-le":
+                _normalize_codec(codec) == "utf-16-le":
             buffer_ = ctypes.create_string_buffer(data + b"\x00\x00")
             value = ctypes.wstring_at(buffer_, len(data) // 2)
             if value.encode("utf-16-le", _surrogatepass) != data:
@@ -50,6 +60,20 @@ def _decode_surrogatepass(data, codec):
             return value
         else:
             raise
+
+
+if PY2:
+    def _winpath2bytes(text, codec):
+        return text.encode(codec, codec)
+else:
+    def _winpath2bytes(text, codec):
+        # merge surrogate codepoints
+        if _normalize_codec(codec).startswith("utf-16"):
+            # fast path, utf-16 merges anyway
+            return text.encode(codec, _surrogatepass)
+        return _bytes2winpath(
+            text.encode("utf-16-le", _surrogatepass),
+            "utf-16-le").encode(codec, _surrogatepass)
 
 
 def _fsn2legacy(path):
@@ -313,7 +337,7 @@ def fsn2bytes(path, encoding):
             raise ValueError("invalid encoding %r" % encoding)
 
         try:
-            return path.encode(encoding, _surrogatepass)
+            return _winpath2bytes(path, encoding)
         except LookupError:
             raise ValueError("invalid encoding %r" % encoding)
     else:
@@ -345,7 +369,7 @@ def bytes2fsn(data, encoding):
         if encoding is None:
             raise ValueError("invalid encoding %r" % encoding)
         try:
-            return _decode_surrogatepass(data, encoding)
+            return _bytes2winpath(data, encoding)
         except LookupError:
             raise ValueError("invalid encoding %r" % encoding)
     elif PY2:

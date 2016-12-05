@@ -523,6 +523,9 @@ def test_fsn2text():
         with pytest.raises(TypeError):
             fsn2text(path)
 
+    if os.name == "nt":
+        assert fsn2text(u"\uD800\uDC01") == u"\U00010001"
+
 
 def test_fsn2text_strict():
     if os.name != "nt":
@@ -558,6 +561,21 @@ def test_fsn2bytes():
     for path in iternotfsn():
         with pytest.raises(TypeError):
             fsn2bytes(path)
+
+
+@pytest.mark.skipif(os.name != "nt", reason="win only")
+def test_fsn2bytes_surrogate_pairs():
+    assert fsn2bytes(u"\uD800\uDC01", "utf-8") == b"\xf0\x90\x80\x81"
+    assert fsn2bytes(u"\uD800\uDC01", "utf-16-le") == b"\x00\xd8\x01\xdc"
+    assert fsn2bytes(u"\uD800\uDC01", "utf-16-be") == b"\xd8\x00\xdc\x01"
+    assert fsn2bytes(u"\uD800\uDC01", "utf-16") == b"\xff\xfe\x00\xd8\x01\xdc"
+    assert fsn2bytes(u"\uD800\uDC01", "utf-32-le") == b"\x01\x00\x01\x00"
+
+    for c in ["utf-8", "utf-16-le", "utf-32-le", "utf-32-be"]:
+        assert fsn2bytes(
+            bytes2fsn(fsn2bytes(u"\uD800", c), c) +
+            bytes2fsn(fsn2bytes(u"\uDC01", c), c), c) == \
+            fsn2bytes(u"\uD800\uDC01", c)
 
 
 def test_surrogates():
@@ -820,6 +838,8 @@ def test_fsn2uri():
         # winapi can't handle too large paths. make sure we raise properly
         with pytest.raises(ValueError):
             fsn2uri(u"C:\\" + 4000 * u"a")
+
+        assert fsn2uri(u"C:\\\uD800\uDC01") == u"file:///C:/%F0%90%80%81"
     else:
         if PY2:
             path = "/foo-\xe1\x88\xb4"
