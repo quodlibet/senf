@@ -579,6 +579,38 @@ def test_fsn2bytes_surrogate_pairs():
             fsn2bytes(u"\uD800\uDC01", c)
 
 
+@pytest.mark.skipif(os.name != "nt", reason="win only")
+def test_fsn2bytes_wtf8():
+    test_data = {
+        u"aé ": b"a\xC3\xA9 ",
+        u"aé 💩": b"a\xC3\xA9 \xF0\x9F\x92\xA9",
+        u"\uD83D\x20\uDCA9": b"\xED\xA0\xBD \xED\xB2\xA9",
+        u"\uD800\uDBFF": b"\xED\xA0\x80\xED\xAF\xBF",
+        u"\uD800\uE000": b"\xED\xA0\x80\xEE\x80\x80",
+        u"\uD7FF\uDC00": b"\xED\x9F\xBF\xED\xB0\x80",
+        u"\x61\uDC00": b"\x61\xED\xB0\x80",
+        u"\uDC00": b"\xED\xB0\x80",
+    }
+
+    for uni, data in test_data.items():
+        assert fsn2bytes(uni, "utf-8") == data
+
+    def cat(*args):
+        return fsn2bytes(
+            "".join([bytes2fsn(a, "utf-8") for a in args]), "utf-8")
+
+    assert cat(b"\xED\xA0\xBD", b"\xED\xB2\xA9") == b"\xF0\x9F\x92\xA9"
+    assert cat(b"\xED\xA0\xBD", b" ", b"\xED\xB2\xA9") == \
+        b"\xED\xA0\xBD \xED\xB2\xA9"
+    assert cat(b"\xED\xA0\x80", b"\xED\xAF\xBF") == \
+        b"\xED\xA0\x80\xED\xAF\xBF"
+    assert cat(b"\xED\xA0\x80", b"\xEE\x80\x80") == \
+        b"\xED\xA0\x80\xEE\x80\x80"
+    assert cat(b"\xED\x9F\xBF", b"\xED\xB0\x80") == b"\xED\x9F\xBF\xED\xB0\x80"
+    assert cat(b"a", b"\xED\xB0\x80") == b"\x61\xED\xB0\x80"
+    assert cat(b"\xED\xB0\x80") == b"\xED\xB0\x80"
+
+
 def test_surrogates():
     if os.name == "nt":
         assert fsn2bytes(u"\ud83d", "utf-16-le") == b"=\xd8"
