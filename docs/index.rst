@@ -18,9 +18,8 @@
 |
 
 **Senf** introduces a new platform native string type called `fsnative`. It
-adds functions to convert text, data and paths to and from that new type and
-helper functions to integrate it nicely with the Python stdlib. `fsnative` is
-just an alias for a builtin type depending on the Python version and platform.
+adds functions to convert text, bytes and paths to and from that new type and
+helper functions to integrate it nicely with the Python stdlib.
 
 **Senf** supports Python 2.7, 3.3+, works with PyPy, works on Linux, Windows,
 macOS, is MIT licensed, and only depends on the stdlib. It does not monkey
@@ -41,12 +40,12 @@ program arguments (`sys.argv` and `subprocess`), for printing to the console
 The problem with them is that they come in many shapes and forms and handling
 them has changed significantly between Python 2 and Python 3.
 
-A valid platform string is either `bytes`, `unicode`, `str` + surrogates
-(either through the ``surrogatepass`` or the ``surrogateescape`` error
-handler) or anything implementing the ``__fspath__`` protocol. The values of
-those types depend on the Python version, the platform and the enviroment the
-program was started in. Ideally we don't want to care about any of those
-details.
+A valid platform native string is either `bytes`, `unicode`, `str` +
+surrogates (either through the ``surrogatepass`` or the ``surrogateescape``
+error handler) or anything implementing the ``__fspath__`` protocol. The
+values of those types depend on the Python version, the platform and the
+enviroment the program was started in. Ideally we don't want to care about any
+of those details.
 
 ----
 

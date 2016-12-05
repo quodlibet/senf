@@ -386,11 +386,16 @@ def fsn2bytes(path, encoding):
         TypeError: If no `fsnative` path is passed
         ValueError: If encoding fails or no encoding is given
 
-    Turns a `fsnative` path to `bytes`.
+    Converts a `fsnative` path to `bytes`.
 
     The passed *encoding* is only used on platforms where paths are not
     associated with an encoding (Windows for example). If you don't care about
     Windows you can pass `None`.
+
+    For Windows paths, lone surrogates will be encoded like normal code points
+    and surrogate pairs will be merged before encoding. In case of ``utf-8``
+    or ``utf-16-le`` this is equal to the `WTF-8 and WTF-16 encoding
+    <https://simonsapin.github.io/wtf-8/>`__.
     """
 
     path = _validate_fsnative(path)
