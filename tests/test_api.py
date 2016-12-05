@@ -611,6 +611,14 @@ def test_fsn2bytes_wtf8():
     assert cat(b"\xED\xB0\x80") == b"\xED\xB0\x80"
 
 
+@pytest.mark.skipif(os.name != "nt", reason="win only")
+def test_fsn2bytes_ill_formed_utf16():
+    p = bytes2fsn(b"a\x00\xe9\x00 \x00=\xd8=\xd8\xa9\xdc", "utf-16-le")
+    assert fsn2bytes(p, "utf-8") == b"a\xC3\xA9 \xED\xA0\xBD\xF0\x9F\x92\xA9"
+    assert fsn2bytes(u"aé " + u"\uD83D" + u"💩", "utf-16-le") == \
+        b'a\x00\xe9\x00 \x00=\xd8=\xd8\xa9\xdc'
+
+
 def test_surrogates():
     if os.name == "nt":
         assert fsn2bytes(u"\ud83d", "utf-16-le") == b"=\xd8"
