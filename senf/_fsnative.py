@@ -62,18 +62,29 @@ def _bytes2winpath(data, codec):
             raise
 
 
+def _winpath2bytes_py3(text, codec):
+    """Fallback implementation for text including surrogates"""
+
+    # merge surrogate codepoints
+    if _normalize_codec(codec).startswith("utf-16"):
+        # fast path, utf-16 merges anyway
+        return text.encode(codec, _surrogatepass)
+    return _bytes2winpath(
+        text.encode("utf-16-le", _surrogatepass),
+        "utf-16-le").encode(codec, _surrogatepass)
+
+
 if PY2:
     def _winpath2bytes(text, codec):
-        return text.encode(codec, codec)
+        return text.encode(codec)
+elif sys.version_info[:2] < (3, 4):
+    _winpath2bytes = _winpath2bytes_py3
 else:
     def _winpath2bytes(text, codec):
-        # merge surrogate codepoints
-        if _normalize_codec(codec).startswith("utf-16"):
-            # fast path, utf-16 merges anyway
-            return text.encode(codec, _surrogatepass)
-        return _bytes2winpath(
-            text.encode("utf-16-le", _surrogatepass),
-            "utf-16-le").encode(codec, _surrogatepass)
+        try:
+            return text.encode(codec)
+        except UnicodeEncodeError:
+            return _winpath2bytes_py3(text, codec)
 
 
 def _fsn2legacy(path):

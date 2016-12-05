@@ -570,6 +570,7 @@ def test_fsn2bytes_surrogate_pairs():
     assert fsn2bytes(u"\uD800\uDC01", "utf-16-be") == b"\xd8\x00\xdc\x01"
     assert fsn2bytes(u"\uD800\uDC01", "utf-16") == b"\xff\xfe\x00\xd8\x01\xdc"
     assert fsn2bytes(u"\uD800\uDC01", "utf-32-le") == b"\x01\x00\x01\x00"
+    assert fsn2bytes(u"\uD800\uDC01", "utf-32-be") == b"\x00\x01\x00\x01"
 
     for c in ["utf-8", "utf-16-le", "utf-32-le", "utf-32-be"]:
         assert fsn2bytes(
