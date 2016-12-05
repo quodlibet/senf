@@ -39,6 +39,16 @@ def _normalize_codec(codec, _cache={}):
         return _cache[codec]
 
 
+def _swap_bytes(data):
+    """swaps bytes for 16 bit, leaves remaining trailing bytes alone"""
+
+    a, b = data[1::2], data[::2]
+    data = bytearray().join(bytearray(x) for x in zip(a, b))
+    if len(b) > len(a):
+        data += b[-1:]
+    return bytes(data)
+
+
 def _bytes2winpath(data, codec):
     """Like data.decode(codec, 'surrogatepass') but makes utf-16-le work
     on Python < 3.4 + Windows
@@ -51,13 +61,18 @@ def _bytes2winpath(data, codec):
     try:
         return data.decode(codec, _surrogatepass)
     except UnicodeDecodeError:
-        if os.name == "nt" and sys.version_info[:2] < (3, 4) and \
-                _normalize_codec(codec) == "utf-16-le":
-            buffer_ = ctypes.create_string_buffer(data + b"\x00\x00")
-            value = ctypes.wstring_at(buffer_, len(data) // 2)
-            if value.encode("utf-16-le", _surrogatepass) != data:
+        if os.name == "nt" and sys.version_info[:2] < (3, 4):
+            if _normalize_codec(codec) == "utf-16-be":
+                data = _swap_bytes(data)
+                codec = "utf-16-le"
+            if _normalize_codec(codec) == "utf-16-le":
+                buffer_ = ctypes.create_string_buffer(data + b"\x00\x00")
+                value = ctypes.wstring_at(buffer_, len(data) // 2)
+                if value.encode("utf-16-le", _surrogatepass) != data:
+                    raise
+                return value
+            else:
                 raise
-            return value
         else:
             raise
 

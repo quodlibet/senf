@@ -572,7 +572,7 @@ def test_fsn2bytes_surrogate_pairs():
     assert fsn2bytes(u"\uD800\uDC01", "utf-32-le") == b"\x01\x00\x01\x00"
     assert fsn2bytes(u"\uD800\uDC01", "utf-32-be") == b"\x00\x01\x00\x01"
 
-    for c in ["utf-8", "utf-16-le", "utf-32-le", "utf-32-be"]:
+    for c in ["utf-8", "utf-16-le", "utf-16-be", "utf-32-le", "utf-32-be"]:
         assert fsn2bytes(
             bytes2fsn(fsn2bytes(u"\uD800", c), c) +
             bytes2fsn(fsn2bytes(u"\uDC01", c), c), c) == \
@@ -582,10 +582,7 @@ def test_fsn2bytes_surrogate_pairs():
 def test_surrogates():
     if os.name == "nt":
         assert fsn2bytes(u"\ud83d", "utf-16-le") == b"=\xd8"
-        if sys.version_info[:2] >= (3, 4):
-            # decoding lone surrogates is broken on PY < 3.4 with utf-16
-            # https://bugs.python.org/issue27971
-            assert bytes2fsn(b"\xd8=", "utf-16-be") == u"\ud83d"
+        assert bytes2fsn(b"\xd8=", "utf-16-be") == u"\ud83d"
 
         # for utf-16-le we have a workaround
         assert bytes2fsn(b"=\xd8", "utf-16-le") == u"\ud83d"
