@@ -49,8 +49,44 @@ def _swap_bytes(data):
     return bytes(data)
 
 
+def _codec_fails_on_encode_surrogates(codec, _cache={}):
+    """Returns if a codec fails correctly when passing in surrogates with
+    a surrogatepass/surrogateescape error handler. Some codecs were broken
+    in Python <3.4
+    """
+
+    try:
+        return _cache[codec]
+    except KeyError:
+        try:
+            u"\uD800\uDC01".encode(codec)
+        except UnicodeEncodeError:
+            _cache[codec] = True
+        else:
+            _cache[codec] = False
+        return _cache[codec]
+
+
+def _codec_can_decode_with_surrogatepass(codec, _cache={}):
+    """Returns if a codec supports the surrogatepass error handler when
+    decoding. Some codecs were broken in Python <3.4
+    """
+
+    try:
+        return _cache[codec]
+    except KeyError:
+        try:
+            u"\ud83d".encode(
+                codec, _surrogatepass).decode(codec, _surrogatepass)
+        except UnicodeDecodeError:
+            _cache[codec] = False
+        else:
+            _cache[codec] = True
+        return _cache[codec]
+
+
 def _bytes2winpath(data, codec):
-    """Like data.decode(codec, 'surrogatepass') but makes utf-16-le work
+    """Like data.decode(codec, 'surrogatepass') but makes utf-16-le/be work
     on Python < 3.4 + Windows
 
     https://bugs.python.org/issue27971
@@ -61,7 +97,7 @@ def _bytes2winpath(data, codec):
     try:
         return data.decode(codec, _surrogatepass)
     except UnicodeDecodeError:
-        if os.name == "nt" and sys.version_info[:2] < (3, 4):
+        if not _codec_can_decode_with_surrogatepass(codec):
             if _normalize_codec(codec) == "utf-16-be":
                 data = _swap_bytes(data)
                 codec = "utf-16-le"
@@ -92,13 +128,14 @@ def _winpath2bytes_py3(text, codec):
 if PY2:
     def _winpath2bytes(text, codec):
         return text.encode(codec)
-elif sys.version_info[:2] < (3, 4):
-    _winpath2bytes = _winpath2bytes_py3
 else:
     def _winpath2bytes(text, codec):
-        try:
-            return text.encode(codec)
-        except UnicodeEncodeError:
+        if _codec_fails_on_encode_surrogates(codec):
+            try:
+                return text.encode(codec)
+            except UnicodeEncodeError:
+                return _winpath2bytes_py3(text, codec)
+        else:
             return _winpath2bytes_py3(text, codec)
 
 
