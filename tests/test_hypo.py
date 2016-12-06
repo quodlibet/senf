@@ -12,6 +12,7 @@
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
+import pytest
 from hypothesis import given, strategies
 
 from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes, print_
@@ -46,6 +47,8 @@ def test_text2fsn(text):
 
 @given(strategies.text())
 def test_text_fsn_roudntrip(text):
+    if u"\x00" in text:
+        return
     assert isinstance(fsn2text(text2fsn(text)), text_type)
 
 
@@ -53,6 +56,11 @@ def test_text_fsn_roudntrip(text):
        strategies.sampled_from(("utf-8", "utf-16-le",
                                 "utf-32-le", "latin-1")))
 def test_bytes(data, encoding):
+    if u"\x00".encode(encoding) in data:
+        with pytest.raises(ValueError):
+            bytes2fsn(data, encoding)
+        return
+
     try:
         path = bytes2fsn(data, encoding)
     except ValueError:

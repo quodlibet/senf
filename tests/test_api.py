@@ -463,9 +463,16 @@ def test_fsnative():
     with pytest.raises(TypeError):
         fsnative(b"")
 
+    assert fsnative(u"\x00") == fsnative(u"\uFFFD")
+
 
 def test_path2fsn():
     assert isinstance(path2fsn(senf.__path__[0]), fsnative)
+
+    with pytest.raises(ValueError):
+        path2fsn(b"\x00")
+    with pytest.raises(ValueError):
+        path2fsn(u"\x00")
 
     if os.name == "nt":
         assert path2fsn(u"\u1234") == u"\u1234"
@@ -548,6 +555,14 @@ def test_fsn2bytes():
     assert fsn2bytes(fsnative(u"foo"), "utf-8") == b"foo"
     with pytest.raises(TypeError):
         fsn2bytes(object(), "utf-8")
+
+    if PY3:
+        with pytest.raises(TypeError):
+            fsn2bytes(u"\x00", "utf-8")
+    else:
+        with pytest.raises(TypeError):
+            fsn2bytes(b"\x00", "utf-8")
+
     if os.name != "nt":
         assert fsn2bytes(fsnative(u"foo"), None) == b"foo"
     else:
@@ -627,7 +642,9 @@ def test_surrogates():
         # for utf-16-le we have a workaround
         assert bytes2fsn(b"=\xd8", "utf-16-le") == u"\ud83d"
         assert bytes2fsn(b"=\xd8=\xd8", "utf-16-le") == u"\ud83d\ud83d"
-        assert bytes2fsn(b"=\xd8\x00\x00", "utf-16-le") == u"\ud83d\x00"
+
+        with pytest.raises(ValueError):
+            bytes2fsn(b"=\xd8\x00\x00", "utf-16-le")
 
         # 4 byte code point
         assert fsn2bytes(u"\U0001f600", "utf-16-le") == b"=\xd8\x00\xde"
@@ -666,6 +683,12 @@ def test_bytes2fsn():
     assert bytes2fsn(b"foo", "utf-8") == fsnative(u"foo")
     assert (bytes2fsn(fsn2bytes(fsnative(u"\u1234"), "utf-8"), "utf-8") ==
             fsnative(u"\u1234"))
+
+    with pytest.raises(ValueError):
+        bytes2fsn(b"\x00", "utf-8")
+
+    with pytest.raises(ValueError):
+        bytes2fsn(b"\x00\x00", "utf-16-le")
 
     with pytest.raises(TypeError):
         bytes2fsn(object(), "utf-8")
@@ -826,6 +849,10 @@ def test_putenv():
 
 def test_uri2fsn():
     if os.name != "nt":
+        with pytest.raises(ValueError):
+            assert uri2fsn(u"file:///%00")
+        with pytest.raises(ValueError):
+            assert uri2fsn("file:///%00")
         assert uri2fsn("file:///foo") == fsnative(u"/foo")
         assert uri2fsn(u"file:///foo") == fsnative(u"/foo")
         assert isinstance(uri2fsn("file:///foo"), fsnative)
@@ -833,6 +860,10 @@ def test_uri2fsn():
         assert \
             uri2fsn("file:///foo-%E1%88%B4") == path2fsn(b"/foo-\xe1\x88\xb4")
     else:
+        with pytest.raises(ValueError):
+            assert uri2fsn(u"file:///C:/%00")
+        with pytest.raises(ValueError):
+            assert uri2fsn("file:///C:/%00")
         assert uri2fsn("file:///C:/foo") == fsnative(u"C:\\foo")
         assert uri2fsn(u"file:///C:/foo") == fsnative(u"C:\\foo")
         assert isinstance(uri2fsn("file:///C:/foo"), fsnative)
@@ -863,6 +894,8 @@ def test_fsn2uri():
         fsn2uri(object())
 
     if os.name == "nt":
+        with pytest.raises(TypeError):
+            fsn2uri(u"\x00")
         assert fsn2uri(fsnative(u"C:\\foo")) == "file:///C:/foo"
         assert fsn2uri(u"C:\\ö ä%") == "file:///C:/%C3%B6%20%C3%A4%25"
         assert (fsn2uri(u"C:\\foo-\u1234") ==
@@ -879,6 +912,8 @@ def test_fsn2uri():
 
         assert fsn2uri(u"C:\\\uD800\uDC01") == u"file:///C:/%F0%90%80%81"
     else:
+        with pytest.raises(TypeError):
+            fsn2uri(b"\x00")
         if PY2:
             path = "/foo-\xe1\x88\xb4"
         else:
