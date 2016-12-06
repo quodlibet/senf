@@ -231,6 +231,9 @@ def _create_fsnative(type_):
           containing code points which can be encoded with the locale encoding)
 
         Constructing a `fsnative` can't fail.
+
+        Passing a `fsnative` to :func:`open` can only lead to
+        `EnvironmentError`, not `ValueError` or `TypeError`.
         """
 
         def __new__(cls, text=u""):
