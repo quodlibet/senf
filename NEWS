@@ -1,3 +1,12 @@
+1.2.0 - 2016-12-06
+------------------
+
+* `fsnative`: safeguard against containing null bytes. All operations
+  converting to `fsnative` will now fail if the result would contain null
+  bytes. This means passing `fsnative` to functions like :func:`open` is now
+  always safe.
+
+
 1.1.0 - 2016-12-05
 ------------------
 
