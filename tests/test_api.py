@@ -639,6 +639,12 @@ def test_surrogates():
         assert fsn2bytes(u"\ud83d", "utf-16-le") == b"=\xd8"
         assert bytes2fsn(b"\xd8=", "utf-16-be") == u"\ud83d"
 
+        with pytest.raises(ValueError):
+            bytes2fsn(b"\xd8=a", "utf-16-be")
+
+        with pytest.raises(ValueError):
+            bytes2fsn(b"=\xd8a", "utf-16-le")
+
         # for utf-16-le we have a workaround
         assert bytes2fsn(b"=\xd8", "utf-16-le") == u"\ud83d"
         assert bytes2fsn(b"=\xd8=\xd8", "utf-16-le") == u"\ud83d\ud83d"
