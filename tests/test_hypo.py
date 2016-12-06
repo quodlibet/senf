@@ -56,11 +56,6 @@ def test_text_fsn_roudntrip(text):
        strategies.sampled_from(("utf-8", "utf-16-le",
                                 "utf-32-le", "latin-1")))
 def test_bytes(data, encoding):
-    if u"\x00".encode(encoding) in data:
-        with pytest.raises(ValueError):
-            bytes2fsn(data, encoding)
-        return
-
     try:
         path = bytes2fsn(data, encoding)
     except ValueError:
