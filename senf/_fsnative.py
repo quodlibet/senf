@@ -224,16 +224,21 @@ def _create_fsnative(type_):
 
         The real returned type is:
 
-        - Python 2 + Windows: :obj:`python:unicode` with ``surrogates``
-        - Python 2 + Unix: :obj:`python:str`
-        - Python 3 + Windows: :obj:`python3:str` with ``surrogates``
-        - Python 3 + Unix: :obj:`python3:str` with ``surrogates`` (only
-          containing code points which can be encoded with the locale encoding)
+        - **Python 2 + Windows:** :obj:`python:unicode`, with ``surrogates``,
+          without ``null``
+        - **Python 2 + Unix:** :obj:`python:str`, without ``null``
+        - **Python 3 + Windows:** :obj:`python3:str`, with ``surrogates``,
+          without ``null``
+        - **Python 3 + Unix:** :obj:`python3:str`, with ``surrogates``, without
+          ``null``, without code points not encodable with the locale encoding
 
         Constructing a `fsnative` can't fail.
 
-        Passing a `fsnative` to :func:`open` can only lead to
-        `EnvironmentError`, not `ValueError` or `TypeError`.
+        Passing a `fsnative` to :func:`open` will never lead to `ValueError`
+        or `TypeError`.
+
+        Any operation on `fsnative` can also use the `str` type, as long as
+        the `str` only contains ASCII and no NULL.
         """
 
         def __new__(cls, text=u""):
