@@ -29,6 +29,12 @@ patch anything in the stdlib.
 
     pip install senf
 
+.. |github-logo| raw:: html
+
+    <i class="fa fa-github"></i>
+
+|github-logo| https://github.com/lazka/senf
+
 Why?
 ----
 
