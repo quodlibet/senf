@@ -1,3 +1,10 @@
+1.2.1 - 2016-12-07
+------------------
+
+* ``isinstance(path, fsnative)`` now checks the value as well. If True
+  passing the instance to `path2fsn` will never fail.
+
+
 1.2.0 - 2016-12-06
 ------------------
 
