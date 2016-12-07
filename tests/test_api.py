@@ -74,6 +74,11 @@ def iternotfsn():
         # in case we have a ascii encoding this is an invalid path
         yield u"\u1234"
 
+    if PY2 and is_unix:
+        yield b"\x00"
+    else:
+        yield u"\x00"
+
 
 class PathLike(object):
 
@@ -464,6 +469,10 @@ def test_fsnative():
         fsnative(b"")
 
     assert fsnative(u"\x00") == fsnative(u"\uFFFD")
+
+    assert isinstance(fsnative(u"\x00"), fsnative)
+    for inst in iternotfsn():
+        assert not isinstance(inst, fsnative)
 
 
 def test_path2fsn():
