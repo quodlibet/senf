@@ -12,7 +12,6 @@
 # The above copyright notice and this permission notice shall be
 # included in all copies or substantial portions of the Software.
 
-import pytest
 from hypothesis import given, strategies
 
 from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes, print_
