@@ -6,10 +6,15 @@ sed -i -e 's/Z://g' .coverage
 sed -i -e 's/\\\\/\//g' .coverage
 mv .coverage .coverage.win.py2
 
+./run_wine.sh 3.3.5 python -m coverage run --branch --include "senf\\*" setup.py test -a "-s"
+sed -i -e 's/Z://g' .coverage
+sed -i -e 's/\\\\/\//g' .coverage
+mv .coverage .coverage.win.py3.3
+
 ./run_wine.sh 3.4.4 python -m coverage run --branch --include "senf\\*" setup.py test -a "-s"
 sed -i -e 's/Z://g' .coverage
 sed -i -e 's/\\\\/\//g' .coverage
-mv .coverage .coverage.win.py3
+mv .coverage .coverage.win.py3.4
 
 python-coverage run --branch --include "senf/*" setup.py test -a "-s"
 mv .coverage .coverage.unix.py2
