@@ -1,3 +1,9 @@
+1.2.2 - 2016-12-18
+------------------
+
+* `uri2fsn`: improve error handling on unescaped URIs :bug:`4`
+
+
 1.2.1 - 2016-12-07
 ------------------
 
