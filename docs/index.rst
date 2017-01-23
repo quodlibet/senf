@@ -33,7 +33,7 @@ patch anything in the stdlib.
 
     <i class="fa fa-github"></i>
 
-|github-logo| https://github.com/lazka/senf
+|github-logo| https://github.com/quodlibet/senf
 
 Why?
 ----

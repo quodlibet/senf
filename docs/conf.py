@@ -44,7 +44,7 @@ html_static_path = [
 ]
 
 extlinks = {
-    'bug': ('https://github.com/lazka/senf/issues/%s', '#'),
-    'pr': ('https://github.com/lazka/senf/pull/%s', '#'),
+    'bug': ('https://github.com/quodlibet/senf/issues/%s', '#'),
+    'pr': ('https://github.com/quodlibet/senf/pull/%s', '#'),
     'user': ('https://github.com/%s', ''),
 }

@@ -75,7 +75,7 @@ if __name__ == "__main__":
     setup(
         name="senf",
         version=senf.version_string,
-        url="https://github.com/lazka/senf",
+        url="https://github.com/quodlibet/senf",
         description=("Consistent filename handling for all Python versions "
                      "and platforms"),
         long_description=long_description,
