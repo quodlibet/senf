@@ -1,5 +1,8 @@
-.. image:: https://travis-ci.org/quodlibet/senf.svg?branch=master
-    :target: https://travis-ci.org/quodlibet/senf
+.. image:: https://cdn.rawgit.com/quodlibet/senf/master/docs/images/header.svg
+   :align: center
+   :width: 400px
+
+|
 
 **Senf** introduces a new platform native string type called `fsnative`. It
 adds functions to convert text, bytes and paths to and from that new type and
@@ -18,3 +21,6 @@ For more info see https://senf.readthedocs.io/
 .. image:: https://github.com/quodlibet/senf/raw/master/docs/images/ansi.png
     :width: 699
     :height: 470
+
+.. image:: https://travis-ci.org/quodlibet/senf.svg?branch=master
+    :target: https://travis-ci.org/quodlibet/senf
