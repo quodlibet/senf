@@ -888,8 +888,7 @@ def test_uri2fsn():
             fsnative(u"/bla:foo@NOPE.com")
         assert uri2fsn("file:///bla?x#b") == fsnative(u"/bla?x#b")
     else:
-        # FIXME
-        # assert uri2fsn("file:///C:/%ED%A0%80") == fsnative(u"C:\\\ud800")
+        assert uri2fsn("file:///C:/%ED%A0%80") == fsnative(u"C:\\\ud800")
         assert uri2fsn("file:///C:/%20") == "C:\\ "
         assert uri2fsn("file:NOPE") == "\\NOPE"
         assert uri2fsn("file:/NOPE") == "\\NOPE"
@@ -967,6 +966,7 @@ def test_uri_roundtrip():
     else:
         path = path2fsn(b"/foo-\xe1\x88\xb4")
 
+        assert uri2fsn(fsn2uri(path2fsn(b"/\x80"))) == path2fsn(b"/\x80")
         assert uri2fsn(fsn2uri(fsnative(u"/foo"))) == "/foo"
         assert uri2fsn(fsn2uri(path)) == path
         assert isinstance(uri2fsn(fsn2uri(path)), fsnative)

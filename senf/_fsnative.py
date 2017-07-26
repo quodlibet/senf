@@ -26,8 +26,7 @@ import ctypes
 import codecs
 
 from . import _winapi as winapi
-from ._compat import text_type, PY3, PY2, url2pathname, urlparse, quote, \
-    unquote, urlunparse
+from ._compat import text_type, PY3, PY2, urlparse, quote, unquote, urlunparse
 
 
 is_win = os.name == "nt"
@@ -551,7 +550,18 @@ def uri2fsn(uri):
     uri = urlunparse(parsed)[7:]
 
     if is_win:
-        path = url2pathname(uri)
+        try:
+            drive, rest = uri.split(":", 1)
+        except ValueError:
+            path = ""
+            rest = uri.replace("/", "\\")
+        else:
+            path = drive[-1] + ":"
+            rest = rest.replace("/", "\\")
+        if PY2:
+            path += unquote(rest)
+        else:
+            path += unquote(rest, errors="surrogatepass")
         if netloc:
             path = "\\\\" + path
         if PY2:
@@ -560,11 +570,12 @@ def uri2fsn(uri):
             raise ValueError("embedded null")
         return path
     else:
-        path = unquote(uri)
+        if PY2:
+            path = unquote(uri)
+        else:
+            path = unquote(uri, errors="surrogateescape")
         if "\x00" in path:
             raise ValueError("embedded null")
-        if PY3:
-            path = fsnative(path)
         return path
 
 

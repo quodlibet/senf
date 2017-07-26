@@ -44,15 +44,7 @@ def test_anything(pathlike):
     abspath = os.path.abspath(
         fsn.replace(sep, fsnative()).replace(altsep or sep, fsnative()))
     if os.path.isabs(abspath):
-        try:
-            if isinstance(abspath, text_type):
-                abspath.encode("utf-8")
-        except UnicodeEncodeError:
-            # FIXME: url2pathname can't handle surrogates in Python 3,
-            # get rid of it
-            pass
-        else:
-            assert uri2fsn(fsn2uri(abspath)) == abspath
+        assert uri2fsn(fsn2uri(abspath)) == abspath
 
     try:
         # never raises ValueError/TypError
