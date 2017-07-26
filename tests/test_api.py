@@ -888,6 +888,9 @@ def test_uri2fsn():
             fsnative(u"/bla:foo@NOPE.com")
         assert uri2fsn("file:///bla?x#b") == fsnative(u"/bla?x#b")
     else:
+        # FIXME
+        # assert uri2fsn("file:///C:/%ED%A0%80") == fsnative(u"C:\\\ud800")
+        assert uri2fsn("file:///C:/%20") == "C:\\ "
         assert uri2fsn("file:NOPE") == "\\NOPE"
         assert uri2fsn("file:/NOPE") == "\\NOPE"
         with pytest.raises(ValueError):
@@ -926,6 +929,8 @@ def test_fsn2uri():
     if os.name == "nt":
         with pytest.raises(TypeError):
             fsn2uri(u"\x00")
+        assert fsn2uri(fsnative(u"C:\\\ud800")) == "file:///C:/%ED%A0%80"
+        assert fsn2uri(fsnative(u"C:\\ ")) == "file:///C:/%20"
         assert fsn2uri(fsnative(u"C:\\foo")) == "file:///C:/foo"
         assert fsn2uri(u"C:\\ö ä%") == "file:///C:/%C3%B6%20%C3%A4%25"
         assert (fsn2uri(u"C:\\foo-\u1234") ==

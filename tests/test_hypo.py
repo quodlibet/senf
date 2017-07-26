@@ -20,10 +20,51 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+import os
+
 from hypothesis import given, strategies
 
-from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes, print_
+from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes, print_, \
+    path2fsn, fsn2uri, uri2fsn, sep, altsep
 from senf._compat import text_type, StringIO
+
+from tests.strategies import pathlikes
+
+
+@given(pathlikes())
+def test_anything(pathlike):
+    if isinstance(pathlike, fsnative):
+        assert path2fsn(pathlike) == pathlike
+
+    fsn = path2fsn(pathlike)
+    assert path2fsn(fsn) == fsn
+
+    assert isinstance(fsn, fsnative)
+
+    abspath = os.path.abspath(
+        fsn.replace(sep, fsnative()).replace(altsep or sep, fsnative()))
+    if os.path.isabs(abspath):
+        try:
+            if isinstance(abspath, text_type):
+                abspath.encode("utf-8")
+        except UnicodeEncodeError:
+            # FIXME: url2pathname can't handle surrogates in Python 3,
+            # get rid of it
+            pass
+        else:
+            assert uri2fsn(fsn2uri(abspath)) == abspath
+
+    try:
+        # never raises ValueError/TypError
+        with open(pathlike):
+            pass
+    except EnvironmentError:
+        pass
+
+    assert isinstance(fsn2text(fsn), text_type)
+
+    data = fsn2bytes(fsn, "utf-8")
+    assert fsn2bytes(bytes2fsn(data, "utf-8"), "utf-8") == data
 
 
 @given(strategies.lists(strategies.text()), strategies.text(),

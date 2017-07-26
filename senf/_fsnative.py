@@ -560,7 +560,7 @@ def uri2fsn(uri):
             raise ValueError("embedded null")
         return path
     else:
-        path = url2pathname(uri)
+        path = unquote(uri)
         if "\x00" in path:
             raise ValueError("embedded null")
         if PY3:
