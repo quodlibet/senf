@@ -53,7 +53,14 @@ def test_anything(pathlike):
     except EnvironmentError:
         pass
 
-    assert isinstance(fsn2text(fsn), text_type)
+    fsn2text(fsn).encode("utf-8")
+
+    try:
+        t = fsn2text(fsn, strict=True)
+    except ValueError:
+        pass
+    else:
+        assert text2fsn(t) == fsn
 
     data = fsn2bytes(fsn, "utf-8")
     assert fsn2bytes(bytes2fsn(data, "utf-8"), "utf-8") == data
