@@ -31,6 +31,14 @@ from senf._compat import text_type, StringIO
 from tests.strategies import fspaths
 
 
+@given(fspaths(pathname_only=True))
+def test_any_pathnames(path):
+    fsn = path2fsn(path)
+    abspath = os.path.abspath(fsn)
+    if os.path.isabs(abspath):
+        assert uri2fsn(fsn2uri(abspath)) == abspath
+
+
 @given(fspaths())
 def test_any_filenames(path):
     if isinstance(path, fsnative):
@@ -49,10 +57,6 @@ def test_any_filenames(path):
         pass
 
     fsn2text(fsn).encode("utf-8")
-
-    abspath = os.path.abspath(fsn)
-    if os.path.isabs(abspath):
-        assert uri2fsn(fsn2uri(abspath)) == abspath
 
     try:
         t = fsn2text(fsn, strict=True)
