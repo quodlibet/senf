@@ -583,7 +583,7 @@ def uri2fsn(uri):
         if PY2:
             path += unquote(rest)
         else:
-            path += unquote(rest, errors="surrogatepass")
+            path += unquote(rest, encoding="utf-8", errors="surrogatepass")
         if netloc:
             path = "\\\\" + path
         if PY2:
@@ -595,7 +595,7 @@ def uri2fsn(uri):
         if PY2:
             path = unquote(uri)
         else:
-            path = unquote(uri, errors="surrogateescape")
+            path = unquote(uri, encoding=_encoding, errors="surrogateescape")
         if "\x00" in path:
             raise ValueError("embedded null")
         return path
