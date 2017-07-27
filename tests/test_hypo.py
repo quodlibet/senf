@@ -26,6 +26,7 @@ from hypothesis import given, strategies, find
 
 from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes, print_, \
     path2fsn, fsn2uri, uri2fsn
+from senf._fsnative import _fsn2norm
 from senf._compat import text_type, StringIO
 
 from tests.strategies import fspaths
@@ -68,7 +69,7 @@ def test_any_filenames(path):
     except ValueError:
         pass
     else:
-        assert text2fsn(t) == fsn
+        assert _fsn2norm(text2fsn(t)) == _fsn2norm(fsn)
 
     data = fsn2bytes(fsn, "utf-8")
     assert fsn2bytes(bytes2fsn(data, "utf-8"), "utf-8") == data
