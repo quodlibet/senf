@@ -65,7 +65,7 @@ def filenames(draw):
         else:
             unix_path_text = unix_path_bytes.map(
                 lambda b: b.decode(
-                    sys.getfilesystemencoding(), "replace"))
+                    sys.getfilesystemencoding(), "ignore"))
         s.append(unix_path_text)
 
     return draw(sampled_from(list(map(draw, s))))
