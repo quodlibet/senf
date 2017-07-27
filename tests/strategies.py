@@ -27,8 +27,28 @@ from hypothesis.strategies import composite, sampled_from, characters, lists, \
     integers, binary
 
 
+class _PathLike(object):
+
+    def __init__(self, value):
+        self._value = value
+
+    def __fspath__(self):
+        return self._value
+
+
 @composite
-def filenames(draw):
+def fspaths(draw, pathname_only=False, allow_pathlike=True):
+    """A hypothesis strategy which gives valid path values.
+
+    Valid path values are everything which when passed to open() will not raise
+    ValueError or TypeError (but might raise OSError due to file system or
+    operating system restrictions).
+
+    Args:
+        pathname_only: if the path should not contain any separators
+        allow_pathlike: If the result can be a pathlike (__fspath__ proto)
+    """
+
     s = []
 
     if os.name == "nt":
@@ -68,23 +88,15 @@ def filenames(draw):
                     sys.getfilesystemencoding(), "ignore"))
         s.append(unix_path_text)
 
-    return draw(sampled_from(list(map(draw, s))))
+    result = draw(sampled_from(list(map(draw, s))))
 
+    if pathname_only:
+        if isinstance(result, bytes):
+            result = result.replace(b"/", b" ").replace(b"\\", b" ")
+        else:
+            result = result.replace(u"/", u" ").replace(u"\\", u" ")
 
-class _PathLike(object):
+    if allow_pathlike and hasattr(os, "fspath"):
+        result = draw(sampled_from([result, _PathLike(result)]))
 
-    def __init__(self, value):
-        self._value = value
-
-    def __fspath__(self):
-        return self._value
-
-
-@composite
-def pathlikes(draw):
-    filename = draw(filenames())
-
-    if hasattr(os, "fspath"):
-        return draw(sampled_from([filename, _PathLike(filename)]))
-    else:
-        return filename
+    return result

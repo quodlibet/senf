@@ -28,32 +28,31 @@ from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes, print_, \
     path2fsn, fsn2uri, uri2fsn, sep, altsep
 from senf._compat import text_type, StringIO
 
-from tests.strategies import pathlikes
+from tests.strategies import fspaths
 
 
-@given(pathlikes())
-def test_anything(pathlike):
-    if isinstance(pathlike, fsnative):
-        assert path2fsn(pathlike) == pathlike
+@given(fspaths())
+def test_any_filenames(path):
+    if isinstance(path, fsnative):
+        assert path2fsn(path) == path
 
-    fsn = path2fsn(pathlike)
+    fsn = path2fsn(path)
     assert path2fsn(fsn) == fsn
 
     assert isinstance(fsn, fsnative)
 
-    abspath = os.path.abspath(
-        fsn.replace(sep, fsnative()).replace(altsep or sep, fsnative(u" ")))
-    if os.path.isabs(abspath):
-        assert uri2fsn(fsn2uri(abspath)) == abspath
-
     try:
         # never raises ValueError/TypError
-        with open(pathlike):
+        with open(fsn):
             pass
     except EnvironmentError:
         pass
 
     fsn2text(fsn).encode("utf-8")
+
+    abspath = os.path.abspath(fsn)
+    if os.path.isabs(abspath):
+        assert uri2fsn(fsn2uri(abspath)) == abspath
 
     try:
         t = fsn2text(fsn, strict=True)
