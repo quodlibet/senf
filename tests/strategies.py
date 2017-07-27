@@ -57,10 +57,14 @@ def fspaths(draw, pathname_only=False, allow_pathlike=True):
         else:
             unichr_ = unichr
 
-        surrogate = integers(
-            min_value=0xD800, max_value=0xDFFF).map(lambda i: unichr_(i))
-        one_char = sampled_from(draw(characters(blacklist_characters=u"\x00")))
-        any_char = sampled_from([draw(one_char), draw(surrogate)])
+        hsurrogate = integers(
+            min_value=0xD800, max_value=0xDBFF).map(lambda i: unichr_(i))
+        lsurrogate = integers(
+            min_value=0xDC00, max_value=0xDFFF).map(lambda i: unichr_(i))
+        one_char = integers(
+            min_value=1, max_value=sys.maxunicode).map(lambda i: unichr_(i))
+        any_char = sampled_from([
+            draw(one_char), draw(hsurrogate), draw(lsurrogate)])
         any_text = lists(any_char).map(lambda l: u"".join(l))
 
         windows_path_text = any_text
