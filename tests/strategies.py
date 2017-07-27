@@ -40,8 +40,6 @@ class _PathLike(object):
 def _norm_path(p):
     """Takes a text type and merges surrogate pairs"""
 
-    if os.name != "nt":
-        return p
     if sys.version_info[0] == 2:
         return p.encode("utf-8").decode("utf-8")
 
