@@ -42,7 +42,7 @@ def test_anything(pathlike):
     assert isinstance(fsn, fsnative)
 
     abspath = os.path.abspath(
-        fsn.replace(sep, fsnative()).replace(altsep or sep, fsnative()))
+        fsn.replace(sep, fsnative()).replace(altsep or sep, fsnative(u" ")))
     if os.path.isabs(abspath):
         assert uri2fsn(fsn2uri(abspath)) == abspath
 
