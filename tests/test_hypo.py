@@ -25,7 +25,7 @@ import os
 from hypothesis import given, strategies
 
 from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes, print_, \
-    path2fsn, fsn2uri, uri2fsn, sep, altsep
+    path2fsn, fsn2uri, uri2fsn
 from senf._compat import text_type, StringIO
 
 from tests.strategies import fspaths

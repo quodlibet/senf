@@ -56,11 +56,19 @@ def fspaths(draw, pathname_only=False, allow_pathlike=True):
             unichr_ = chr
         else:
             unichr_ = unichr
+
+        def normalize(t):
+            if sys.version_info[0] == 3:
+                errors = "surrogatepass"
+            else:
+                errors = "strict"
+            return t.encode("utf-16", errors).decode("utf-16", errors)
+
         surrogate = integers(
             min_value=0xD800, max_value=0xDFFF).map(lambda i: unichr_(i))
         one_char = sampled_from(draw(characters(blacklist_characters=u"\x00")))
         any_char = sampled_from([draw(one_char), draw(surrogate)])
-        any_text = lists(any_char).map(lambda l: u"".join(l))
+        any_text = lists(any_char).map(lambda l: normalize(u"".join(l)))
 
         windows_path_text = any_text
         s.append(windows_path_text)
