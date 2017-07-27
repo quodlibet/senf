@@ -75,6 +75,7 @@ install:
   - if [ "$TYPE" == "osx" ] || [ "$TYPE" == "linux" ]; then python -m pip install pytest hypothesis; fi
 
 script:
+  - if [ "$TYPE" == "linux" ]; then env; fi
   - if [ "$TYPE" == "linux" ]; then python -c "import sys; print(sys.getfilesystemencoding())"; fi
   - if [ "$TYPE" == "linux" ]; then eval python $PYARGS -m pytest tests; fi
   - if [ "$TYPE" == "linux" ]; then LC_CTYPE=C python -c "import sys; print(sys.getfilesystemencoding())"; fi
