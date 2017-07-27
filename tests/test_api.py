@@ -34,7 +34,7 @@ from senf import fsnative, sep, pathsep, curdir, pardir, \
     altsep, extsep, devnull, defpath, argv, getcwd, environ, getenv, \
     unsetenv, putenv, uri2fsn, fsn2uri, path2fsn, mkstemp, mkdtemp, \
     fsn2text, fsn2bytes, bytes2fsn, print_, input_, \
-    expanduser, text2fsn, expandvars
+    expanduser, text2fsn, expandvars, supports_ansi_escape_codes
 from senf._compat import iteritems, PY3, PY2, BytesIO, StringIO, text_type, \
     TextIO
 from senf._environ import set_windows_env_var, get_windows_env_var, \
@@ -1084,3 +1084,7 @@ def test_python_handling_broken_utf16():
 def test_fsn2norm():
     if os.name == "nt":
         assert _fsn2norm(u"\uD800\uDC01") == _fsn2norm(u"\U00010001")
+
+
+def test_supports_ansi_escape_codes():
+    supports_ansi_escape_codes(sys.stdout.fileno())

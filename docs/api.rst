@@ -53,6 +53,14 @@ default arguments) or Unicode support for Windows is added (sys.argv)
 :func:`mkdtemp`         :func:`tempfile.mkdtemp` replacement
 ======================= =======================================================
 
+Misc Functions
+--------------
+
+================================== ============================================
+:func:`supports_ansi_escape_codes` if the output file supports ANSI codes
+================================== ============================================
+
+
 Package Related
 ---------------
 
@@ -129,6 +137,8 @@ Package Related
 .. autofunction:: mkstemp
 
 .. autofunction:: mkdtemp
+
+.. autofunction:: supports_ansi_escape_codes
 
 
 Documentation Types
