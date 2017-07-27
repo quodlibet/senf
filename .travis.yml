@@ -23,6 +23,11 @@ matrix:
     - os: linux
       dist: trusty
       language: python
+      python: "3.6"
+      env: TYPE="linux" PYVER="3.6" PYARGS="-R -bb"
+    - os: linux
+      dist: trusty
+      language: python
       python: "nightly"
       env: TYPE="linux" PYVER="nightly" PYARGS="-R -bb"
     - os: linux
