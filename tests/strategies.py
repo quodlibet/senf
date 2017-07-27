@@ -22,6 +22,7 @@
 
 import os
 import sys
+import ctypes
 
 from hypothesis.strategies import composite, sampled_from, characters, lists, \
     integers, binary
@@ -34,6 +35,23 @@ class _PathLike(object):
 
     def __fspath__(self):
         return self._value
+
+
+def _norm_path(p):
+    """Takes a text type and merges surrogate pairs"""
+
+    if os.name != "nt":
+        return p
+    if sys.version_info[0] == 2:
+        return p.encode("utf-8").decode("utf-8")
+
+    data = p.encode("utf-16-le", "surrogatepass")
+    try:
+        return data.decode("utf-16-le", "surrogatepass")
+    except UnicodeDecodeError:
+        # in python3.3 utf-16 with "surrogatepass" is broken
+        buffer_ = ctypes.create_string_buffer(data + b"\x00\x00")
+        return ctypes.wstring_at(buffer_, len(data) // 2)
 
 
 @composite
@@ -57,18 +75,11 @@ def fspaths(draw, pathname_only=False, allow_pathlike=True):
         else:
             unichr_ = unichr
 
-        def normalize(t):
-            if sys.version_info[0] == 3:
-                errors = "surrogatepass"
-            else:
-                errors = "strict"
-            return t.encode("utf-16", errors).decode("utf-16", errors)
-
         surrogate = integers(
             min_value=0xD800, max_value=0xDFFF).map(lambda i: unichr_(i))
         one_char = sampled_from(draw(characters(blacklist_characters=u"\x00")))
         any_char = sampled_from([draw(one_char), draw(surrogate)])
-        any_text = lists(any_char).map(lambda l: normalize(u"".join(l)))
+        any_text = lists(any_char).map(lambda l: _norm_path(u"".join(l)))
 
         windows_path_text = any_text
         s.append(windows_path_text)

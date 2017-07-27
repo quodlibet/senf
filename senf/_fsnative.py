@@ -146,6 +146,30 @@ else:
             return _winpath2bytes_py3(text, codec)
 
 
+def _fsn2norm(path):
+    """Normalizes a path.
+
+    When concatenating fsnative the result might be different than
+    concatenating the serialized form and then deserializing it.
+
+    This returns the normalized form.
+
+    Args:
+        path (fsnative)
+    Returns:
+        fsnative
+    """
+
+    native = _fsn2native(path)
+
+    if is_win:
+        return _bytes2winpath(
+            native.encode("utf-16-le", _surrogatepass),
+            "utf-16-le")
+    else:
+        return path
+
+
 def _fsn2legacy(path):
     """Takes a fsnative path and returns a path that can be put into os.environ
     or sys.argv. Might result in a mangled path on Python2 + Windows.
@@ -269,7 +293,7 @@ def _typecheck_fsnative(path):
         if u"\x00" in path:
             return False
 
-        if is_unix and not _is_unicode_encoding:
+        if is_unix:
             try:
                 path.encode(_encoding, "surrogateescape")
             except UnicodeEncodeError:
@@ -304,7 +328,6 @@ def _fsn2native(path):
             try:
                 path = path.encode(_encoding, "surrogateescape")
             except UnicodeEncodeError:
-                assert not _is_unicode_encoding
                 # This look more like ValueError, but raising only one error
                 # makes things simpler... also one could say str + surrogates
                 # is its own type
@@ -338,7 +361,6 @@ def _get_encoding():
 
 
 _encoding = _get_encoding()
-_is_unicode_encoding = _encoding.startswith("utf")
 
 
 def path2fsn(path):

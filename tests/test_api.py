@@ -41,7 +41,8 @@ from senf._environ import set_windows_env_var, get_windows_env_var, \
     del_windows_env_var
 from senf._winansi import ansi_parse, ansi_split
 from senf._stdlib import _get_userdir
-from senf._fsnative import _encoding, is_unix, _surrogatepass, _get_encoding
+from senf._fsnative import _encoding, is_unix, _surrogatepass, _get_encoding, \
+    _fsn2norm
 from senf._print import _encode_codepage, _decode_codepage
 from senf import _winapi as winapi
 
@@ -481,6 +482,10 @@ def test_fsnative():
     assert isinstance(fsnative(u"\x00"), fsnative)
     for inst in iternotfsn():
         assert not isinstance(inst, fsnative)
+
+    if isinstance(fsnative(u"\uD800"), text_type) and \
+            fsnative(u"\uD800") != u"\uD800":
+        assert not isinstance(u"\uD800", fsnative)
 
 
 def test_path2fsn():
@@ -1074,3 +1079,8 @@ def test_python_handling_broken_utf16():
                 assert h.read() == b"content"
     finally:
         shutil.rmtree(tmp)
+
+
+def test_fsn2norm():
+    if os.name == "nt":
+        assert _fsn2norm(u"\uD800\uDC01") == _fsn2norm(u"\U00010001")

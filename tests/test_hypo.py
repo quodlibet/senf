@@ -22,13 +22,18 @@
 
 import os
 
-from hypothesis import given, strategies
+from hypothesis import given, strategies, find
 
 from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes, print_, \
     path2fsn, fsn2uri, uri2fsn
 from senf._compat import text_type, StringIO
 
 from tests.strategies import fspaths
+
+
+def test_fspaths():
+    find(fspaths(), lambda p: isinstance(p, bytes))
+    find(fspaths(), lambda p: isinstance(p, text_type))
 
 
 @given(fspaths(pathname_only=True))
