@@ -26,8 +26,8 @@ from hypothesis import given, strategies, find
 
 from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes, print_, \
     path2fsn, fsn2uri, uri2fsn
-from senf._fsnative import _fsn2norm
-from senf._compat import text_type, StringIO
+from senf._fsnative import fsn2norm
+from senf._compat import text_type, StringIO, PY3
 
 from tests.strategies import fspaths
 
@@ -45,10 +45,37 @@ def test_any_pathnames(path):
         assert uri2fsn(fsn2uri(abspath)) == abspath
 
 
+@given(fspaths(allow_pathlike=False))
+def test_any_normalize(path):
+    fsn = path2fsn(path)
+
+    if os.name == "nt":
+        data = fsn2bytes(fsn, "utf-16-le")
+        parts = []
+        for i in range(0, len(data), 2):
+            parts.append(bytes2fsn(data[i:i+2], "utf-16-le"))
+    else:
+        data = fsn2bytes(fsn, None)
+        if PY3:
+            parts = [bytes([c]) for c in data]
+        else:
+            parts = list(data)
+        parts = [bytes2fsn(p, None) for p in parts]
+
+    assert fsn2norm(fsnative().join(parts)) == fsn2norm(fsn)
+
+    assert path2fsn(path) == fsn2norm(fsn)
+
+    assert bytes2fsn(fsn2bytes(fsn, "utf-8"), "utf-8") == fsn2norm(fsn)
+
+    if isinstance(path, text_type):
+        assert text2fsn(path) == fsn2norm(text2fsn(path))
+
+
 @given(fspaths())
 def test_any_filenames(path):
     if isinstance(path, fsnative):
-        assert path2fsn(path) == path
+        assert path2fsn(path) == fsn2norm(path)
 
     fsn = path2fsn(path)
     assert path2fsn(fsn) == fsn
@@ -69,7 +96,7 @@ def test_any_filenames(path):
     except ValueError:
         pass
     else:
-        assert _fsn2norm(text2fsn(t)) == _fsn2norm(fsn)
+        assert fsn2norm(text2fsn(t)) == fsn2norm(fsn)
 
     data = fsn2bytes(fsn, "utf-8")
     assert fsn2bytes(bytes2fsn(data, "utf-8"), "utf-8") == data

@@ -2,6 +2,7 @@
 ------------------
 
 * New :func:`supports_ansi_escape_codes`
+* New :func:`fsn2norm` (+ all API now returns normalized fsnative)
 * :func:`fsn2uri`: various fixes
 
 

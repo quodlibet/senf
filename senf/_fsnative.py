@@ -92,7 +92,7 @@ def _codec_can_decode_with_surrogatepass(codec, _cache={}):
         return _cache[codec]
 
 
-def _bytes2winpath(data, codec):
+def _decode_surrogatepass(data, codec):
     """Like data.decode(codec, 'surrogatepass') but makes utf-16-le/be work
     on Python < 3.4 + Windows
 
@@ -127,7 +127,7 @@ def _winpath2bytes_py3(text, codec):
     if _normalize_codec(codec).startswith("utf-16"):
         # fast path, utf-16 merges anyway
         return text.encode(codec, _surrogatepass)
-    return _bytes2winpath(
+    return _decode_surrogatepass(
         text.encode("utf-16-le", _surrogatepass),
         "utf-16-le").encode(codec, _surrogatepass)
 
@@ -146,26 +146,37 @@ else:
             return _winpath2bytes_py3(text, codec)
 
 
-def _fsn2norm(path):
-    """Normalizes a path.
-
-    When concatenating fsnative the result might be different than
-    concatenating the serialized form and then deserializing it.
-
-    This returns the normalized form.
-
+def fsn2norm(path):
+    """
     Args:
-        path (fsnative)
+        path (fsnative): The path to normalize
     Returns:
-        fsnative
+        `fsnative`
+
+    Normalizes an fsnative path.
+
+    The same underlying path can have multiple representations as fsnative
+    (due to surrogate pairs and variable length encodings). When concatenating
+    fsnative the result might be different than concatenating the serialized
+    form and then deserializing it.
+
+    This returns the normalized form i.e. the form which os.listdir() would
+    return. This is useful when you alter fsnative but require that the same
+    underlying path always maps to the same fsnative value.
+
+    All functions like :func:`bytes2fsn`, :func:`fsnative`, :func:`text2fsn`
+    and :func:`path2fsn` always return a normalized path, independent of their
+    input.
     """
 
     native = _fsn2native(path)
 
     if is_win:
-        return _bytes2winpath(
+        return _decode_surrogatepass(
             native.encode("utf-16-le", _surrogatepass),
             "utf-16-le")
+    elif PY3:
+        return bytes2fsn(native, None)
     else:
         return path
 
@@ -212,6 +223,7 @@ def _fsnative(text):
     else:
         if u"\x00" in text:
             text = text.replace(u"\x00", u"\uFFFD")
+        text = fsn2norm(text)
         return text
 
 
@@ -401,6 +413,7 @@ def path2fsn(path):
         else:
             if u"\x00" in path:
                 raise ValueError("embedded null")
+            path = fsn2norm(path)
 
     if not isinstance(path, fsnative_type):
         raise TypeError("path needs to be %s", fsnative_type.__name__)
@@ -521,7 +534,7 @@ def bytes2fsn(data, encoding):
         if encoding is None:
             raise ValueError("invalid encoding %r" % encoding)
         try:
-            path = _bytes2winpath(data, encoding)
+            path = _decode_surrogatepass(data, encoding)
         except LookupError:
             raise ValueError("invalid encoding %r" % encoding)
         if u"\x00" in path:

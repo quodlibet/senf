@@ -34,15 +34,14 @@ from senf import fsnative, sep, pathsep, curdir, pardir, \
     altsep, extsep, devnull, defpath, argv, getcwd, environ, getenv, \
     unsetenv, putenv, uri2fsn, fsn2uri, path2fsn, mkstemp, mkdtemp, \
     fsn2text, fsn2bytes, bytes2fsn, print_, input_, \
-    expanduser, text2fsn, expandvars, supports_ansi_escape_codes
+    expanduser, text2fsn, expandvars, supports_ansi_escape_codes, fsn2norm
 from senf._compat import iteritems, PY3, PY2, BytesIO, StringIO, text_type, \
     TextIO
 from senf._environ import set_windows_env_var, get_windows_env_var, \
     del_windows_env_var
 from senf._winansi import ansi_parse, ansi_split
 from senf._stdlib import _get_userdir
-from senf._fsnative import _encoding, is_unix, _surrogatepass, _get_encoding, \
-    _fsn2norm
+from senf._fsnative import _encoding, is_unix, _surrogatepass, _get_encoding
 from senf._print import _encode_codepage, _decode_codepage
 from senf import _winapi as winapi
 
@@ -486,6 +485,12 @@ def test_fsnative():
     if isinstance(fsnative(u"\uD800"), text_type) and \
             fsnative(u"\uD800") != u"\uD800":
         assert not isinstance(u"\uD800", fsnative)
+
+    fsn = fsnative(u'\udcc2\udc80')
+    assert fsn == fsn2norm(fsn)
+
+    fsn = fsnative(u"\uD800\uDC01")
+    assert fsn == fsn2norm(fsn)
 
 
 def test_path2fsn():
@@ -1083,7 +1088,14 @@ def test_python_handling_broken_utf16():
 
 def test_fsn2norm():
     if os.name == "nt":
-        assert _fsn2norm(u"\uD800\uDC01") == _fsn2norm(u"\U00010001")
+        assert fsn2norm(u"\uD800\uDC01") == fsn2norm(u"\U00010001")
+
+    if PY3 and is_unix and isunicodeencoding():
+        assert fsn2norm(u'\udcc2\udc80') == fsn2norm(u'\x80')
+
+    for path in iternotfsn():
+        with pytest.raises(TypeError):
+            fsn2norm(path)
 
 
 def test_supports_ansi_escape_codes():
