@@ -23,8 +23,8 @@
 import os
 import sys
 
-from hypothesis.strategies import composite, sampled_from, characters, lists, \
-    integers, binary
+from hypothesis.strategies import composite, sampled_from, lists, \
+    integers, binary, randoms
 
 
 class _PathLike(object):
@@ -37,7 +37,7 @@ class _PathLike(object):
 
 
 @composite
-def fspaths(draw, pathname_only=False, allow_pathlike=True):
+def fspaths(draw, allow_pathlike=True):
     """A hypothesis strategy which gives valid path values.
 
     Valid path values are everything which when passed to open() will not raise
@@ -45,8 +45,8 @@ def fspaths(draw, pathname_only=False, allow_pathlike=True):
     operating system restrictions).
 
     Args:
-        pathname_only: if the path should not contain any separators
-        allow_pathlike: If the result can be a pathlike (__fspath__ proto)
+        allow_pathlike (bool):
+            If the result can be a pathlike (see :class:`os.PathLike`)
     """
 
     s = []
@@ -57,14 +57,14 @@ def fspaths(draw, pathname_only=False, allow_pathlike=True):
         else:
             unichr_ = unichr
 
-        hsurrogate = integers(
+        hight_surrogate = integers(
             min_value=0xD800, max_value=0xDBFF).map(lambda i: unichr_(i))
-        lsurrogate = integers(
+        low_surrogate = integers(
             min_value=0xDC00, max_value=0xDFFF).map(lambda i: unichr_(i))
-        one_char = integers(
+        uni_char = integers(
             min_value=1, max_value=sys.maxunicode).map(lambda i: unichr_(i))
         any_char = sampled_from([
-            draw(one_char), draw(hsurrogate), draw(lsurrogate)])
+            draw(uni_char), draw(hight_surrogate), draw(low_surrogate)])
         any_text = lists(any_char).map(lambda l: u"".join(l))
 
         windows_path_text = any_text
@@ -91,15 +91,17 @@ def fspaths(draw, pathname_only=False, allow_pathlike=True):
             unix_path_text = unix_path_bytes.map(
                 lambda b: b.decode(
                     sys.getfilesystemencoding(), "ignore"))
-        s.append(unix_path_text)
+
+        r = draw(randoms())
+
+        def shuffle_text(t):
+            l = list(t)
+            r.shuffle(l)
+            return u"".join(l)
+
+        s.append(unix_path_text.map(shuffle_text))
 
     result = draw(sampled_from(list(map(draw, s))))
-
-    if pathname_only:
-        if isinstance(result, bytes):
-            result = result.replace(b"/", b" ").replace(b"\\", b" ")
-        else:
-            result = result.replace(u"/", u" ").replace(u"\\", u" ")
 
     if allow_pathlike and hasattr(os, "fspath"):
         result = draw(sampled_from([result, _PathLike(result)]))

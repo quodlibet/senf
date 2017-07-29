@@ -22,22 +22,18 @@
 
 import os
 
-from hypothesis import given, strategies, find
+from hypothesis import given, strategies, settings
 
 from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes, print_, \
     path2fsn, fsn2uri, uri2fsn
 from senf._fsnative import fsn2norm
 from senf._compat import text_type, StringIO, PY3
 
-from tests.strategies import fspaths
+from tests.hypothesis_fspaths import fspaths
 
 
-def test_fspaths():
-    find(fspaths(), lambda p: isinstance(p, bytes))
-    find(fspaths(), lambda p: isinstance(p, text_type))
-
-
-@given(fspaths(pathname_only=True))
+@given(fspaths().map(os.path.basename))
+@settings(max_examples=1000)
 def test_any_pathnames(path):
     fsn = path2fsn(path)
     abspath = os.path.abspath(fsn)
@@ -46,23 +42,9 @@ def test_any_pathnames(path):
 
 
 @given(fspaths(allow_pathlike=False))
+@settings(max_examples=1000)
 def test_any_normalize(path):
     fsn = path2fsn(path)
-
-    if os.name == "nt":
-        data = fsn2bytes(fsn, "utf-16-le")
-        parts = []
-        for i in range(0, len(data), 2):
-            parts.append(bytes2fsn(data[i:i+2], "utf-16-le"))
-    else:
-        data = fsn2bytes(fsn, None)
-        if PY3:
-            parts = [bytes([c]) for c in data]
-        else:
-            parts = list(data)
-        parts = [bytes2fsn(p, None) for p in parts]
-
-    assert fsn2norm(fsnative().join(parts)) == fsn2norm(fsn)
 
     assert path2fsn(path) == fsn2norm(fsn)
 
@@ -73,6 +55,7 @@ def test_any_normalize(path):
 
 
 @given(fspaths())
+@settings(max_examples=1000)
 def test_any_filenames(path):
     if isinstance(path, fsnative):
         assert path2fsn(path) == fsn2norm(path)
