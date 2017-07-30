@@ -27,7 +27,7 @@ from hypothesis import given, strategies, settings
 from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes, print_, \
     path2fsn, fsn2uri, uri2fsn
 from senf._fsnative import fsn2norm
-from senf._compat import text_type, StringIO, PY3
+from senf._compat import text_type, StringIO
 
 from tests.hypothesis_fspaths import fspaths
 
