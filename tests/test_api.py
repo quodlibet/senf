@@ -830,13 +830,15 @@ def test_environ_case():
             environ.pop("foo", None)
             environ["FoO"] = "bla"
             assert environ["foo"] == "bla"
-            assert sorted(os.environ.keys()) == sorted(environ.keys())
+            for key in ["foo", "FoO"]:
+                assert os.environ[key] == environ[key]
     else:
         with preserve_environ():
             environ["foo"] = "1"
             environ["FOO"] = "2"
             assert environ["foo"] != environ["FOO"]
-            assert sorted(os.environ.keys()) == sorted(environ.keys())
+            for key in ["foo", "FOO"]:
+                assert os.environ[key] == environ[key]
 
 
 @pytest.mark.skipif(os.name != "nt", reason="win only")
