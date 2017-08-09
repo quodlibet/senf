@@ -26,4 +26,7 @@ For more info see https://senf.readthedocs.io/
     :target: https://travis-ci.org/quodlibet/senf
 
 .. image:: https://ci.appveyor.com/api/projects/status/71gxf8nmfsm7bc86/branch/master?svg=true
-    :target: https://ci.appveyor.com/project/quodlibet/senf/branch/master
+    :target: https://ci.appveyor.com/project/lazka/senf/branch/master
+
+.. image:: https://codecov.io/gh/quodlibet/senf/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/quodlibet/senf
