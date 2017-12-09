@@ -12,11 +12,11 @@ environment:
     - PYTHON: "C:\\Python36-x64"
 
 install:
-  - %PYTHON%\\python.exe -m pip install pytest\<3.3.0 hypothesis coverage codecov
+  - '%PYTHON%\\python.exe -m pip install "pytest<3.3.0" hypothesis coverage codecov'
 
 test_script:
-  - %PYTHON%\\python.exe -m coverage run --branch setup.py test
-  - %PYTHON%\\python.exe -m coverage xml -i
-  - %PYTHON%\\python.exe -m codecov --file coverage.xml
+  - "%PYTHON%\\python.exe -m coverage run --branch setup.py test'
+  - "%PYTHON%\\python.exe -m coverage xml -i"
+  - "%PYTHON%\\python.exe -m codecov --file coverage.xml"
 
 build: off
