@@ -35,6 +35,11 @@ matrix:
       language: python
       python: "pypy"
       env: PYARGS="-R"
+    - os: linux
+      dist: trusty
+      language: python
+      python: "pypy3"
+      env: PYARGS="-R -bb"
     - os: osx
       osx_image: xcode6.4
       language: generic
