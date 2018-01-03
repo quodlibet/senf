@@ -1,3 +1,10 @@
+1.3.3 - 2018-01-03
+------------------
+
+* Restore WinXP support
+* Fix some warnings with Python 3.6
+
+
 1.3.2 - 2017-11-05
 ------------------
 
