@@ -4,66 +4,66 @@ matrix:
       dist: trusty
       language: python
       python: "2.7"
-      env: TYPE="linux" PYVER="2.7" PYARGS="-R"
+      env: PYARGS="-R"
     - os: linux
       dist: trusty
       language: python
       python: "3.3"
-      env: TYPE="linux" PYVER="3.3" PYARGS="-R -bb"
+      env: PYARGS="-R -bb"
     - os: linux
       dist: trusty
       language: python
       python: "3.4"
-      env: TYPE="linux" PYVER="3.4" PYARGS="-R -bb"
+      env: PYARGS="-R -bb"
     - os: linux
       dist: trusty
       language: python
       python: "3.5"
-      env: TYPE="linux" PYVER="3.5" PYARGS="-R -bb"
+      env: PYARGS="-R -bb"
     - os: linux
       dist: trusty
       language: python
       python: "3.6"
-      env: TYPE="linux" PYVER="3.6" PYARGS="-R -bb"
+      env: PYARGS="-R -bb"
     - os: linux
       dist: trusty
       language: python
       python: "nightly"
-      env: TYPE="linux" PYVER="nightly" PYARGS="-R -bb"
+      env: PYARGS="-R -bb"
     - os: linux
       dist: trusty
       language: python
       python: "pypy"
-      env: TYPE="linux" PYVER="pypy" PYARGS="-R"
+      env: PYARGS="-R"
     - os: osx
       osx_image: xcode6.4
       language: generic
-      env: TYPE="osx" PYVER="3" PYARGS="-R -bb"
+      env: PYVER="3" PYARGS="-R -bb"
     - os: osx
       osx_image: xcode6.4
       language: generic
-      env: TYPE="osx" PYVER="2" PYARGS="-R"
+      env: PYVER="2" PYARGS="-R"
 
 install:
-  - if [ "$TYPE" == "osx" ]; then brew update; fi
-  - if [ "$TYPE" == "osx" ] && [ "$PYVER" == "3" ]; then brew install python3; fi
-  - if [ "$TYPE" == "osx" ] && [ "$PYVER" == "3" ]; then python3 -m pip install virtualenv; fi
-  - if [ "$TYPE" == "osx" ] && [ "$PYVER" == "3" ]; then virtualenv venv -p python3; fi
-  - if [ "$TYPE" == "osx" ] && [ "$PYVER" == "2" ]; then brew install python; fi
-  - if [ "$TYPE" == "osx" ] && [ "$PYVER" == "2" ]; then python2 -m pip install virtualenv; fi
-  - if [ "$TYPE" == "osx" ] && [ "$PYVER" == "2" ]; then virtualenv venv -p python2; fi
-  - if [ "$TYPE" == "osx" ]; then source venv/bin/activate; fi
-  - if [ "$TYPE" == "osx" ] || [ "$TYPE" == "linux" ]; then python -m pip install "pytest<3.3.0" hypothesis flake8 coverage codecov; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$PYVER" == "3" ]; then brew install python3; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$PYVER" == "3" ]; then python3 -m pip install virtualenv; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$PYVER" == "3" ]; then virtualenv venv -p python3; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$PYVER" == "2" ]; then brew install python; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$PYVER" == "2" ]; then python2 -m pip install virtualenv; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$PYVER" == "2" ]; then virtualenv venv -p python2; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then source venv/bin/activate; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ] || [ "$TRAVIS_OS_NAME" == "linux" ]; then python -m pip install "pytest<3.3.0" hypothesis flake8 coverage codecov; fi
 
 script:
-  - if [ "$TYPE" == "linux" ]; then export LANG=C; export LC_ALL=C; fi
-  - if [ "$TYPE" == "linux" ]; then python -c "import sys; print(sys.getfilesystemencoding())"; fi
-  - if [ "$TYPE" == "linux" ]; then eval python $PYARGS -m coverage run --branch setup.py test; fi
-  - if [ "$TYPE" == "linux" ]; then eval python -m codecov; fi
-  - if [ "$TYPE" == "linux" ]; then export LANG=en_US.UTF-8; export LC_ALL=en_US.UTF-8; fi
-  - if [ "$TYPE" == "linux" ]; then python -c "import sys; print(sys.getfilesystemencoding())"; fi
-  - if [ "$TYPE" == "linux" ]; then eval python $PYARGS -m coverage run --branch setup.py test; fi
-  - if [ "$TYPE" == "linux" ]; then eval python -m codecov; fi
-  - if [ "$TYPE" == "linux" ]; then python -m flake8; fi
-  - if [ "$TYPE" == "osx" ]; then eval python $PYARGS -m coverage run --branch setup.py test; fi
-  - if [ "$TYPE" == "osx" ]; then eval python -m codecov; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then export LANG=C; export LC_ALL=C; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then python -c "import sys; print(sys.getfilesystemencoding())"; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then eval python $PYARGS -m coverage run --branch setup.py test; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then eval python -m codecov; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then export LANG=en_US.UTF-8; export LC_ALL=en_US.UTF-8; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then python -c "import sys; print(sys.getfilesystemencoding())"; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then eval python $PYARGS -m coverage run --branch setup.py test; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then eval python -m codecov; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then python -m flake8; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then eval python $PYARGS -m coverage run --branch setup.py test; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then eval python -m codecov; fi
