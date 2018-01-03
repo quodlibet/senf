@@ -14,14 +14,6 @@ patch anything in the stdlib.
 
 For more info see https://senf.readthedocs.io/
 
-.. image:: https://github.com/quodlibet/senf/raw/master/docs/images/ls.png
-    :width: 699
-    :height: 470
-
-.. image:: https://github.com/quodlibet/senf/raw/master/docs/images/ansi.png
-    :width: 699
-    :height: 470
-
 .. image:: https://travis-ci.org/quodlibet/senf.svg?branch=master
     :target: https://travis-ci.org/quodlibet/senf
 

@@ -9,6 +9,7 @@
     changelog
     tutorial
     api
+    examples
     faq
 
 .. title:: Overview
