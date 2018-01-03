@@ -20,7 +20,9 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-from senf import print_
+import sys
+
+from senf import print_, supports_ansi_escape_codes
 
 
 class ANSI(object):
@@ -104,16 +106,26 @@ def main():
         BG.append(getattr(ANSI, "BG_" + n.upper()))
         BG.append(getattr(ANSI, "BG_LIGHT_" + n.upper()))
 
+    def print_ansi(*args, **kwargs):
+        if supports_ansi_escape_codes(sys.stdout.fileno()):
+            print_(*args, **kwargs)
+        else:
+            print_(**kwargs)
+
     i = 0x180
     for background in BG:
-        print_(background, end="")
+        print_ansi(background, end="")
         for foreground in FG:
-            print_(foreground, end="")
-            print_(ANSI.SET_UNDERLINE + unichr_(i) +
-                   ANSI.RESET_UNDERLINE + " ", end="")
-            print_(ANSI.SET_BOLD + unichr_(i) + ANSI.RESET_BOLD + " ", end="")
+            print_ansi(foreground, end="")
+            print_ansi(ANSI.SET_UNDERLINE, end="")
+            print_(unichr_(i), end="")
+            print_ansi(ANSI.RESET_UNDERLINE, end=" ")
+            print_ansi(ANSI.SET_BOLD, end="")
+            print_(unichr_(i), end="")
+            print_ansi(ANSI.RESET_BOLD, end=" ")
+            print_ansi(ANSI.FG_DEFAULT, end="")
             i += 1
-        print_()
+        print_ansi(ANSI.BG_DEFAULT)
     print_()
 
 
