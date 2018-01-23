@@ -604,6 +604,8 @@ def test_fsn2bytes():
         with pytest.raises(TypeError):
             fsn2bytes(path)
 
+    assert fsn2bytes(fsnative(u"foo"), "utf-8") == fsn2bytes(fsnative(u"foo"))
+
 
 @pytest.mark.skipif(os.name != "nt", reason="win only")
 def test_fsn2bytes_surrogate_pairs():
@@ -736,6 +738,8 @@ def test_bytes2fsn():
             bytes2fsn(b"data", None)
         with pytest.raises(TypeError):
             bytes2fsn(b"data", object())
+
+    assert bytes2fsn(b"foo", "utf-8") == bytes2fsn(b"foo")
 
 
 def test_constants():

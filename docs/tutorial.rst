@@ -12,7 +12,7 @@ There are various ways to create fsnative instances:
     >>> senf.fsnative(u"foo")
     'foo'
 
-    # create form some serialized format
+    # create from some serialized format
     >>> senf.bytes2fsn(b"foo", "utf-8")
     'foo'
 
