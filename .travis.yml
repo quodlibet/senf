@@ -58,6 +58,7 @@ install:
   - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$PYVER" == "2" ]; then python2 -m pip install virtualenv; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$PYVER" == "2" ]; then virtualenv venv -p python2; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then source venv/bin/activate; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ] || [ "$TRAVIS_OS_NAME" == "linux" ]; then python -m pip install --upgrade setuptools; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ] || [ "$TRAVIS_OS_NAME" == "linux" ]; then python -m pip install "pytest<3.3.0" hypothesis flake8 coverage codecov; fi
 
 script:
