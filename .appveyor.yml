@@ -1,19 +1,17 @@
 environment:
   matrix:
     - PYTHON: "C:\\Python27"
-    - PYTHON: "C:\\Python33"
     - PYTHON: "C:\\Python34"
     - PYTHON: "C:\\Python35"
     - PYTHON: "C:\\Python36"
     - PYTHON: "C:\\Python27-x64"
-    - PYTHON: "C:\\Python33-x64"
     - PYTHON: "C:\\Python34-x64"
     - PYTHON: "C:\\Python35-x64"
     - PYTHON: "C:\\Python36-x64"
 
 install:
   - '%PYTHON%\\python.exe -m pip install --upgrade setuptools'
-  - '%PYTHON%\\python.exe -m pip install "pytest<3.3.0" hypothesis coverage codecov'
+  - '%PYTHON%\\python.exe -m pip install pytest hypothesis coverage codecov'
 
 test_script:
   - '%PYTHON%\\python.exe -m coverage run --branch setup.py test'
