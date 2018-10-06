@@ -92,6 +92,7 @@ def test_any_filenames(path):
 
 @given(strategies.lists(strategies.text()), strategies.text(),
        strategies.text(), strategies.booleans())
+@settings(suppress_health_check=HealthCheck.all())
 def test_print(objects, sep, end, flush):
     h = StringIO()
     print_(*objects, sep=sep, end=end, flush=flush, file=h)
