@@ -22,7 +22,7 @@
 
 import os
 
-from hypothesis import given, strategies, settings
+from hypothesis import given, strategies, settings, HealthCheck
 
 from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes, print_, \
     path2fsn, fsn2uri, uri2fsn
@@ -100,6 +100,7 @@ def test_print(objects, sep, end, flush):
 
 @given(strategies.lists(strategies.binary()), strategies.binary(),
        strategies.binary(), strategies.booleans())
+@settings(suppress_health_check=HealthCheck.all())
 def test_print_bytes(objects, sep, end, flush):
     h = StringIO()
     print_(*objects, sep=sep, end=end, flush=flush, file=h)
