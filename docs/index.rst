@@ -40,7 +40,7 @@ Why?
 ----
 
 OS strings are used in many different places across the Python stdlib. They
-are used for filesystem paths, for environemnt variables (`os.environ`), for
+are used for filesystem paths, for environment variables (`os.environ`), for
 program arguments (`sys.argv` and `subprocess`), for printing to the console
 (`sys.stdout`, `sys.stderr`) and more.
 
