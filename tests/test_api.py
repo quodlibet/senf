@@ -48,12 +48,12 @@ from senf import _winapi as winapi
 
 is_wine = "WINEDEBUG" in os.environ
 
-linesepb = os.linesep
-linesepu = os.linesep
 if PY3:
-    linesepb = linesepb.encode("ascii")
-if PY2:
-    linesepu = linesepu.decode("ascii")
+    linesepb = os.linesep.encode("ascii")
+    linesepu = os.linesep
+else:
+    linesepb = os.linesep
+    linesepu = os.linesep.decode("ascii")
 
 
 def notfsnative(text=u""):
@@ -161,7 +161,7 @@ def capture_output(data=None):
 
 def test__get_encoding():
     orig = sys.getfilesystemencoding
-    sys.getfilesystemencoding = lambda: None
+    sys.getfilesystemencoding = lambda: None  # type: ignore
     try:
         codecs.lookup(_get_encoding())
     finally:

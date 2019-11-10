@@ -21,7 +21,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import ctypes
-from ctypes import WinDLL, CDLL, wintypes
+from ctypes import WinDLL, CDLL, wintypes  # type: ignore
 
 
 shell32 = WinDLL("shell32")

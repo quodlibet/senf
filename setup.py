@@ -21,6 +21,8 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+# type: ignore
+
 import os
 import sys
 
@@ -103,6 +105,12 @@ if __name__ == "__main__":
         packages=[
             "senf",
         ],
+        package_data={
+            "senf": [
+                "__init__.pyi",
+                "py.typed",
+            ],
+        },
         classifiers=[
             'Operating System :: OS Independent',
             'Programming Language :: Python :: 2',

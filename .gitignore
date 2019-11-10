@@ -8,3 +8,4 @@ coverage
 .coverage
 build
 .hypothesis
+.mypy_cache
