@@ -36,7 +36,6 @@ is_wine = "WINEDEBUG" in os.environ
 
 
 @given(fspaths().map(os.path.basename))
-@settings(max_examples=1000)
 def test_any_pathnames(path):
     fsn = path2fsn(path)
     abspath = os.path.abspath(fsn)
@@ -47,7 +46,6 @@ def test_any_pathnames(path):
 
 
 @given(fspaths(allow_pathlike=False))
-@settings(max_examples=1000)
 def test_any_normalize(path):
     fsn = path2fsn(path)
 
@@ -60,7 +58,6 @@ def test_any_normalize(path):
 
 
 @given(fspaths())
-@settings(max_examples=1000)
 def test_any_filenames(path):
     if isinstance(path, fsnative):
         assert path2fsn(path) == fsn2norm(path)
