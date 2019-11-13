@@ -33,6 +33,8 @@ from tests.hypothesis_fspaths import fspaths
 
 
 is_wine = "WINEDEBUG" in os.environ
+settings.register_profile("ci", suppress_health_check=HealthCheck.all())
+settings.load_profile("ci")
 
 
 @given(fspaths().map(os.path.basename))
@@ -89,7 +91,6 @@ def test_any_filenames(path):
 
 @given(strategies.lists(strategies.text()), strategies.text(),
        strategies.text(), strategies.booleans())
-@settings(suppress_health_check=HealthCheck.all())
 def test_print(objects, sep, end, flush):
     h = StringIO()
     print_(*objects, sep=sep, end=end, flush=flush, file=h)
@@ -98,7 +99,6 @@ def test_print(objects, sep, end, flush):
 
 @given(strategies.lists(strategies.binary()), strategies.binary(),
        strategies.binary(), strategies.booleans())
-@settings(suppress_health_check=HealthCheck.all())
 def test_print_bytes(objects, sep, end, flush):
     h = StringIO()
     print_(*objects, sep=sep, end=end, flush=flush, file=h)
