@@ -21,13 +21,15 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import os
+import platform
 
+import pytest
 from hypothesis import given, strategies, settings, HealthCheck
 
 from senf import fsnative, text2fsn, fsn2text, bytes2fsn, fsn2bytes, print_, \
     path2fsn, fsn2uri, uri2fsn
 from senf._fsnative import fsn2norm
-from senf._compat import text_type, StringIO
+from senf._compat import text_type, StringIO, PY3
 
 from tests.hypothesis_fspaths import fspaths
 
@@ -122,6 +124,9 @@ def test_text_fsn_roudntrip(text):
     assert isinstance(fsn2text(text2fsn(text)), text_type)
 
 
+# https://bitbucket.org/pypy/pypy/issues/3116
+@pytest.mark.skipif(PY3 and platform.python_implementation() == "PyPy",
+                    reason="broken on pypy3")
 @given(strategies.binary(),
        strategies.sampled_from(("utf-8", "utf-16-le",
                                 "utf-32-le", "latin-1")))
