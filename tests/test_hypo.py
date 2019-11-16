@@ -22,6 +22,7 @@
 
 import os
 import platform
+from typing import Text, List
 
 import pytest
 from hypothesis import given, strategies, settings, HealthCheck
@@ -41,6 +42,8 @@ settings.load_profile("ci")
 
 @given(fspaths().map(os.path.basename))
 def test_any_pathnames(path):
+    # type: (fsnative) -> None
+
     fsn = path2fsn(path)
     abspath = os.path.abspath(fsn)
     if os.path.isabs(abspath):
@@ -51,6 +54,8 @@ def test_any_pathnames(path):
 
 @given(fspaths(allow_pathlike=False))
 def test_any_normalize(path):
+    # type: (fsnative) -> None
+
     fsn = path2fsn(path)
 
     assert path2fsn(path) == fsn2norm(fsn)
@@ -63,6 +68,8 @@ def test_any_normalize(path):
 
 @given(fspaths())
 def test_any_filenames(path):
+    # type: (fsnative) -> None
+
     if isinstance(path, fsnative):
         assert path2fsn(path) == fsn2norm(path)
 
@@ -94,6 +101,8 @@ def test_any_filenames(path):
 @given(strategies.lists(strategies.text()), strategies.text(),
        strategies.text(), strategies.booleans())
 def test_print(objects, sep, end, flush):
+    # type: (List[Text], Text, Text, bool) -> None
+
     h = StringIO()
     print_(*objects, sep=sep, end=end, flush=flush, file=h)
     h.getvalue()
@@ -102,23 +111,31 @@ def test_print(objects, sep, end, flush):
 @given(strategies.lists(strategies.binary()), strategies.binary(),
        strategies.binary(), strategies.booleans())
 def test_print_bytes(objects, sep, end, flush):
+    # type: (List[bytes], bytes, bytes, bool) -> None
+
     h = StringIO()
-    print_(*objects, sep=sep, end=end, flush=flush, file=h)
+    print_(*objects, sep=sep, end=end, flush=flush, file=h)  # type: ignore
     h.getvalue()
 
 
 @given(strategies.text())
 def test_fsnative(text):
+    # type: (Text) -> None
+
     assert isinstance(fsnative(text), fsnative)
 
 
 @given(strategies.text())
 def test_text2fsn(text):
+    # type: (Text) -> None
+
     assert isinstance(text2fsn(text), fsnative)
 
 
 @given(strategies.text())
 def test_text_fsn_roudntrip(text):
+    # type: (Text) -> None
+
     if u"\x00" in text:
         return
     assert isinstance(fsn2text(text2fsn(text)), text_type)
@@ -131,6 +148,8 @@ def test_text_fsn_roudntrip(text):
        strategies.sampled_from(("utf-8", "utf-16-le",
                                 "utf-32-le", "latin-1")))
 def test_bytes(data, encoding):
+    # type: (bytes, str) -> None
+
     try:
         path = bytes2fsn(data, encoding)
     except ValueError:

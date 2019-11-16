@@ -11,7 +11,7 @@ environment:
 
 install:
   - '%PYTHON%\\python.exe -m pip install --upgrade setuptools'
-  - '%PYTHON%\\python.exe -m pip install pytest hypothesis coverage codecov'
+  - '%PYTHON%\\python.exe -m pip install pytest hypothesis coverage codecov typing'
 
 test_script:
   - '%PYTHON%\\python.exe -m coverage run --branch setup.py test'

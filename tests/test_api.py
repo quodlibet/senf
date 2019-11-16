@@ -26,6 +26,7 @@ import contextlib
 import ctypes
 import shutil
 import codecs
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -88,7 +89,13 @@ def iternotfsn():
         yield u"\x00"
 
 
-class PathLike(object):
+if TYPE_CHECKING:
+    _base = os.PathLike
+else:
+    _base = object
+
+
+class PathLike(_base):
 
     def __init__(self, path):
         self._path = path
@@ -160,6 +167,8 @@ def capture_output(data=None):
 
 
 def test__get_encoding():
+    # type: () -> None
+
     orig = sys.getfilesystemencoding
     sys.getfilesystemencoding = lambda: None  # type: ignore
     try:
@@ -169,13 +178,15 @@ def test__get_encoding():
 
 
 def test_getuserdir():
+    # type: () -> None
+
     userdir = _get_userdir()
     assert isinstance(userdir, fsnative)
 
     with pytest.raises(TypeError):
         _get_userdir(notfsnative(u"foo"))
 
-    if os.name == "nt":
+    if sys.platform == "win32":
         otherdir = _get_userdir(u"foo")
         assert otherdir == os.path.join(os.path.dirname(userdir), u"foo")
     else:
@@ -188,7 +199,7 @@ def test_getuserdir():
 
     with preserve_environ():
         environ.pop("HOME", None)
-        if os.name != "nt":
+        if sys.platform != "win32":
             assert _get_userdir()
         else:
             environ["USERPROFILE"] = "uprof"
@@ -197,7 +208,7 @@ def test_getuserdir():
     with preserve_environ():
         environ.pop("HOME", None)
         environ.pop("USERPROFILE", None)
-        if os.name == "nt":
+        if sys.platform == "win32":
             environ["HOMEPATH"] = "hpath"
             environ["HOMEDRIVE"] = "C:\\"
             assert _get_userdir() == "C:\\hpath"
@@ -207,11 +218,13 @@ def test_getuserdir():
         environ.pop("HOME", None)
         environ.pop("USERPROFILE", None)
         environ.pop("HOMEPATH", None)
-        if os.name == "nt":
+        if sys.platform == "win32":
             assert _get_userdir() is None
 
 
 def test_expanduser_simple():
+    # type: () -> None
+
     home = _get_userdir()
     assert expanduser("~") == home
     assert isinstance(expanduser("~"), fsnative)
@@ -223,6 +236,8 @@ def test_expanduser_simple():
 
 
 def test_expanduser_user():
+    # type: () -> None
+
     home = _get_userdir()
     user = os.path.basename(home)
 
@@ -237,12 +252,14 @@ def test_expanduser_user():
         assert expanduser("~" + user + senf.altsep + "a" + senf.sep) == \
             home + senf.altsep + "a" + senf.sep
 
-    if os.name == "nt":
+    if sys.platform == "win32":
         assert expanduser(os.path.join("~nope", "foo")) == \
             os.path.join(os.path.dirname(home), "nope", "foo")
 
 
 def test_ansi_matching():
+    # type: () -> None
+
     to_match = [u"\033[39m", u"\033[3m", u"\033[m", u"\033[;m", u"\033[;2;m"]
     for t in to_match:
         assert list(ansi_split(t)) == [(True, t)]
@@ -260,6 +277,8 @@ def test_ansi_matching():
 
 @pytest.mark.skipif(os.name != "nt" or PY3, reason="win+py2 only")
 def test_set_windows_env_var():
+    # type: () -> None
+
     with pytest.raises(TypeError):
         set_windows_env_var("", u"")
 
@@ -278,12 +297,16 @@ def test_set_windows_env_var():
 
 @pytest.mark.skipif(os.name != "nt" or PY3, reason="win+py2 only")
 def test_get_windows_env_var():
+    # type: () -> None
+
     with pytest.raises(TypeError):
         get_windows_env_var("")
 
 
 @pytest.mark.skipif(os.name != "nt" or PY3, reason="win+py2 only")
 def test_del_windows_env_var():
+    # type: () -> None
+
     with pytest.raises(TypeError):
         del_windows_env_var("")
 
@@ -293,65 +316,73 @@ def test_del_windows_env_var():
 
 
 def test_print():
+    # type: () -> None
+
     f = BytesIO()
-    print_(u"foo", file=f)
+    print_(u"foo", file=f)  # type: ignore
     out = f.getvalue()
     assert isinstance(out, bytes)
     assert out == b"foo" + linesepb
 
-    f = StringIO()
-    print_(u"foo", file=f)
-    out = f.getvalue()
-    assert isinstance(out, str)
-    assert out == "foo" + os.linesep
+    f2 = StringIO()
+    print_(u"foo", file=f2)
+    out2 = f2.getvalue()
+    assert isinstance(out2, str)
+    assert out2 == "foo" + os.linesep
 
-    print_(u"foo", file=f, flush=True)
+    print_(u"foo", file=f, flush=True)  # type: ignore
 
-    f = TextIO()
-    print_(u"foo", file=f)
-    out = f.getvalue()
-    assert isinstance(out, text_type)
-    assert out == u"foo" + linesepu
+    f3 = TextIO()
+    print_(u"foo", file=f3)
+    out3 = f3.getvalue()
+    assert isinstance(out3, text_type)
+    assert out3 == u"foo" + linesepu
 
-    f = TextIO()
-    print_(u"", file=f, end=b"\n")
-    out = f.getvalue()
-    assert isinstance(out, text_type)
-    assert out == linesepu
+    f4 = TextIO()
+    print_(u"", file=f4, end=b"\n")  # type: ignore
+    out4 = f4.getvalue()
+    assert isinstance(out4, text_type)
+    assert out4 == linesepu
 
-    f = BytesIO()
-    print_("", file=f, end=b"\n")
-    out = f.getvalue()
-    assert isinstance(out, bytes)
-    assert out == linesepb
+    f5 = BytesIO()
+    print_("", file=f5, end=b"\n")  # type: ignore
+    out5 = f5.getvalue()
+    assert isinstance(out5, bytes)
+    assert out5 == linesepb
 
 
 @pytest.mark.skipif(os.name != "nt", reason="win only")
 def test_print_windows():
+    # type: () -> None
+
     f = BytesIO()
-    print_(u"öäü\ud83d", file=f)
+    print_(u"öäü\ud83d", file=f)  # type: ignore
     out = f.getvalue()
     assert isinstance(out, bytes)
     assert out == b"\xc3\xb6\xc3\xa4\xc3\xbc\xed\xa0\xbd" + linesepb
 
-    f = TextIO()
-    print_(u"öäü\ud83d", file=f)
-    out = f.getvalue()
-    assert isinstance(out, text_type)
-    assert out == u"öäü\ud83d" + linesepu
+    f2 = TextIO()
+    print_(u"öäü\ud83d", file=f2)
+    out2 = f2.getvalue()
+    assert isinstance(out2, text_type)
+    assert out2 == u"öäü\ud83d" + linesepu
 
 
 def test_print_defaults_none():
+    # type: () -> None
+
     # python 3 print takes None as default, try to do the same
     with capture_output() as (out, err):
         print_("foo", "bar")
     first = out.getvalue()
     with capture_output() as (out, err):
-        print_("foo", "bar", end=None, sep=None, file=None)
+        print_("foo", "bar", end=None, sep=None, file=None)  # type: ignore
     assert out.getvalue() == first
 
 
 def test_print_ansi():
+    # type: () -> None
+
     for i in range(1, 110):
         print_("\033[%dm" % i, end="")
     other = ["\033[A", "\033[B", "\033[C", "\033[D", "\033[s", "\033[u",
@@ -361,6 +392,8 @@ def test_print_ansi():
 
 
 def test_print_anything():
+    # type: () -> None
+
     with capture_output():
         print_(u"\u1234")
 
@@ -374,15 +407,19 @@ def test_print_anything():
 
 
 def test_print_error():
-    with pytest.raises(TypeError):
-        print_(end=4)
+    # type: () -> None
 
     with pytest.raises(TypeError):
-        print_(sep=4)
+        print_(end=4)  # type: ignore
+
+    with pytest.raises(TypeError):
+        print_(sep=4)  # type: ignore
 
 
 @pytest.mark.skipif(os.name != "nt", reason="windows only")
 def test_win_cp_encodings():
+    # type: () -> None
+
     assert _encode_codepage(437, u"foo") == b"foo"
     assert _encode_codepage(437, u"\xe4") == b"\x84"
     assert _encode_codepage(437, u"") == b""
@@ -394,6 +431,8 @@ def test_win_cp_encodings():
 
 @pytest.mark.skipif(os.name == "nt" or PY2, reason="unix+py3 only")
 def test_print_strict_strio():
+    # type: () -> None
+
     f = StringIO()
 
     real_write = f.write
@@ -403,13 +442,15 @@ def test_print_strict_strio():
             raise TypeError
         real_write(data.encode("utf-8").decode("utf-8"))
 
-    f.write = strict_write
+    f.write = strict_write  # type: ignore
 
     print_(b"\xff\xfe".decode(_encoding, "surrogateescape"), file=f)
     assert f.getvalue() == u"\ufffd\ufffd\n"
 
 
 def test_print_real():
+    # type: () -> None
+
     print_(u"foo")
     print_(u"foo", file=sys.stderr)
     print_(u"\033[94mfoo", u"\033[0m")
@@ -419,6 +460,8 @@ def test_print_real():
 
 
 def test_print_capture():
+    # type: () -> None
+
     with capture_output() as (out, err):
         print_(u"bla")
         assert out.getvalue() == b"bla" + linesepb
@@ -434,6 +477,8 @@ def test_print_capture():
 
 
 def test_print_py3_stringio():
+    # type: () -> None
+
     if os.name != "nt" and PY3:
         f = StringIO()
         print_(b"\xff\xfe", file=f)
@@ -442,6 +487,8 @@ def test_print_py3_stringio():
 
 
 def test_input():
+    # type: () -> None
+
     with capture_output(b"foo" + linesepb + b"bla"):
         out = input_()
         assert out == "foo"
@@ -452,6 +499,8 @@ def test_input():
 
 
 def test_input_prompt():
+    # type: () -> None
+
     with capture_output(b"foo") as (out, err):
         in_ = input_(u"bla")
         assert in_ == "foo"
@@ -461,20 +510,26 @@ def test_input_prompt():
 
 
 def test_version():
+    # type: () -> None
+
     assert isinstance(senf.version, tuple)
     assert len(senf.version) == 3
 
 
 def test_version_string():
+    # type: () -> None
+
     assert isinstance(senf.version_string, str)
 
 
 def test_fsnative():
+    # type: () -> None
+
     assert isinstance(fsnative(u"foo"), fsnative)
     fsntype = type(fsnative(u""))
     assert issubclass(fsntype, fsnative)
     with pytest.raises(TypeError):
-        fsnative(b"")
+        fsnative(b"")  # type: ignore
 
     assert fsnative(u"\x00") == fsnative(u"\uFFFD")
 
@@ -494,14 +549,16 @@ def test_fsnative():
 
 
 def test_path2fsn():
-    assert isinstance(path2fsn(senf.__path__[0]), fsnative)
+    # type: () -> None
+
+    assert isinstance(path2fsn(senf.__path__[0]), fsnative)  # type: ignore
 
     with pytest.raises(ValueError):
         path2fsn(b"\x00")
     with pytest.raises(ValueError):
         path2fsn(u"\x00")
 
-    if os.name == "nt":
+    if sys.platform == "win32":
         assert path2fsn(u"\u1234") == u"\u1234"
         assert path2fsn("abc") == u"abc"
         assert isinstance(path2fsn("abc"), fsnative)
@@ -526,11 +583,13 @@ def test_path2fsn():
                 assert fsnative(u"\u1234") == path2fsn(fsnative(u"\u1234"))
 
     with pytest.raises(TypeError):
-        path2fsn(object())
+        path2fsn(object())  # type: ignore
 
 
 @pytest.mark.skipif(not hasattr(os, "fspath"), reason="python3.6 only")
 def test_path2fsn_pathlike():
+    # type: () -> None
+
     # basic tests for os.fspath
     with pytest.raises(TypeError):
         os.fspath(PathLike(None))
@@ -547,9 +606,11 @@ def test_path2fsn_pathlike():
 
 
 def test_fsn2text():
+    # type: () -> None
+
     assert fsn2text(fsnative(u"foo")) == u"foo"
     with pytest.raises(TypeError):
-        fsn2text(object())
+        fsn2text(object())  # type: ignore
     with pytest.raises(TypeError):
         fsn2text(notfsnative(u"foo"))
 
@@ -557,12 +618,14 @@ def test_fsn2text():
         with pytest.raises(TypeError):
             fsn2text(path)
 
-    if os.name == "nt":
+    if sys.platform == "win32":
         assert fsn2text(u"\uD800\uDC01") == u"\U00010001"
 
 
 def test_fsn2text_strict():
-    if os.name != "nt":
+    # type: () -> None
+
+    if sys.platform != "win32":
         path = bytes2fsn(b"\xff", None)
     else:
         path = u"\ud83d"
@@ -573,32 +636,36 @@ def test_fsn2text_strict():
 
 
 def test_text2fsn():
+    # type: () -> None
+
     with pytest.raises(TypeError):
-        text2fsn(b"foo")
+        text2fsn(b"foo")  # type: ignore
     assert text2fsn(u"foo") == fsnative(u"foo")
 
 
 def test_fsn2bytes():
+    # type: () -> None
+
     assert fsn2bytes(fsnative(u"foo"), "utf-8") == b"foo"
     with pytest.raises(TypeError):
-        fsn2bytes(object(), "utf-8")
+        fsn2bytes(object(), "utf-8")  # type: ignore
 
     if PY3:
         with pytest.raises(TypeError):
-            fsn2bytes(u"\x00", "utf-8")
+            fsn2bytes(u"\x00", "utf-8")  # type: ignore
     else:
         with pytest.raises(TypeError):
-            fsn2bytes(b"\x00", "utf-8")
+            fsn2bytes(b"\x00", "utf-8")  # type: ignore
 
-    if os.name != "nt":
+    if sys.platform != "win32":
         assert fsn2bytes(fsnative(u"foo"), None) == b"foo"
     else:
         with pytest.raises(ValueError):
             fsn2bytes(fsnative(u"foo"), "notanencoding")
         with pytest.raises(ValueError):
-            fsn2bytes(fsnative(u"foo"), None)
+            fsn2bytes(fsnative(u"foo"), None)  # type: ignore
         with pytest.raises(TypeError):
-            fsn2bytes(fsnative(u"foo"), object())
+            fsn2bytes(fsnative(u"foo"), object())  # type: ignore
 
     for path in iternotfsn():
         with pytest.raises(TypeError):
@@ -609,6 +676,8 @@ def test_fsn2bytes():
 
 @pytest.mark.skipif(os.name != "nt", reason="win only")
 def test_fsn2bytes_surrogate_pairs():
+    # type: () -> None
+
     assert fsn2bytes(u"\uD800\uDC01", "utf-8") == b"\xf0\x90\x80\x81"
     assert fsn2bytes(u"\uD800\uDC01", "utf-16-le") == b"\x00\xd8\x01\xdc"
     assert fsn2bytes(u"\uD800\uDC01", "utf-16-be") == b"\xd8\x00\xdc\x01"
@@ -625,6 +694,8 @@ def test_fsn2bytes_surrogate_pairs():
 
 @pytest.mark.skipif(os.name != "nt", reason="win only")
 def test_fsn2bytes_wtf8():
+    # type: () -> None
+
     test_data = {
         u"aé ": b"a\xC3\xA9 ",
         u"aé 💩": b"a\xC3\xA9 \xF0\x9F\x92\xA9",
@@ -657,6 +728,8 @@ def test_fsn2bytes_wtf8():
 
 @pytest.mark.skipif(os.name != "nt", reason="win only")
 def test_fsn2bytes_ill_formed_utf16():
+    # type: () -> None
+
     p = bytes2fsn(b"a\x00\xe9\x00 \x00=\xd8=\xd8\xa9\xdc", "utf-16-le")
     assert fsn2bytes(p, "utf-8") == b"a\xC3\xA9 \xED\xA0\xBD\xF0\x9F\x92\xA9"
     assert fsn2bytes(u"aé " + u"\uD83D" + u"💩", "utf-16-le") == \
@@ -664,7 +737,9 @@ def test_fsn2bytes_ill_formed_utf16():
 
 
 def test_surrogates():
-    if os.name == "nt":
+    # type: () -> None
+
+    if sys.platform == "win32":
         assert fsn2bytes(u"\ud83d", "utf-16-le") == b"=\xd8"
         assert bytes2fsn(b"\xd8=", "utf-16-be") == u"\ud83d"
 
@@ -715,6 +790,8 @@ def test_surrogates():
 
 
 def test_bytes2fsn():
+    # type: () -> None
+
     assert bytes2fsn(b"foo", "utf-8") == fsnative(u"foo")
     assert (bytes2fsn(fsn2bytes(fsnative(u"\u1234"), "utf-8"), "utf-8") ==
             fsnative(u"\u1234"))
@@ -726,23 +803,25 @@ def test_bytes2fsn():
         bytes2fsn(b"\x00\x00", "utf-16-le")
 
     with pytest.raises(TypeError):
-        bytes2fsn(object(), "utf-8")
+        bytes2fsn(object(), "utf-8")  # type: ignore
 
     with pytest.raises(TypeError):
-        bytes2fsn(u"data", "utf-8")
+        bytes2fsn(u"data", "utf-8")  # type: ignore
 
-    if os.name == "nt":
+    if sys.platform == "win32":
         with pytest.raises(ValueError):
             bytes2fsn(b"data", "notanencoding")
         with pytest.raises(ValueError):
-            bytes2fsn(b"data", None)
+            bytes2fsn(b"data", None)  # type: ignore
         with pytest.raises(TypeError):
-            bytes2fsn(b"data", object())
+            bytes2fsn(b"data", object())  # type: ignore
 
     assert bytes2fsn(b"foo", "utf-8") == bytes2fsn(b"foo")
 
 
 def test_constants():
+    # type: () -> None
+
     assert isinstance(sep, fsnative)
     assert isinstance(pathsep, fsnative)
     assert isinstance(curdir, fsnative)
@@ -754,12 +833,16 @@ def test_constants():
 
 
 def test_argv():
+    # type: () -> None
+
     assert len(sys.argv) == len(argv)
     assert all(isinstance(v, fsnative) for v in argv)
     assert all(isinstance(v, fsnative) for v in argv[:])
 
 
 def test_argv_change():
+    # type: () -> None
+
     with preserve_argv():
         argv.append(fsnative(u"\u1234"))
         assert argv[-1] == fsnative(u"\u1234")
@@ -794,14 +877,18 @@ def test_argv_change():
         argv.insert(0, "")
         assert isinstance(argv[0], fsnative)
         assert len(argv) == 2
-        assert not argv > argv
+        assert not (argv > argv)
 
 
 def test_getcwd():
+    # type: () -> None
+
     assert isinstance(getcwd(), fsnative)
 
 
 def test_environ():
+    # type: () -> None
+
     for key, value in iteritems(environ):
         assert isinstance(key, fsnative)
         assert isinstance(value, fsnative)
@@ -829,6 +916,8 @@ def test_environ():
 
 
 def test_environ_case():
+    # type: () -> None
+
     if not environ_case_sensitive:
         with preserve_environ():
             environ.pop("foo", None)
@@ -847,6 +936,8 @@ def test_environ_case():
 
 @pytest.mark.skipif(os.name != "nt", reason="win only")
 def test_environ_mirror():
+    # type: () -> None
+
     with preserve_environ():
         os.environ.pop("BLA", None)
         environ["BLA"] = u"\ud83d"
@@ -859,6 +950,8 @@ def test_environ_mirror():
 
 
 def test_getenv():
+    # type: () -> None
+
     environ["foo"] = "bar"
 
     assert getenv("foo") == "bar"
@@ -868,6 +961,8 @@ def test_getenv():
 
 
 def test_unsetenv():
+    # type: () -> None
+
     putenv("foo", "bar")
     # for some reason getenv goes to the cache, which makes it hard to test
     # things
@@ -878,6 +973,8 @@ def test_unsetenv():
 
 
 def test_putenv():
+    # type: () -> None
+
     try:
         putenv("==", "bla")
     except ValueError:
@@ -885,7 +982,9 @@ def test_putenv():
 
 
 def test_uri2fsn():
-    if os.name != "nt":
+    # type: () -> None
+
+    if sys.platform != "win32":
         with pytest.raises(ValueError):
             assert uri2fsn(u"file:///%00")
         with pytest.raises(ValueError):
@@ -923,7 +1022,7 @@ def test_uri2fsn():
         assert uri2fsn(u"file://\u1234/\u4321") == u"\\\\\u1234\\\u4321"
 
     with pytest.raises(TypeError):
-        uri2fsn(object())
+        uri2fsn(object())  # type: ignore
 
     with pytest.raises(ValueError):
         uri2fsn("http://www.foo.bar")
@@ -934,14 +1033,16 @@ def test_uri2fsn():
 
     if PY3:
         with pytest.raises(TypeError):
-            uri2fsn(b"file:///foo")
+            uri2fsn(b"file:///foo")  # type: ignore
 
 
 def test_fsn2uri():
-    with pytest.raises(TypeError):
-        fsn2uri(object())
+    # type: () -> None
 
-    if os.name == "nt":
+    with pytest.raises(TypeError):
+        fsn2uri(object())  # type: ignore
+
+    if sys.platform == "win32":
         with pytest.raises(TypeError):
             fsn2uri(u"\x00")
         assert fsn2uri(fsnative(u"C:\\\ud800")) == "file:///C:/%ED%A0%80"
@@ -965,7 +1066,7 @@ def test_fsn2uri():
         assert fsn2uri(u"C:\\\uD800\uDC01") == u"file:///C:/%F0%90%80%81"
     else:
         with pytest.raises(TypeError):
-            fsn2uri(b"\x00")
+            fsn2uri(b"\x00")  # type: ignore
         if PY2:
             path = "/foo-\xe1\x88\xb4"
         else:
@@ -975,7 +1076,9 @@ def test_fsn2uri():
 
 
 def test_uri_roundtrip():
-    if os.name == "nt":
+    # type: () -> None
+
+    if sys.platform == "win32":
         for path in [u"C:\\foo-\u1234", u"C:\\bla\\quux ha",
                      u"\\\\\u1234\\foo\\\u1423", u"\\\\foo;\\f"]:
             path = fsnative(path)
@@ -991,6 +1094,8 @@ def test_uri_roundtrip():
 
 
 def test_mkdtemp():
+    # type: () -> None
+
     fsn = mkdtemp()
     assert isinstance(fsn, fsnative)
     os.rmdir(fsn)
@@ -1002,6 +1107,8 @@ def test_mkdtemp():
 
 
 def test_test_mkstemp():
+    # type: () -> None
+
     fd, fsn = mkstemp()
     os.close(fd)
     assert isinstance(fsn, fsnative)
@@ -1015,6 +1122,8 @@ def test_test_mkstemp():
 
 
 def test_expandvars():
+    # type: () -> None
+
     with preserve_environ():
         environ["foo"] = "bar"
         environ["nope b"] = "xxx"
@@ -1050,6 +1159,8 @@ def test_expandvars():
 
 
 def test_expandvars_case():
+    # type: () -> None
+
     if not environ_case_sensitive:
         with preserve_environ():
             environ.pop("foo", None)
@@ -1065,6 +1176,8 @@ def test_expandvars_case():
 
 
 def test_python_handling_broken_utf16():
+    # type: () -> None
+
     # Create a file with an invalid utf-16 name.
     # Mainly to see how Python handles it
 
@@ -1075,7 +1188,7 @@ def test_python_handling_broken_utf16():
             h.write(b"content")
         assert "foo" in os.listdir(tmp)
 
-        if os.name == "nt":
+        if sys.platform == "win32":
             faulty = (path.encode("utf-16-le") + b"=\xd8\x01\xde" +
                       b"=\xd8-\x00\x01\xde")
             buf = ctypes.create_string_buffer(faulty + b"\x00\x00")
@@ -1095,7 +1208,8 @@ def test_python_handling_broken_utf16():
 
 
 def test_fsn2norm():
-    if os.name == "nt":
+    # type: () -> None
+    if sys.platform == "win32":
         assert fsn2norm(u"\uD800\uDC01") == fsn2norm(u"\U00010001")
 
     if PY3 and is_unix and isunicodeencoding():
@@ -1107,4 +1221,5 @@ def test_fsn2norm():
 
 
 def test_supports_ansi_escape_codes():
+    # type: () -> None
     supports_ansi_escape_codes(sys.stdout.fileno())

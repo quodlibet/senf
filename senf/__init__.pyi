@@ -1,9 +1,12 @@
 import sys
 import os
 
-from typing import Text, Union, Any, MutableMapping, MutableSequence, Optional, Tuple
+from typing import Text, Union, Any, Optional, Tuple, List, Dict
 
-_pathlike = Union[Text, bytes, 'os.PathLike[Any]']
+if sys.version_info[0] == 2:
+    _pathlike = Union[Text, bytes]
+else:
+    _pathlike = Union[Text, bytes, 'os.PathLike[Any]']
 _uri = Union[Text, str]
 
 if sys.version_info[0] == 2:
@@ -18,43 +21,50 @@ class fsnative(_base):
     def __init__(self, object: Text=u"") -> None:
         ...
 
-def path2fsn(path: _pathlike) -> fsnative:
+_fsnative = Union[fsnative, _base]
+
+if sys.platform == "win32":
+    _bytes_default_encoding = str
+else:
+    _bytes_default_encoding = Optional[str]
+
+def path2fsn(path: _pathlike) -> _fsnative:
     ...
 
-def fsn2text(path: fsnative, strict: bool=False) -> Text:
+def fsn2text(path: _fsnative, strict: bool=False) -> Text:
     ...
 
-def text2fsn(text: Text) -> fsnative:
+def text2fsn(text: Text) -> _fsnative:
     ...
 
-def fsn2bytes(path: fsnative, encoding: str="utf-8") -> bytes:
+def fsn2bytes(path: _fsnative, encoding: _bytes_default_encoding="utf-8") -> bytes:
     ...
 
-def bytes2fsn(data: bytes, encoding: str="utf-8") -> fsnative:
+def bytes2fsn(data: bytes, encoding: _bytes_default_encoding="utf-8") -> _fsnative:
     ...
 
-def uri2fsn(uri: _uri) -> fsnative:
+def uri2fsn(uri: _uri) -> _fsnative:
     ...
 
-def fsn2uri(path: fsnative) -> Text:
+def fsn2uri(path: _fsnative) -> Text:
     ...
 
-def fsn2norm(path: fsnative) -> fsnative:
+def fsn2norm(path: _fsnative) -> _fsnative:
     ...
 
-sep: fsnative
-pathsep: fsnative
-curdir: fsnative
-pardir: fsnative
-altsep: fsnative
-extsep: fsnative
-devnull: fsnative
-defpath: fsnative
+sep: _fsnative
+pathsep: _fsnative
+curdir: _fsnative
+pardir: _fsnative
+altsep: _fsnative
+extsep: _fsnative
+devnull: _fsnative
+defpath: _fsnative
 
-def getcwd() -> fsnative:
+def getcwd() -> _fsnative:
     ...
 
-def getenv(key: _pathlike, value: Optional[fsnative]=None) -> Optional[fsnative]:
+def getenv(key: _pathlike, value: Optional[_fsnative]=None) -> Optional[_fsnative]:
     ...
 
 def putenv(key: _pathlike, value: _pathlike):
@@ -66,22 +76,22 @@ def unsetenv(key: _pathlike) -> None:
 def supports_ansi_escape_codes(fd: int) -> bool:
     ...
 
-def expandvars(path: _pathlike) -> fsnative:
+def expandvars(path: _pathlike) -> _fsnative:
     ...
 
-def expanduser(path: _pathlike) -> fsnative:
+def expanduser(path: _pathlike) -> _fsnative:
     ...
 
-environ: MutableMapping[fsnative,fsnative]
-argv: MutableSequence[fsnative]
+environ: Dict[_fsnative,_fsnative]
+argv: List[_fsnative]
 
-def gettempdir() -> fsnative:
+def gettempdir() -> _fsnative:
     pass
 
-def mkstemp(suffix: Optional[_pathlike]=None, prefix: Optional[_pathlike]=None, dir: Optional[_pathlike]=None, text: bool=False) -> Tuple[int, fsnative]:
+def mkstemp(suffix: Optional[_pathlike]=None, prefix: Optional[_pathlike]=None, dir: Optional[_pathlike]=None, text: bool=False) -> Tuple[int, _fsnative]:
     ...
 
-def mkdtemp(suffix: Optional[_pathlike]=None, prefix: Optional[_pathlike]=None, dir: Optional[_pathlike]=None) -> fsnative:
+def mkdtemp(suffix: Optional[_pathlike]=None, prefix: Optional[_pathlike]=None, dir: Optional[_pathlike]=None) -> _fsnative:
     ...
 
 version_string: str
@@ -90,5 +100,5 @@ version: Tuple[int, int, int]
 
 print_ = print
 
-def input_(prompt: Any=None) -> fsnative:
+def input_(prompt: Any=None) -> _fsnative:
     ...

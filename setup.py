@@ -125,7 +125,7 @@ if __name__ == "__main__":
             'Programming Language :: Python :: Implementation :: PyPy',
             'License :: OSI Approved :: MIT License',
         ],
-        tests_require=['pytest'],
+        tests_require=['pytest', 'typing', 'hypothesis'],
         python_requires=(
             '>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <4'),
         cmdclass={
