@@ -607,6 +607,8 @@ def fsn2uri(path):
         except WindowsError as e:
             raise ValueError(e)
         uri = buf[:length.value]
+        # https://bitbucket.org/pypy/pypy/issues/3133
+        uri = _merge_surrogates(uri)
 
         # For some reason UrlCreateFromPathW escapes some chars outside of
         # ASCII and some not. Unquote and re-quote with utf-8.
