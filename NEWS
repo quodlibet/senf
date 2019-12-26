@@ -1,3 +1,9 @@
+1.4.1 - 2019-12-26
+------------------
+
+* :func:`fsn2uri`: Fix handling of surrogates with PyPy3 on Windows
+
+
 1.4.0 - 2019-11-17
 ------------------
 
