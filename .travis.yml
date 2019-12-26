@@ -1,7 +1,7 @@
 matrix:
   include:
     - os: linux
-      dist: xenial
+      dist: bionic
       language: python
       python: "2.7"
       env: PYARGS="-R"
@@ -11,33 +11,33 @@ matrix:
       python: "3.4"
       env: PYARGS="-R -bb"
     - os: linux
-      dist: xenial
+      dist: bionic
       language: python
       python: "3.5"
       env: PYARGS="-R -bb"
     - os: linux
-      dist: xenial
+      dist: bionic
       language: python
       python: "3.6"
       env: PYARGS="-R -bb"
     - os: linux
-      dist: xenial
+      dist: bionic
       sudo: required
       language: python
       python: "3.7"
       env: PYARGS="-R -bb"
     - os: linux
-      dist: xenial
+      dist: bionic
       language: python
       python: "3.8"
       env: PYARGS="-R -bb"
     - os: linux
-      dist: xenial
+      dist: bionic
       language: python
-      python: "pypy"
+      python: "pypy2"
       env: PYARGS="-R"
     - os: linux
-      dist: xenial
+      dist: bionic
       language: python
       python: "pypy3"
       env: PYARGS="-R -bb"
