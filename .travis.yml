@@ -52,6 +52,7 @@ matrix:
 
 install:
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then brew update; fi
+  - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$PYVER" == "3" ]; then brew unlink python@2 || true; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$PYVER" == "3" ]; then brew install python || brew upgrade python; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$PYVER" == "3" ]; then python3 -m pip install virtualenv; fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ] && [ "$PYVER" == "3" ]; then virtualenv venv -p python3; fi
