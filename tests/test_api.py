@@ -177,10 +177,19 @@ def test__get_encoding():
         sys.getfilesystemencoding = orig
 
 
+def _get_real_userdir():
+    # Tries to return the real userdir of the current user
+    # ignore potentially replaced env vars
+    with preserve_environ():
+        environ.pop("HOME", None)
+        userdir = _get_userdir()
+    return userdir or _get_userdir()
+
+
 def test_getuserdir():
     # type: () -> None
 
-    userdir = _get_userdir()
+    userdir = _get_real_userdir()
     assert isinstance(userdir, fsnative)
 
     with pytest.raises(TypeError):
@@ -191,7 +200,7 @@ def test_getuserdir():
         assert otherdir == os.path.join(os.path.dirname(userdir), u"foo")
     else:
         user = os.path.basename(userdir)
-        assert _get_userdir() == _get_userdir(user)
+        assert userdir == _get_userdir(user)
 
     with preserve_environ():
         environ["HOME"] = "bla"
@@ -238,7 +247,7 @@ def test_expanduser_simple():
 def test_expanduser_user():
     # type: () -> None
 
-    home = _get_userdir()
+    home = _get_real_userdir()
     user = os.path.basename(home)
 
     assert expanduser("~" + user) == home
