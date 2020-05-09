@@ -1030,6 +1030,10 @@ def test_uri2fsn():
         assert uri2fsn(u"file://UNC/foo/bar") == u"\\\\UNC\\foo\\bar"
         assert uri2fsn(u"file://\u1234/\u4321") == u"\\\\\u1234\\\u4321"
 
+        # Also handle legacy UNC URIs
+        assert uri2fsn(u"file:////UNC/foo") == u"\\\\UNC\\foo"
+        assert fsn2uri(uri2fsn(u"file:////UNC/foo")) == u"file://UNC/foo"
+
     with pytest.raises(TypeError):
         uri2fsn(object())  # type: ignore
 
