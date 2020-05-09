@@ -202,9 +202,10 @@ def test_getuserdir():
         user = os.path.basename(userdir)
         assert userdir == _get_userdir(user)
 
-    with preserve_environ():
-        environ["HOME"] = "bla"
-        assert _get_userdir() == "bla"
+    if sys.platform != "win32":
+        with preserve_environ():
+            environ["HOME"] = "bla"
+            assert _get_userdir() == "bla"
 
     with preserve_environ():
         environ.pop("HOME", None)
@@ -220,8 +221,8 @@ def test_getuserdir():
         if sys.platform == "win32":
             environ["HOMEPATH"] = "hpath"
             environ["HOMEDRIVE"] = "C:\\"
-            assert _get_userdir() == "C:\\hpath"
-            assert _get_userdir(u"bla") == "C:\\bla"
+            assert _get_userdir() == os.path.join("C:", senf.sep, "hpath")
+            assert _get_userdir(u"bla") == os.path.join("C:", senf.sep, "bla")
 
     with preserve_environ():
         environ.pop("HOME", None)
