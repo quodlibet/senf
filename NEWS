@@ -1,3 +1,11 @@
+1.5.0 - 2020-05-09
+------------------
+
+* tests: fix tests in case HOME is overridden :bug:`12`
+* uri2fsn: Handle a subset of legacy UNC file URIs on Windows :pr:`14`
+* expanduser: Ignore HOME env var on Windows like Python 3.8 :pr:`15`
+
+
 1.4.1 - 2019-12-26
 ------------------
 
