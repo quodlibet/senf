@@ -52,7 +52,7 @@ class coverage_command(Command):
 
         for key in list(sys.modules.keys()):
             if key.startswith('senf'):
-                del(sys.modules[key])
+                del sys.modules[key]
 
         cov = coverage()
         cov.start()

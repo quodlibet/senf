@@ -22,7 +22,7 @@
 
 import os
 import platform
-from typing import Text, List
+from typing import Text, List  # noqa
 
 import pytest
 from hypothesis import given, strategies, settings, HealthCheck

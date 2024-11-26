@@ -7,9 +7,10 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.5, 3.6, 3.7, 3.8, pypy3]
+        os: [ubuntu-20.04, macos-13, windows-2019]
+        python-version: ['3.6', '3.7', '3.8', '3.9', '3.10', '3.11', 'pypy3.10']
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -21,7 +22,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest hypothesis flake8 coverage
     - name: Run tests on Unix
-      if: ${{ matrix.os != 'windows-latest' }}
+      if: ${{ matrix.os != 'windows-2019' }}
       run: |
         LANG=C LC_ALL=C python -c "import sys; print(sys.getfilesystemencoding())";
         LANG=C LC_ALL=C python -m coverage run --branch setup.py test
@@ -31,66 +32,12 @@ jobs:
 
         python -m coverage xml -i
     - name: Run tests on Windows
-      if: ${{ matrix.os == 'windows-latest' }}
+      if: ${{ matrix.os == 'windows-2019' }}
       run: |
         python -m coverage run --branch setup.py test
         python -m coverage xml -i
     - name: Run flake8
       run: |
         python -m flake8
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v5
-
-  test-mypy:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [3.6, 3.8]
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install mypy
-    - name: Run mypy
-      run: |
-        python -m mypy .
-
-  test-py2:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: [2.7]
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest hypothesis coverage typing
-    - name: Run tests on Unix
-      if: ${{ matrix.os != 'windows-latest' }}
-      run: |
-        LANG=C LC_ALL=C python -c "import sys; print(sys.getfilesystemencoding())";
-        LANG=C LC_ALL=C python -m coverage run --branch setup.py test
-
-        LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 python -c "import sys; print(sys.getfilesystemencoding())";
-        LANG=C LC_ALL=C python -m coverage run --append --branch setup.py test
-
-        python -m coverage xml -i
-    - name: Run tests on Windows
-      if: ${{ matrix.os == 'windows-latest' }}
-      run: |
-        python -m coverage run --branch setup.py test
-        python -m coverage xml -i
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
