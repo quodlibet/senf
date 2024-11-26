@@ -1005,7 +1005,7 @@ def test_uri2fsn():
         assert isinstance(uri2fsn(u"file:///foo"), fsnative)
         assert \
             uri2fsn("file:///foo-%E1%88%B4") == path2fsn(b"/foo-\xe1\x88\xb4")
-        assert uri2fsn("file:NOPE") == fsnative(u"/NOPE")
+        assert uri2fsn("file:NOPE") == fsnative(u"NOPE")
         assert uri2fsn("file:/NOPE") == fsnative(u"/NOPE")
         with pytest.raises(ValueError):
             assert uri2fsn("file://NOPE")
@@ -1015,7 +1015,7 @@ def test_uri2fsn():
     else:
         assert uri2fsn("file:///C:/%ED%A0%80") == fsnative(u"C:\\\ud800")
         assert uri2fsn("file:///C:/%20") == "C:\\ "
-        assert uri2fsn("file:NOPE") == "\\NOPE"
+        assert uri2fsn("file:NOPE") == "NOPE"
         assert uri2fsn("file:/NOPE") == "\\NOPE"
         with pytest.raises(ValueError):
             assert uri2fsn(u"file:///C:/%00")
