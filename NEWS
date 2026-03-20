@@ -1,3 +1,9 @@
+1.5.1 - 2026-03-20
+------------------
+
+* uri2fsn: fix handling of relative paths with newer Python :pr:`17`
+
+
 1.5.0 - 2020-05-09
 ------------------
 
